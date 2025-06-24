@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> New target</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>New target</h1>
+    <form action="{{ url_for('new_target') }}" method="post">
+        <span>Name:</span> <input type="text" name="name" required><p></p>
+        <span>Recycle criteria:</span>&nbsp;
+        <select name="recycle_criteria" required>
+            <option value="none" default>None</option>
+            <option value="count">Count: When multiple backups are present</option>
+            <option value="age">Age: When backups are old enough</option>
+        </select>
+        <p></p>
+        <span>Recycle value:</span>
+        <input type="number" name="recycle_value" required><p></p>
+        <ul>
+            <li>If you chose 'count', then backups will be recycled after this many backups reached.</li>
+            <li>If you chose 'age', then backups will be recycled after this many days.</li>
+        </ul>
+        <span>Recycle action:</span>&nbsp;
+        <select name="recycle_action" required>
+            <option value="delete">Delete (permanently delete once criteria met)</option>
+            <option value="recycle" default>Recycle (move to recycle bin once criteria met)</option>
+        </select><p></p>
+        <span>Backup type:</span>&nbsp;
+        <select name="backup_type" required>
+            <option value="single" default>Single file</option>
+            <option value="multi">Multiple files</option>
+        </select><p></p>
+        <span>Backup location:</span> <input type="text" name="location" required><p></p>
+        <ul>
+            <li>Path to store backups (e.g. <span class="monospace">/var/backups</span>)</li>
+            <li>The user account running Backup-chan must have read and write access to access this location.</li>
+            <li>If the path does not exist, Backup-chan will try to create it.</li>
+        </ul>
+        <span>Name template:</span> <input type="text" name="name_template" required><br>
+        <ul>
+            <li>The name template is the template for individual backup names.</li>
+            <li>It must contain either the creation date (<span class="monospace">$D</span>) or the ID of the backup (<span class="monospace">$I</span>).</li>
+            <li>Example: <span class="monospace">backup-$I-$D</span></li>
+        </ul><p></p>
+        <input type="submit" value="Create target">
+    </form>
+</body>
+</html>

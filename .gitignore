@@ -1,0 +1,4 @@
+*.db
+config.jsonc
+*.swp
+__pycache__/

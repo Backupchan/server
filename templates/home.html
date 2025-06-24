@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Home page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Home page</h1>
+    <p>This Backup-chan is a home to {{ num_targets }} backup targets and a total of {{ num_backups }} backups.</p>
+    <ul>
+        <li><a href="{{ url_for('new_target') }}">Create a new target</a></li>
+    </ul>
+    <ol>
+    {% for target in targets %}
+        <li>
+            <b title="{{ target.id }}">{{ target.name }}</b> in <span class="monospace">{{ target.location }}</span> (template: <span class="monospace">{{ target.name_template }}</span>)
+        </li>
+    {% endfor %}
+    </ol>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+    // Filename of your database
+    "db_path": "./backupchan.db",
+
+    // Password to the web interface
+    "webui_password": "123456",
+
+    // Whether or not to enable debug mode on web interface
+    // Only enable if you're developing.
+    "webui_debug": False
+}
