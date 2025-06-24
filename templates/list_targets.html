@@ -1,3 +1,4 @@
+{% from "macro.html" import target_print %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,45 +13,8 @@
     <ol>
     {% for target in targets %}
         <li>
-            ID: <b class="monospace">{{ target.id }}</b><br>
-            Name: <b>{{ target.name }}</b><br>
-            Recycle criteria:
-            {{ target.recycle_criteria }}
-            <b>
-            {% if target.recycle_criteria == "none" %}
-                None
-            {% elif target.recycle_criteria == "count" %}
-                After {{ target.recycle_value }} copies
-            {% elif target.recycle_criteria == "age" %}
-                After {{ target.recycle_value }} days
-            {% else %}
-                (broken value)
-            {% endif %}
-            </b><br>
-            Recycle action:
-            <b>
-            {% if target.recycle_action is not none %}
-                {% if target.recycle_action == "delete" %}
-                    Delete
-                {% elif target.recycle_action == "recycle" %}
-                    Move to recycle bin
-                {% else %}
-                    (broken value)
-                {% endif %}
-            {% endif %}
-            </b><br>
-            Type:
-            <b>
-            {% if target.target_type == "single" %}
-                Single file
-            {% elif target.target_type == "multi" %}
-                Multiple files
-            {% else %}
-                (broken value)
-            {% endif %}
-            </b><br>
-            Location: <b class="monospace">{{ target.location }}</b><br>
-            Name template: <b class="monospace">{{ target.name_template }}</b>
+            {{ target_print(target) }}
+            <a href="{{ url_for('view_target', id=target.id) }}">View target</a>
         </li>
     {% endfor %}
     </ol>

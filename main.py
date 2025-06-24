@@ -28,6 +28,11 @@ def list_targets():
     targets = db.list_targets()
     return render_template("list_targets.html", targets=targets, num_targets=db.count_targets())
 
+@app.route("/target/<id>")
+def view_target(id):
+    target = db.get_target(id)
+    return render_template("view_target.html", target=target)
+
 @app.route("/new_target", methods=["GET", "POST"])
 def new_target():
     if request.method == "POST":
