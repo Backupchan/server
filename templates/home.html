@@ -11,6 +11,7 @@
     <p>This Backup-chan is a home to {{ num_targets }} backup targets and a total of {{ num_backups }} backups.</p>
     <ul>
         <li><a href="{{ url_for('new_target') }}">Create a new target</a></li>
+        <li><a href="{{ url_for('list_targets') }}">View all targets</a></li>
     </ul>
     <ol>
     {% for target in targets %}

@@ -2,6 +2,8 @@
 
 import database
 import serverconfig
+import traceback
+import sys
 from flask import Flask, render_template, request, redirect, url_for
 
 config = serverconfig.get_server_config()
@@ -18,6 +20,15 @@ def handle_post_new_target() -> str | None:
     try:
         db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
     except Exception as exc:
+        return str(exc)
+    return None
+
+def handle_edit_new_target(target_id) -> str | None:
+    app.logger.info(f"Handle POST edit target with data: {request.form}")
+    try:
+        db.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
+    except Exception as exc:
+        print(traceback.format_exc(), file=sys.stderr)
         return str(exc)
     return None
 
@@ -46,7 +57,7 @@ def new_target():
         if error_message is None:
             return redirect(url_for("list_targets"))
         else:
-            return render_template("new_target.html", error_message=error_message)
+            return render_template("edit_target.html", target=None, error_message=error_message)
     return render_template("edit_target.html", target=None)
 
 @app.route("/target/<id>")
@@ -62,6 +73,12 @@ def upload_backup(id):
 @app.route("/target/<id>/edit", methods=["GET", "POST"])
 def edit_target(id):
     target = db.get_target(id)
+    if request.method == "POST":
+        error_message = handle_edit_new_target(id)
+        if error_message is None:
+            return redirect(url_for("view_target", id=id))
+        else:
+            return render_template("edit_target.html", target=target, error_message=error_message)
     return render_template("edit_target.html", target=target)
 
 @app.route("/target/<id>/delete", methods=["GET", "POST"])

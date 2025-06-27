@@ -20,6 +20,24 @@ def backups_from_rows(rows: list[tuple]) -> list[models.Backup]:
         backups.append(models.Backup(row[0], row[1], created_at, row[3]))
     return backups
 
+def validate_target(name, name_template):
+    # The name must not be empty.
+    if len(name) == 0:
+        raise DatabaseError("Name of new target must not be empty")
+
+    # Name template must contain either ID of backup or its creation date.
+    if not nameformat.verify_name(name_template):
+        raise DatabaseError("Filename template must contain either creation date or ID of backup")
+
+    # Name template must be unique to this target.
+    # TODO
+
+    # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
+    # TODO this is os-based
+
+    # Location must not contain illegal characters. '/' is okay.
+    # TODO
+
 class Database:
     """
     This class handles the communication with the database.
@@ -41,26 +59,28 @@ class Database:
         recycle_value: int | None,
         recycle_action: models.BackupRecycleAction | None,
         location: str,
-        name_template: str):
-        # The name must not be empty.
-        if len(name) == 0:
-            raise DatabaseError("Name of new target must not be empty")
-
-        # Name template must contain either ID of backup or its creation date.
-        if not nameformat.verify_name(name_template):
-            raise DatabaseError("Filename template must contain either creation date or ID of backup")
-
-        # Name template must be unique to this target.
-        # TODO
-
-        # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
-        # TODO this is os-based
-
-        # Location must not contain illegal characters. '/' is okay.
-        # TODO
+        name_template: str
+    ):
+        validate_target(name, name_template)
 
         target_id = str(uuid.uuid4())
         self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template))
+        self.connection.commit()
+
+    def edit_target(
+        self,
+        id: str,
+        name: str,
+        target_type: models.BackupType,
+        recycle_criteria: models.BackupRecycleCriteria,
+        recycle_value: int | None,
+        recycle_action: models.BackupRecycleAction | None,
+        location: str,
+        name_template: str
+    ):
+        validate_target(name, name_template)
+
+        self.cursor.execute("UPDATE targets SET name = ?, type = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?", (name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template))
         self.connection.commit()
 
     def list_targets(self) -> list[models.BackupTarget]:
