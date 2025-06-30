@@ -8,8 +8,12 @@ import sys
 import datetime
 import uuid
 import os
+import logging
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
+
+# Set up logging for other modules
+logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
 
 config = serverconfig.get_server_config()
 db = database.Database(config.get("db_path"))

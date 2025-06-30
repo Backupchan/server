@@ -43,7 +43,6 @@ class FileManager:
     def __init__(self, db: database.Database):
         self.db = db
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
 
     def add_backup(self, backup_id: str, filename: str):
         self.logger.info("Start add backup operation. Backup id: {%s} filename: %s", backup_id, filename)
