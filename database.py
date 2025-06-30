@@ -106,20 +106,18 @@ class Database:
         row = self.cursor.fetchone()
         return None if row is None else models.BackupTarget(*row)
 
-    def delete_target(self, id: str, delete_files: bool):
+    def delete_target(self, id: str):
         self.cursor.execute("DELETE FROM targets WHERE id = ?", (id,))
         self.connection.commit()
-        # TODO handle deleting backups is delete_files is true
         self.logger.info("Delete target {%s}", id)
 
     def count_targets(self) -> int:
         self.cursor.execute("SELECT COUNT(*) FROM targets")
         return self.cursor.fetchone()[0]
 
-    def delete_target_backups(self, id: str, delete_files: bool):
+    def delete_target_backups(self, id: str):
         self.cursor.execute("DELETE FROM backups WHERE target_id = ?", (id,))
         self.connection.commit()
-        # TODO
         self.logger.info("Delete target backups {%s}")
 
     #

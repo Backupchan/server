@@ -39,6 +39,22 @@ def extract_archive(fs_location: str, filename: str):
         return
     raise FileManagerError("Unsupported archive format")
 
+def get_fs_location(location: str, name_template: str, backup_id: str, backup_creation_str: str) -> str:
+    return os.path.join(location, nameformat.parse(name_template, backup_id, backup_creation_str))
+
+def get_backup_fs_location(backup: models.Backup, target: models.BackupTarget) -> str:
+    return get_fs_location(target.location, target.name_template, backup.id, backup.created_at.isoformat())
+
+def find_single_backup_file(base_path: str) -> str | None:
+    base = Path(base_path)
+    parent = base.parent
+    stem = base.name
+
+    for file in parent.iterdir():
+        if file.is_file() and file.stem == stem:
+            return file
+    return None
+
 class FileManager:
     def __init__(self, db: database.Database):
         self.db = db
@@ -59,7 +75,7 @@ class FileManager:
         if target is None:
             return FileManagerError(f"Backup {backup_id} points to nonexistent target")
 
-        fs_location = self.get_backup_fs_location(backup, target)
+        fs_location = get_backup_fs_location(backup, target)
 
         # If it's single-file, append the extension as well.
         if target.target_type == models.BackupType.SINGLE:
@@ -95,5 +111,54 @@ class FileManager:
 
         self.logger.info("Finish upload")
 
-    def get_backup_fs_location(self, backup: models.Backup, target: models.BackupTarget) -> str:
-        return os.path.join(target.location, nameformat.parse(target.name_template, backup.id, backup.created_at.isoformat()))
+    def delete_backup(self, backup_id: str):
+        backup = self.db.get_backup(backup_id)
+        if backup is None:
+            raise FileManagerError(f"Backup {backup_id} does not exist")
+
+        target = self.db.get_target(backup.target_id)
+        if target is None:
+            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+
+        self.logger.info("Deleting backup {%s}", backup_id)
+
+        fs_location = get_backup_fs_location(backup, target)
+        if target.target_type == models.BackupType.SINGLE:
+            for path in Path(target.location).glob(nameformat.parse(target.name_template, backup.id, backup.created_at.isoformat())):
+                path.unlink()
+        else:
+            shutil.rmtree(fs_location)
+
+    def delete_target_backups(self, target_id: str):
+        target = self.db.get_target(target_id)
+        if target is None:
+            raise FileManagerError(f"Target {target_id} does not exist")
+
+        self.logger.info("Deleting all backups for target {%s}", target_id)
+        backups = self.db.list_backups_target(target_id)
+        for backup in backups:
+            self.delete_backup(backup.id)
+
+    def update_backup_locations(self, target: models.BackupTarget, old_name_template: str, old_location: str):
+        # for convenience
+        new_name_template = target.name_template
+        new_location = target.location
+
+        self.logger.info("Starting move backups in target {%s}. Name template: '%s' -> '%s', location: '%s' -> '%s'", target.id, old_name_template, new_name_template, old_location, new_location)
+        self.db.validate_target(target.name, new_name_template, new_location, target.id)
+
+        os.makedirs(new_location, exist_ok=True)
+
+        for backup in self.db.list_backups_target(target.id):
+            old_fs_location = get_fs_location(old_location, old_name_template, backup.id, backup.created_at.isoformat())
+            new_fs_location = get_fs_location(new_location, new_name_template, backup.id, backup.created_at.isoformat())
+
+            if target.target_type == models.BackupType.SINGLE:
+                old_fs_location = find_single_backup_file(old_fs_location)
+                if old_fs_location is None:
+                    raise FileManagerError("Could not find backup file for backup {%s}", backup.id)
+                new_fs_location += "".join(Path(old_fs_location).suffixes)
+
+            shutil.move(old_fs_location, new_fs_location)
+
+        self.logger.info("Finished moving")

@@ -44,7 +44,9 @@ def handle_post_edit_target(target_id: str) -> str | None:
 
 def handle_post_delete_target(target_id: str):
     app.logger.info(f"Handle POST delete target with data: {request.form}")
-    db.delete_target(target_id, bool(request.form.get("delete_files")))
+    if bool(request.form.get("delete_files")):
+        file_manager.delete_target_backups(target_id)
+    db.delete_target(target_id)
 
 def move_uploaded_backup() -> str:
     uploaded_file = request.files["backup_file"]
@@ -76,11 +78,15 @@ def handle_post_upload_backup(target_id: str) -> str | None:
 
 def handle_post_delete_backup(backup_id: str):
     app.logger.info(f"Handle POST delete backup with data: {request.form}")
+    if bool(request.form.get("delete_files")):
+        file_manager.delete_backup(backup_id)
     db.delete_backup(backup_id)
 
 def handle_post_delete_target_backups(target_id: str):
     app.logger.info(f"Handle POST delete target backups with data: {request.form}")
-    db.delete_target_backups(target_id, bool(request.form.get("delete_files")))
+    if bool(request.form.get("delete_files")):
+        file_manager.delete_target_backups(target_id)
+    db.delete_target_backups(target_id)
 
 #
 # Endpoints
