@@ -9,6 +9,7 @@ import logging
 import nameformat
 import platform
 import re
+import unicodedata
 from datetime import datetime
 
 class DatabaseError(Exception):
@@ -23,13 +24,23 @@ def backups_from_rows(rows: list[tuple]) -> list[models.Backup]:
         backups.append(models.Backup(row[0], row[1], created_at, row[3]))
     return backups
 
+# TODO might be worth separating the two below functions to a separate module
+
+def is_printable_string(s: str) -> bool:
+    for char in s:
+        category = unicodedata.category(char)
+        if category.startswith("C"): # control chars start with c
+            return False
+    return True
+
 def is_valid_path(path: str, slash_ok: bool) -> bool:
     if platform.system() == "Windows":
         if not slash_ok and ("/" in path or "\\" in path):
             return False
         return not re.search(r'[<>:"|?*]', path)
 
-    return slash_ok or (not slash_ok and "/" not in path)
+    # Regardless of system, disallow non-printable characters for sanity.
+    return is_printable_string(path) and slash_ok or (not slash_ok and "/" not in path)
 
 class Database:
     """
