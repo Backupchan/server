@@ -4,21 +4,40 @@ import models
 import os
 import logging
 import shutil
+import zipfile
+import tarfile
 from pathlib import Path
 
 class FileManagerError(Exception):
     pass
 
+ZIP_SUFFIXES = [".zip"]
+TAR_SUFFIXES = [".tar"]
+TAR_GZ_SUFFIXES = [".tar", ".gz"]
+TAR_XZ_SUFFIXES = [".tar", ".xz"]
+
 VALID_ARCHIVE_SUFFIXES = [
-    [".zip"],
-    [".tar"],
-    [".tar", ".gz"],
-    [".tar", ".xz"]
+    ZIP_SUFFIXES,
+    TAR_SUFFIXES,
+    TAR_GZ_SUFFIXES,
+    TAR_XZ_SUFFIXES
 ]
 
 def is_archive_filename(filename: str) -> bool:
     suffixes = Path(filename).suffixes
     return suffixes in VALID_ARCHIVE_SUFFIXES
+
+def extract_archive(fs_location: str, filename: str):
+    suffixes = Path(filename).suffixes
+    if suffixes == ZIP_SUFFIXES:
+        with zipfile.ZipFile(filename, "r") as zip_file:
+            zip_file.extractall(fs_location)
+        return
+    elif suffixes == TAR_SUFFIXES or suffixes == TAR_GZ_SUFFIXES or suffixes == TAR_XZ_SUFFIXES:
+        with tarfile.TarFile(filename, "r:*") as tar_file:
+            tar_file.extractall(fs_location)
+        return
+    raise FileManagerError("Unsupported archive format")
 
 class FileManager:
     def __init__(self, db: database.Database):
@@ -71,6 +90,9 @@ class FileManager:
 
         if target.target_type == models.BackupType.SINGLE:
             shutil.move(filename, fs_location)
+        else:
+            # pull up the extremely convenient archive extractor(tm)
+            extract_archive(fs_location, filename)
 
         self.logger.info("Finish upload")
 
