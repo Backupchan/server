@@ -93,6 +93,8 @@ class FileManager:
             # pull up the extremely convenient archive extractor(tm)
             extract_archive(fs_location, filename)
 
+        os.remove(filename)
+
         self.logger.info("Finish upload")
 
     def get_backup_fs_location(self, backup: models.Backup, target: models.BackupTarget) -> str:
