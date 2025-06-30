@@ -1,5 +1,5 @@
-CREATE TABLE targets (
-    id TEXT PRIMARY KEY, -- Stored as a UUID
+CREATE TABLE IF NOT EXISTS targets (
+    id CHAR(36) PRIMARY KEY, -- Stored as a UUID
     name TEXT NOT NULL, -- Name of target set by user
     type TEXT NOT NULL CHECK (
         type IN (
@@ -28,10 +28,10 @@ CREATE TABLE targets (
     name_template TEXT NOT NULL
 );
 
-CREATE TABLE backups (
-    id TEXT PRIMARY KEY, -- UUID
-    target_id TEXT NOT NULL,
-    created_at TEXT NOT NULL, -- Assumed to be in ISO 8601. Please do not try to put anything else. SQLite does not know what a DATETIME is.
+CREATE TABLE IF NOT EXISTS backups (
+    id CHAR(36) PRIMARY KEY, -- UUID
+    target_id CHAR(36) NOT NULL,
+    created_at TEXT NOT NULL, -- TODO use DATETIME. we can because we mariadb now
     manual INTEGER NOT NULL CHECK (manual IN (0, 1)), -- Boolean integer
     FOREIGN KEY (target_id) REFERENCES targets(id) ON DELETE CASCADE
 );

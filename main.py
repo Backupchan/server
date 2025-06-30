@@ -9,14 +9,14 @@ import datetime
 import uuid
 import os
 import logging
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, abort
 from werkzeug.utils import secure_filename
 
 # Set up logging for other modules
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
 
 config = serverconfig.get_server_config()
-db = database.Database(config.get("db_path"))
+db = database.Database(config.get("db_path"), config.get("db"))
 file_manager = file_manager.FileManager(db)
 
 app = Flask(__name__)
@@ -126,12 +126,16 @@ def new_target():
 @app.route("/target/<id>")
 def view_target(id):
     target = db.get_target(id)
+    if target is None:
+        abort(404)
     backups = db.list_backups_target(id)
     return render_template("view_target.html", target=target, backups=backups, num_backups = len(backups))
 
 @app.route("/target/<id>/upload", methods=["GET", "POST"])
 def upload_backup(id):
     target = db.get_target(id)
+    if target is None:
+        abort(404)
     if request.method == "POST":
         error_message = handle_post_upload_backup(id)
         if error_message is None:
@@ -143,6 +147,8 @@ def upload_backup(id):
 @app.route("/target/<id>/edit", methods=["GET", "POST"])
 def edit_target(id):
     target = db.get_target(id)
+    if target is None:
+        abort(404)
     if request.method == "POST":
         error_message = handle_post_edit_target(id)
         if error_message is None:
@@ -154,6 +160,8 @@ def edit_target(id):
 @app.route("/target/<id>/delete", methods=["GET", "POST"])
 def delete_target(id):
     target = db.get_target(id)
+    if target is None:
+        abort(404)
     if request.method == "POST":
         handle_post_delete_target(id) # shouldn't really fail
         return redirect(url_for("list_targets"))
@@ -162,6 +170,8 @@ def delete_target(id):
 @app.route("/target/<id>/delete_all", methods=["GET", "POST"])
 def delete_target_backups(id):
     target = db.get_target(id)
+    if target is None:
+        abort(404)
     if request.method == "POST":
         handle_post_delete_target_backups(id)
         return redirect(url_for("view_target", id=id))
@@ -174,6 +184,8 @@ def delete_target_backups(id):
 @app.route("/backup/<id>/delete", methods=["GET", "POST"])
 def delete_backup(id):
     backup = db.get_backup(id)
+    if backup is None:
+        abort(404)
     if request.method == "POST":
         handle_post_delete_backup(id)
         return redirect(url_for("view_target", id=backup.target_id))

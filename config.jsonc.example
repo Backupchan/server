@@ -11,5 +11,15 @@
 
     // Temporary location for uploaded files
     // Must be writable and readable
-    "temp_save_path": "/tmp/backupchan"
+    "temp_save_path": "/tmp/backupchan",
+
+    // Database connection info
+    // You *have* to set this in your config, as this has no default values.
+    "db": {
+        "user": "backupchan",
+        "password": "your_password",
+        "host": "127.0.0.1",
+        "port": 3306,
+        "database": "backupchan"
+    }
 }

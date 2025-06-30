@@ -2,7 +2,7 @@
 Module for accessing the database in an easy way.
 """
 
-import sqlite3
+import mariadb
 import models
 import uuid
 import logging
@@ -47,8 +47,11 @@ class Database:
     This class handles the communication with the database.
     It does not perform any actual file operations on backups.
     """
-    def __init__(self, db_path: str):
-        self.connection = sqlite3.connect(db_path, check_same_thread=False)
+    def __init__(self, db_path: str, connection_config: dict):
+        if connection_config == {}:
+            raise DatabaseError("Database connection not configured")
+
+        self.connection = mariadb.connect(user=connection_config["user"], password=connection_config["password"], host=connection_config["host"], port=connection_config["port"], database=connection_config["database"])
         self.cursor = self.connection.cursor()
         self.logger = logging.getLogger(__name__)
 
@@ -191,5 +194,17 @@ class Database:
         if not is_valid_path(location, True):
             raise DatabaseError("Target location must not contain invalid characters")
 
+    def initialize_database(self):
+        with open("./db.sql", "r", encoding="utf-8") as db_sql:
+            sql_commands = db_sql.read()
+
+        for command in sql_commands.split(";"):
+            command = command.strip()
+            if command:
+                self.cursor.execute(command)
+
+        self.connection.commit()
+
     def __del__(self):
+        self.cursor.close()
         self.connection.close()
