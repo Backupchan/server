@@ -7,6 +7,8 @@ import models
 import uuid
 import logging
 import nameformat
+import platform
+import re
 from datetime import datetime
 
 class DatabaseError(Exception):
@@ -21,23 +23,13 @@ def backups_from_rows(rows: list[tuple]) -> list[models.Backup]:
         backups.append(models.Backup(row[0], row[1], created_at, row[3]))
     return backups
 
-def validate_target(name, name_template):
-    # The name must not be empty.
-    if len(name) == 0:
-        raise DatabaseError("Name of new target must not be empty")
+def is_valid_path(path: str, slash_ok: bool) -> bool:
+    if platform.system() == "Windows":
+        if not slash_ok and ("/" in path or "\\" in path):
+            return False
+        return not re.search(r'[<>:"|?*]', path)
 
-    # Name template must contain either ID of backup or its creation date.
-    if not nameformat.verify_name(name_template):
-        raise DatabaseError("Filename template must contain either creation date or ID of backup")
-
-    # Name template must be unique to this target.
-    # TODO
-
-    # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
-    # TODO this is os-based
-
-    # Location must not contain illegal characters. '/' is okay.
-    # TODO
+    return slash_ok or (not slash_ok and "/" not in path)
 
 class Database:
     """
@@ -63,7 +55,7 @@ class Database:
         location: str,
         name_template: str
     ):
-        validate_target(name, name_template)
+        self.validate_target(name, name_template, location)
 
         target_id = str(uuid.uuid4())
         self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template))
@@ -82,7 +74,7 @@ class Database:
         location: str,
         name_template: str
     ):
-        validate_target(name, name_template)
+        self.validate_target(name, name_template, location)
 
         self.cursor.execute("UPDATE targets SET name = ?, type = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ? WHERE id = ?", (name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, id))
         self.connection.commit()
@@ -155,6 +147,32 @@ class Database:
     def count_backups(self) -> int:
         self.cursor.execute("SELECT COUNT(*) FROM backups")
         return self.cursor.fetchone()[0]
+
+    #
+    # Miscellaneous
+    #
+
+    def validate_target(self, name, name_template, location):
+        # The name must not be empty.
+        if len(name) == 0:
+            raise DatabaseError("Name of new target must not be empty")
+
+        # Name template must contain either ID of backup or its creation date.
+        if not nameformat.verify_name(name_template):
+            raise DatabaseError("Filename template must contain either creation date or ID of backup")
+
+        # Name template must be unique to this target if it shares location with another target.
+        for target in self.list_targets():
+            if target.location == location and target.name_template == name_template:
+                raise DatabaseError("New target location collides with another target")
+
+        # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
+        if not is_valid_path(name_template, False):
+            raise DatabaseError("Filename template must not contain invalid characters")
+
+        # Location must not contain illegal characters. '/' is okay.
+        if not is_valid_path(location, True):
+            raise DatabaseError("Target location must not contain invalid characters")
 
     def __del__(self):
         self.connection.close()
