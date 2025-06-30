@@ -48,7 +48,7 @@ class Database:
         self.connection = sqlite3.connect(db_path, check_same_thread=False)
         self.cursor = self.connection.cursor()
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
     #
     # Target methods
@@ -117,9 +117,9 @@ class Database:
     # Backup methods
     #
 
-    def add_backup(self, target_id: str, created_at: datetime, manual: bool):
+    def add_backup(self, target_id: str, created_at: datetime, manual: bool) -> str:
         # Target ID must already exist.
-        self.cursor.execute("SELECT id FROM targets WHERE id = ", (target_id,))
+        self.cursor.execute("SELECT id FROM targets WHERE id = ?", (target_id,))
         if self.cursor.fetchone() is None:
             raise DatabaseError(f"Target with id '{target_id}' does not exist")
 
@@ -128,6 +128,17 @@ class Database:
         self.cursor.execute("INSERT INTO backups (id, target_id, created_at, manual) VALUES (?, ?, ?, ?)", (backup_id, target_id, created_at_str, manual))
 
         self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target_id, str(created_at), str(manual))
+        return backup_id
+
+    def get_backup(self, id: str) -> None | models.Backup:
+        """
+        Returns None if the backups wasn't found.
+        """
+        self.cursor.execute("SELECT * FROM backups WHERE id = ?", (id,))
+        row = self.cursor.fetchone()
+        if row is None:
+            return None
+        return models.Backup(row[0], row[1], datetime.fromisoformat(row[2]), row[3])
 
     def delete_backup(self, id: str):
         self.cursor.execute("DELETE from backups WHERE id = ?", (id,))

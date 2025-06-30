@@ -1,13 +1,19 @@
 #!/usr/bin/python3
 
 import database
+import file_manager
 import serverconfig
 import traceback
 import sys
+import datetime
+import uuid
+import os
 from flask import Flask, render_template, request, redirect, url_for
+from werkzeug.utils import secure_filename
 
 config = serverconfig.get_server_config()
 db = database.Database(config.get("db_path"))
+file_manager = file_manager.FileManager(db)
 
 app = Flask(__name__)
 
@@ -35,6 +41,25 @@ def handle_post_edit_target(target_id: str) -> str | None:
 def handle_post_delete_target(target_id: str):
     app.logger.info(f"Handle POST delete target with data: {request.form}")
     db.delete_target(target_id, bool(request.form.get("delete_files")))
+
+def move_uploaded_backup() -> str:
+    uploaded_file = request.files["backup_file"]
+    temp_path = f"{config.get('temp_save_path')}/{uuid.uuid4().hex}_{secure_filename(uploaded_file.filename)}"
+    os.makedirs(config.get("temp_save_path"), exist_ok=True)
+    uploaded_file.save(temp_path)
+    return temp_path
+
+def handle_post_upload_backup(target_id: str) -> str | None:
+    app.logger.info(f"Handle POST upload backup with data: {request.form}")
+    try:
+        backup_id = db.add_backup(target_id, datetime.datetime.now(), True) # Always manual via the browser
+        backup_filename = move_uploaded_backup()
+        app.logger.info(f"Uploaded file saved as {backup_filename}")
+        file_manager.add_backup(backup_id, backup_filename)
+    except Exception as exc:
+        print(traceback.format_exc(), file=sys.stderr)
+        return str(exc)
+    return None
 
 #
 # Endpoints
@@ -72,6 +97,12 @@ def view_target(id):
 @app.route("/target/<id>/upload", methods=["GET", "POST"])
 def upload_backup(id):
     target = db.get_target(id)
+    if request.method == "POST":
+        error_message = handle_post_upload_backup(id)
+        if error_message is None:
+            return redirect(url_for("view_target", id=id))
+        else:
+            return render_template("upload_backup.html", target=target, error_message=error_message)
     return render_template("upload_backup.html", target=target)
 
 @app.route("/target/<id>/edit", methods=["GET", "POST"])
