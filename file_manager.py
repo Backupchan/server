@@ -139,11 +139,7 @@ class FileManager:
         for backup in backups:
             self.delete_backup(backup.id)
 
-    def update_backup_locations(self, target: models.BackupTarget, old_name_template: str, old_location: str):
-        # for convenience
-        new_name_template = target.name_template
-        new_location = target.location
-
+    def update_backup_locations(self, target: models.BackupTarget, new_name_template: str, new_location: str, old_name_template: str, old_location: str):
         self.logger.info("Starting move backups in target {%s}. Name template: '%s' -> '%s', location: '%s' -> '%s'", target.id, old_name_template, new_name_template, old_location, new_location)
         self.db.validate_target(target.name, new_name_template, new_location, target.id)
 
@@ -156,8 +152,10 @@ class FileManager:
             if target.target_type == models.BackupType.SINGLE:
                 old_fs_location = find_single_backup_file(old_fs_location)
                 if old_fs_location is None:
-                    raise FileManagerError("Could not find backup file for backup {%s}", backup.id)
+                    raise FileManagerError(f"Could not find backup file for backup {backup.id}")
                 new_fs_location += "".join(Path(old_fs_location).suffixes)
+
+            self.logger.info("Move %s -> %s", old_fs_location, new_fs_location)
 
             shutil.move(old_fs_location, new_fs_location)
 

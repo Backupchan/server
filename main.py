@@ -43,7 +43,7 @@ def handle_post_edit_target(target_id: str) -> str | None:
         new_name_template = request.form["name_template"]
         db.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], new_location, new_name_template)
         if old_name_template != new_name_template or old_location != old_location:
-            file_manager.update_backup_locations(target, old_name_template, old_location)
+            file_manager.update_backup_locations(target, new_name_template, new_location, old_name_template, old_location)
     except Exception as exc:
         print(traceback.format_exc(), file=sys.stderr)
         return str(exc)
