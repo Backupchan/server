@@ -5,6 +5,7 @@ Module for accessing the database in an easy way.
 import sqlite3
 import models
 import uuid
+import logging
 import nameformat
 from datetime import datetime
 
@@ -46,6 +47,8 @@ class Database:
     def __init__(self, db_path: str):
         self.connection = sqlite3.connect(db_path, check_same_thread=False)
         self.cursor = self.connection.cursor()
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
 
     #
     # Target methods
@@ -67,6 +70,8 @@ class Database:
         self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template))
         self.connection.commit()
 
+        self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
+
     def edit_target(
         self,
         id: str,
@@ -80,8 +85,10 @@ class Database:
     ):
         validate_target(name, name_template)
 
-        self.cursor.execute("UPDATE targets SET name = ?, type = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?", (name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template))
+        self.cursor.execute("UPDATE targets SET name = ?, type = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ? WHERE id = ?", (name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, id))
         self.connection.commit()
+
+        self.logger.info("Update target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s", id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
 
     def list_targets(self) -> list[models.BackupTarget]:
         # TODO add some way to do pagination
@@ -99,6 +106,7 @@ class Database:
 
     def delete_target(self, id: str):
         self.cursor.execute("DELETE FROM targets WHERE id = ?", (id,))
+        self.logger.info("Delete target {%s}", id)
 
     def count_targets(self) -> int:
         self.cursor.execute("SELECT COUNT(*) FROM targets")
@@ -118,8 +126,11 @@ class Database:
         backup_id = str(uuid.uuid4())
         self.cursor.execute("INSERT INTO backups (id, target_id, created_at, manual) VALUES (?, ?, ?, ?)", (backup_id, target_id, created_at_str, manual))
 
+        self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target_id, str(created_at), str(manual))
+
     def delete_backup(self, id: str):
         self.cursor.execute("DELETE from backups WHERE id = ?", (id,))
+        self.logger.info("Delete backup {%s}", id)
 
     def list_backups(self) -> list[models.Backup]:
         self.cursor.execute("SELECT * FROM backups")
