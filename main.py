@@ -36,7 +36,14 @@ def handle_post_new_target() -> str | None:
 def handle_post_edit_target(target_id: str) -> str | None:
     app.logger.info(f"Handle POST edit target with data: {request.form}")
     try:
-        db.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
+        target = db.get_target(target_id)
+        old_location = target.location
+        old_name_template = target.name_template
+        new_location = request.form["location"]
+        new_name_template = request.form["name_template"]
+        db.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], new_location, new_name_template)
+        if old_name_template != new_name_template or old_location != old_location:
+            file_manager.update_backup_locations(target, old_name_template, old_location)
     except Exception as exc:
         print(traceback.format_exc(), file=sys.stderr)
         return str(exc)
