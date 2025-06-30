@@ -11,18 +11,10 @@ import platform
 import re
 import unicodedata
 from datetime import datetime
+from pathlib import Path
 
 class DatabaseError(Exception):
     pass
-
-def backups_from_rows(rows: list[tuple]) -> list[models.Backup]:
-    # Can't use a comprehension because the created_at field is stored as a string,
-    # but the model uses a datetime.
-    backups = []
-    for row in rows:
-        created_at = datetime.fromisoformat(row[2])
-        backups.append(models.Backup(row[0], row[1], created_at, row[3]))
-    return backups
 
 # TODO might be worth separating the two below functions to a separate module
 
@@ -133,9 +125,8 @@ class Database:
         if self.cursor.fetchone() is None:
             raise DatabaseError(f"Target with id '{target_id}' does not exist")
 
-        created_at_str = created_at.isoformat()
         backup_id = str(uuid.uuid4())
-        self.cursor.execute("INSERT INTO backups (id, target_id, created_at, manual) VALUES (?, ?, ?, ?)", (backup_id, target_id, created_at_str, manual))
+        self.cursor.execute("INSERT INTO backups (id, target_id, created_at, manual) VALUES (?, ?, ?, ?)", (backup_id, target_id, created_at, manual))
         self.connection.commit()
 
         self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target_id, str(created_at), str(manual))
@@ -149,7 +140,7 @@ class Database:
         row = self.cursor.fetchone()
         if row is None:
             return None
-        return models.Backup(row[0], row[1], datetime.fromisoformat(row[2]), row[3])
+        return models.Backup(*row)
 
     def delete_backup(self, id: str):
         self.cursor.execute("DELETE from backups WHERE id = ?", (id,))
@@ -158,11 +149,13 @@ class Database:
 
     def list_backups(self) -> list[models.Backup]:
         self.cursor.execute("SELECT * FROM backups")
-        return backups_from_rows(self.cursor.fetchall())
+        rows = self.cursor.fetchall()
+        return [models.Backup(*row) for row in rows]
 
     def list_backups_target(self, target_id: str) -> list[models.Backup]:
         self.cursor.execute("SELECT * FROM backups WHERE target_id = ?", (target_id,))
-        return backups_from_rows(self.cursor.fetchall())
+        rows = self.cursor.fetchall()
+        return [models.Backup(*row) for row in rows]
 
     def count_backups(self) -> int:
         self.cursor.execute("SELECT COUNT(*) FROM backups")
@@ -195,15 +188,22 @@ class Database:
             raise DatabaseError("Target location must not contain invalid characters")
 
     def initialize_database(self):
-        with open("./db.sql", "r", encoding="utf-8") as db_sql:
-            sql_commands = db_sql.read()
+        migrations_dir = Path("migrations")
+        sql_files = sorted(migrations_dir.glob("*.sql"))
 
-        for command in sql_commands.split(";"):
-            command = command.strip()
-            if command:
+        for sql_file in sql_files:
+            with open(sql_file, "r", encoding="utf-8") as f:
+                sql = f.read()
+                self.run_migration(sql_file.name, sql)
+
+    def run_migration(self, name: str, commands: str):
+        self.logger.info("Running migration: %s", name)
+        for command in commands.split(";"):
+            if command.strip():
+                self.logger.info("Run statement: %s", command)
                 self.cursor.execute(command)
-
         self.connection.commit()
+
 
     def __del__(self):
         self.cursor.close()

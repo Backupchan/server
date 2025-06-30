@@ -1,3 +1,6 @@
+-- Migration 001
+-- The First One (tm)
+
 CREATE TABLE IF NOT EXISTS targets (
     id CHAR(36) PRIMARY KEY, -- Stored as a UUID
     name TEXT NOT NULL, -- Name of target set by user
