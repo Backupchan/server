@@ -66,7 +66,7 @@ class Database:
         location: str,
         name_template: str
     ):
-        self.validate_target(name, name_template, location)
+        self.validate_target(name, name_template, location, None)
 
         target_id = str(uuid.uuid4())
         self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template))
@@ -85,7 +85,7 @@ class Database:
         location: str,
         name_template: str
     ):
-        self.validate_target(name, name_template, location)
+        self.validate_target(name, name_template, location, id)
 
         self.cursor.execute("UPDATE targets SET name = ?, type = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ? WHERE id = ?", (name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, id))
         self.connection.commit()
@@ -163,7 +163,7 @@ class Database:
     # Miscellaneous
     #
 
-    def validate_target(self, name, name_template, location):
+    def validate_target(self, name: str, name_template: str, location: str, target_id: str | None):
         # The name must not be empty.
         if len(name) == 0:
             raise DatabaseError("Name of new target must not be empty")
@@ -174,7 +174,7 @@ class Database:
 
         # Name template must be unique to this target if it shares location with another target.
         for target in self.list_targets():
-            if target.location == location and target.name_template == name_template:
+            if target.location == location and target.name_template == name_template and target.id != target_id:
                 raise DatabaseError("New target location collides with another target")
 
         # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
