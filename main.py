@@ -10,7 +10,6 @@ import uuid
 import os
 import logging
 from flask import Flask, render_template, request, redirect, url_for, abort
-from werkzeug.utils import secure_filename
 
 # Set up logging for other modules
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
@@ -57,7 +56,7 @@ def handle_post_delete_target(target_id: str):
 
 def move_uploaded_backup() -> str:
     uploaded_file = request.files["backup_file"]
-    temp_path = f"{config.get('temp_save_path')}/{uuid.uuid4().hex}_{secure_filename(uploaded_file.filename)}"
+    temp_path = f"{config.get('temp_save_path')}/{uuid.uuid4().hex}_{uploaded_file.filename}"
     os.makedirs(config.get("temp_save_path"), exist_ok=True)
     uploaded_file.save(temp_path)
     return temp_path
