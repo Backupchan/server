@@ -17,3 +17,8 @@ This is the server portion of Backup-chan, an automatic backup system.
 1. Copy `config.jsonc.example` to `config.jsonc`. Modify as necessary. Make sure to change the options under `db` especially.
 1. Run `create_db.py` to create the database.
 1. Run `main.py` to start the server.
+
+## Running migrations
+
+As you update Backup-chan, the database might change as well. To apply any new migrations, simply run `create_db.py` again.
+It will not create a new database if one already exists.
