@@ -126,6 +126,7 @@ class Database:
         created_at_str = created_at.isoformat()
         backup_id = str(uuid.uuid4())
         self.cursor.execute("INSERT INTO backups (id, target_id, created_at, manual) VALUES (?, ?, ?, ?)", (backup_id, target_id, created_at_str, manual))
+        self.connection.commit()
 
         self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target_id, str(created_at), str(manual))
         return backup_id

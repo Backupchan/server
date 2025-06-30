@@ -92,7 +92,8 @@ def new_target():
 @app.route("/target/<id>")
 def view_target(id):
     target = db.get_target(id)
-    return render_template("view_target.html", target=target)
+    backups = db.list_backups_target(id)
+    return render_template("view_target.html", target=target, backups=backups, num_backups = len(backups))
 
 @app.route("/target/<id>/upload", methods=["GET", "POST"])
 def upload_backup(id):
