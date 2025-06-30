@@ -74,6 +74,14 @@ def handle_post_upload_backup(target_id: str) -> str | None:
         return str(exc)
     return None
 
+def handle_post_delete_backup(backup_id: str):
+    app.logger.info(f"Handle POST delete backup with data: {request.form}")
+    db.delete_backup(backup_id)
+
+def handle_post_delete_target_backups(target_id: str):
+    app.logger.info(f"Handle POST delete target backups with data: {request.form}")
+    db.delete_target_backups(target_id, bool(request.form.get("delete_files")))
+
 #
 # Endpoints
 #
@@ -137,6 +145,26 @@ def delete_target(id):
         handle_post_delete_target(id) # shouldn't really fail
         return redirect(url_for("list_targets"))
     return render_template("delete_target.html", target=target)
+
+@app.route("/target/<id>/delete_all", methods=["GET", "POST"])
+def delete_target_backups(id):
+    target = db.get_target(id)
+    if request.method == "POST":
+        handle_post_delete_target_backups(id)
+        return redirect(url_for("view_target", id=id))
+    return render_template("delete_target_backups.html", target=target)
+
+#
+# Backup endpoints
+#
+
+@app.route("/backup/<id>/delete", methods=["GET", "POST"])
+def delete_backup(id):
+    backup = db.get_backup(id)
+    if request.method == "POST":
+        handle_post_delete_backup(id)
+        return redirect(url_for("view_target", id=backup.target_id))
+    return render_template("delete_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
 
 if __name__ == "__main__":
     app.run(debug=config.get("webui_debug"))

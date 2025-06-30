@@ -14,6 +14,7 @@
         <li><a href="{{ url_for('upload_backup', id=target.id) }}">Upload backup</a></li>
         <li><a href="{{ url_for('edit_target', id=target.id) }}">Edit target</a></li>
         <li><a href="{{ url_for('delete_target', id=target.id) }}">Delete target</a></li>
+        <li><a href="{{ url_for('delete_target_backups', id=target.id) }}">Delete all backups</a></li>
     </ul>
     <p>This target has <b>{{ num_backups }}</b> backups.</p>
     <ol>
@@ -21,7 +22,8 @@
         <li>
             ID: <b class="monospace">{{ backup.id }}</b><br>
             Created at: <b>{{ backup.pretty_created_at() }}</b><br>
-            Uploaded <b>{% if backup.manual %}manually{% else %}automatically{% endif %}</b>
+            Uploaded <b>{% if backup.manual %}manually{% else %}automatically{% endif %}</b><br>
+            <a href="{{ url_for('delete_backup', id=backup.id) }}">Delete</a>
         </li>
     {% endfor %}
     </ul>

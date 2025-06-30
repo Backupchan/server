@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Backup-chan >> Delete target</title>
+    <title>Backup-chan >> Delete target backups</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Delete target</h1>
-    <p>The target <b>{{ target.name }}</b> is about to be deleted. Are you okay with that?</p>
-    <form method="post" action="{{ url_for('delete_target', id=target.id) }}">
+    <h1>Delete target backups</h1>
+    <p>All backups for target <b>{{ target.name }}</b> are about to be deleted. Are you okay with that?</p>
+    <form method="post" action="{{ url_for('delete_target_backups', id=target.id) }}">
         <input type="checkbox" name="delete_files" value="delete_files"> <label for="delete_files">Also delete backup files</label><p></p>
         <input type="submit" value="Delete">
     </form>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Delete backup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Delete backup</h1>
+    <p>Backup with ID <b class="monospace">{{ backup.id }}</b> created at <b>{{ backup.pretty_created_at() }}</b>, belonging to target <b>{{ target_name }}</b> will be deleted. Are you okay with that?</p>
+    <form action="{{ url_for('delete_backup', id=backup.id) }}" method="post">
+        <input type="submit" value="Delete">
+    </form>
+</body>
+</html>
