@@ -23,7 +23,7 @@ def handle_post_new_target() -> str | None:
         return str(exc)
     return None
 
-def handle_edit_new_target(target_id) -> str | None:
+def handle_post_edit_target(target_id: str) -> str | None:
     app.logger.info(f"Handle POST edit target with data: {request.form}")
     try:
         db.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
@@ -31,6 +31,10 @@ def handle_edit_new_target(target_id) -> str | None:
         print(traceback.format_exc(), file=sys.stderr)
         return str(exc)
     return None
+
+def handle_post_delete_target(target_id: str):
+    app.logger.info(f"Handle POST delete target with data: {request.form}")
+    db.delete_target(target_id, bool(request.form.get("delete_files")))
 
 #
 # Endpoints
@@ -74,7 +78,7 @@ def upload_backup(id):
 def edit_target(id):
     target = db.get_target(id)
     if request.method == "POST":
-        error_message = handle_edit_new_target(id)
+        error_message = handle_post_edit_target(id)
         if error_message is None:
             return redirect(url_for("view_target", id=id))
         else:
@@ -84,6 +88,9 @@ def edit_target(id):
 @app.route("/target/<id>/delete", methods=["GET", "POST"])
 def delete_target(id):
     target = db.get_target(id)
+    if request.method == "POST":
+        handle_post_delete_target(id) # shouldn't really fail
+        return redirect(url_for("list_targets"))
     return render_template("delete_target.html", target=target)
 
 if __name__ == "__main__":

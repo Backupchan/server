@@ -104,8 +104,9 @@ class Database:
         row = self.cursor.fetchone()
         return None if row is None else models.BackupTarget(*row)
 
-    def delete_target(self, id: str):
+    def delete_target(self, id: str, delete_files: bool):
         self.cursor.execute("DELETE FROM targets WHERE id = ?", (id,))
+        # TODO handle deleting backups is delete_files is true
         self.logger.info("Delete target {%s}", id)
 
     def count_targets(self) -> int:
