@@ -7,5 +7,9 @@
 
     // Whether or not to enable debug mode on web interface
     // Only enable if you're developing.
-    "webui_debug": False
+    "webui_debug": False,
+
+    // Temporary location for uploaded files
+    // Must be writable and readable
+    "temp_save_path": "/tmp/backupchan"
 }
