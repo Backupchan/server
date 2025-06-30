@@ -55,12 +55,21 @@ def move_uploaded_backup() -> str:
 
 def handle_post_upload_backup(target_id: str) -> str | None:
     app.logger.info(f"Handle POST upload backup with data: {request.form}")
+    backup_id = ""
     try:
         backup_id = db.add_backup(target_id, datetime.datetime.now(), True) # Always manual via the browser
         backup_filename = move_uploaded_backup()
         app.logger.info(f"Uploaded file saved as {backup_filename}")
+    except Exception as exc:
+        db.delete_backup(backup_id)
+        print(traceback.format_exc(), file=sys.stderr)
+        return str(exc)
+
+    try:
         file_manager.add_backup(backup_id, backup_filename)
     except Exception as exc:
+        # if this fails we delete the freaking backup
+        db.delete_backup(backup_id)
         print(traceback.format_exc(), file=sys.stderr)
         return str(exc)
     return None
