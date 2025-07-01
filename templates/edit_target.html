@@ -37,7 +37,7 @@
             <option value="recycle" {% if target is none or target.recycle_criteria == "recycle" %}selected="selected" {% endif %}>Recycle (move to recycle bin once criteria met)</option>
         </select><p></p>
         <span>Backup type:</span>&nbsp;
-        <select name="backup_type" required>
+        <select name="backup_type" {% if target is not none %}disabled{% else %}required{% endif %}>
             <option value="single" {% if target is none or target.target_type == "single" %}selected="selected"{% endif %}>Single file</option>
             <option value="multi" {% if target is not none and target.target_type == "multi" %}selected="selected"{% endif %}>Multiple files</option>
         </select><p></p>

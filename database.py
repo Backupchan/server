@@ -73,7 +73,6 @@ class Database:
         self,
         id: str,
         name: str,
-        target_type: models.BackupType,
         recycle_criteria: models.BackupRecycleCriteria,
         recycle_value: int | None,
         recycle_action: models.BackupRecycleAction | None,
@@ -82,10 +81,10 @@ class Database:
     ):
         self.validate_target(name, name_template, location, id)
 
-        self.cursor.execute("UPDATE targets SET name = ?, type = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ? WHERE id = ?", (name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, id))
+        self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ? WHERE id = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, id))
         self.connection.commit()
 
-        self.logger.info("Update target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s", id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
+        self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s", id, name, recycle_criteria, recycle_value, recycle_action, location, name_template)
 
     def list_targets(self) -> list[models.BackupTarget]:
         # TODO add some way to do pagination

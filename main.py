@@ -37,7 +37,7 @@ def handle_post_new_target() -> str | None:
 def handle_post_edit_target(target_id: str) -> str | None:
     app.logger.info(f"Handle POST edit target with data: {request.form}")
     try:
-        server_api.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], reqyest.form["location"], request.form["name_template"])
+        server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
     except Exception as exc:
         print(traceback.format_exc(), file=sys.stderr)
         return str(exc)
