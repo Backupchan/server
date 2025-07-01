@@ -89,8 +89,7 @@ def handle_post_delete_target_backups(target_id: str):
 
 @app.route("/")
 def homepage():
-    targets = db.list_targets()
-    return render_template("home.html", targets=targets, num_targets=db.count_targets(), num_backups=db.count_backups())
+    return redirect(url_for("list_targets"))
 
 #
 # Target endpoints
@@ -99,7 +98,7 @@ def homepage():
 @app.route("/targets")
 def list_targets():
     targets = db.list_targets()
-    return render_template("list_targets.html", targets=targets, num_targets=db.count_targets())
+    return render_template("list_targets.html", targets=targets, num_targets=db.count_targets(), num_backups=db.count_backups())
 
 @app.route("/target/new", methods=["GET", "POST"])
 def new_target():
