@@ -1,0 +1,26 @@
+{% from "macro.html" import navbar, backup_print %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Recycle bin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Recycle bin</h1>
+        <p>There are {{ num_backups }} items in the recycle bin. You may delete or restore them.</p>
+        <ul><li><a href="{{ url_for('webui.recycle_bin_clear') }}">Delete all</a></li></ul>
+
+        <ol>
+        {% for backup in backups %}
+            <li>
+                {{ backup_print(backup.backup, backup.target) }}
+            </li>
+        {% endfor %}
+        </ol>
+    </div>
+</body>
+</html>

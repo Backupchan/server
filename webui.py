@@ -186,6 +186,23 @@ class WebUI:
                 self.handle_post_unrecycle_backup(id)
                 return redirect(url_for("view_target", id=backup.target_id))
             return render_template("unrecycle_backup.html", backup=backup, target_name=self.db.get_target(backup.target_id).name)
+        
+        @self.blueprint.route("/recycle_bin")
+        @requires_auth
+        def recycle_bin():
+            backups = self.db.list_backups_is_recycled(True)
+            backups_and_targets = []
+            for backup in backups:
+                backups_and_targets.append({"backup": backup, "target": self.db.get_target(backup.target_id)})
+            return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups))
+        
+        @self.blueprint.route("/recycle_bin/clear", methods=["GET", "POST"])
+        @requires_auth
+        def recycle_bin_clear():
+            if request.method == "POST":
+                self.handle_post_recycle_bin_clear()
+                return redirect(url_for("recycle_bin"))
+            return render_template("recycle_bin_clear.html")
 
     #
     # POST request handlers
@@ -257,3 +274,6 @@ class WebUI:
         self.logger.info(f"Handle POST unrecycle backup with data: {request.form}")
         self.server_api.unrecycle_backup(backup_id)
 
+    def handle_post_recycle_bin_clear(self):
+        self.logger.info(f"Handler POST recycle bin clear with data: {request.form}")
+        self.server_api.recycle_bin_clear(bool(request.form.get("delete_files")))

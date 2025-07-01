@@ -1,0 +1,21 @@
+{% from "macro.html" import navbar, backup_print %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Empty recycle bin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Empty recycle bin</h1>
+        <p>Every item in the recycle bin will be permanently deleted. Are you okay with that?</p>
+        <form action="{{ url_for('webui.recycle_bin_clear') }}" method="post">
+            <input type="checkbox" name="delete_files" value="delete_files"> <label for="delete_files">Also delete backup files</label><p></p>
+            <input type="submit" value="Delete">
+        </form>
+    </div>
+</body>
+</html>

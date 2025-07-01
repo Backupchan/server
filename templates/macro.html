@@ -39,13 +39,16 @@
     Name template: <b class="monospace">{{ target.name_template }}</b><br>
 {% endmacro %}
 
-{% macro backup_print(backup) %}
+{% macro backup_print(backup, target=none) %}
     ID: <b class="monospace">{{ backup.id }}</b><br>
+    {% if target is not none %}
+    Belongs to: <a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a><br>
+    {% endif %}
     Created at: <b>{{ backup.pretty_created_at() }}</b><br>
     Uploaded <b>{% if backup.manual %}manually{% else %}automatically{% endif %}</b><br>
-    <a href="{{ url_for('webui.delete_backup', id=backup.id) }}">Delete</a> |&nbsp;
+    <a href="{{ url_for('webui.delete_backup', id=backup.id) }}">Delete</a> |
     {% if backup.is_recycled %}
-    <a href="{{ url_for('webui.unrecycle_backup', id=backup.id) }}">Unrecycle</a>
+    <a href="{{ url_for('webui.unrecycle_backup', id=backup.id) }}">Restore</a>
     {% else %}
     <a href="{{ url_for('webui.recycle_backup', id=backup.id) }}">Recycle</a>
     {% endif %}
@@ -56,7 +59,7 @@
         <ul id="navbar">
             <li id="backupchan-heading">Backup-chan</li>
             <li><a href="{{ url_for('webui.list_targets') }}">Targets</a></li>
-            <li><a href="#">Recycle bin</a></li>
+            <li><a href="{{ url_for('webui.recycle_bin') }}">Recycle bin</a></li>
             <li><a href="#">Logs</a></li>
             <li><a href="#">Stats</a></li>
         </ul>

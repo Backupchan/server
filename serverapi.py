@@ -10,7 +10,7 @@ class ServerAPI:
     def __init__(self, db: database.Database, fm: file_manager.FileManager):
         self.db = db
         self.fm = fm
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def edit_target(self, target_id: str, new_name: str, new_recycle_criteria: str, new_recycle_value: int, new_recycle_action: str, new_location: str, new_name_template: str):
         with self.lock:
@@ -42,3 +42,9 @@ class ServerAPI:
         with self.lock:
             self.fm.unrecycle_backup(backup_id)
             self.db.recycle_backup(backup_id, False)
+
+    def recycle_bin_clear(self, delete_files: bool):
+        with self.lock:
+            recycled_backups = self.db.list_backups_is_recycled(True)
+            for backup in recycled_backups:
+                self.delete_backup(backup.id, delete_files)
