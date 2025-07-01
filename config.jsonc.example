@@ -27,5 +27,9 @@
     "recycle_bin_path": "./Recycle-bin",
 
     // Interval for checking targets for recycling, in minutes
-    "daemon_interval": 60
+    "daemon_interval": 60,
+
+    // Whether or not to enable authentication on webui
+    // Set password by running passwd.py
+    "webui_auth": true
 }

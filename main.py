@@ -12,7 +12,11 @@ import uuid
 import os
 import logging
 import threading
-from flask import Flask, render_template, request, redirect, url_for, abort
+import json
+import functools
+import secrets
+from flask import Flask, render_template, request, redirect, url_for, abort, session
+from werkzeug.security import check_password_hash
 
 # Set up logging for other modules
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
@@ -24,7 +28,16 @@ server_api = serverapi.ServerAPI(db, file_manager)
 daemon = recycle_daemon.RecycleDaemon(db, server_api, config.get("daemon_interval"))
 threading.Thread(target=daemon.run).start()
 
+password_hash = ""
+if config.get("webui_auth"):
+    with open("./auth.json", "r", encoding="utf-8") as auth_json:
+        password_hash = json.load(auth_json)["passwd_hash"]
+
 app = Flask(__name__)
+
+# Make a new secret key each time the server is started.
+# This does mean that everyone gets logged out everytime the server restarts.
+app.secret_key = secrets.token_hex(32)
 
 #
 # POST request handlers
@@ -96,14 +109,44 @@ def handle_post_unrecycle_backup(backup_id: str):
     server_api.unrecycle_backup(backup_id)
 
 #
+# Authentication
+#
+
+def requires_auth(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        print("HEY IM CALLED")
+        if not session.get("authed"):
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        password = request.form["password"]
+        if check_password_hash(password_hash, password):
+            session["authed"] = True
+            return redirect(url_for("list_targets"))
+        else:
+            return render_template("login.html", incorrect=True)
+    return render_template("login.html")
+
+#
 # Endpoints
 #
 
+@app.route("/test")
+def test():
+    return str(session)
+
 @app.route("/")
+@requires_auth
 def homepage():
     return redirect(url_for("list_targets"))
 
 @app.route("/daemon-recheck")
+@requires_auth
 def daemon_recheck():
     daemon.force_recheck()
     return "Forced daemon re-check. Inspect the log for details."
@@ -113,11 +156,13 @@ def daemon_recheck():
 #
 
 @app.route("/targets")
+@requires_auth
 def list_targets():
     targets = db.list_targets()
     return render_template("list_targets.html", targets=targets, num_targets=db.count_targets(), num_backups=db.count_backups())
 
 @app.route("/target/new", methods=["GET", "POST"])
+@requires_auth
 def new_target():
     if request.method == "POST":
         error_message = handle_post_new_target()
@@ -128,6 +173,7 @@ def new_target():
     return render_template("edit_target.html", target=None)
 
 @app.route("/target/<id>")
+@requires_auth
 def view_target(id):
     target = db.get_target(id)
     if target is None:
@@ -137,6 +183,7 @@ def view_target(id):
     return render_template("view_target.html", target=target, active_backups=active_backups, recycled_backups=recycled_backups, num_backups=len(active_backups) + len(recycled_backups), has_recycled_backups=len(recycled_backups) > 0)
 
 @app.route("/target/<id>/upload", methods=["GET", "POST"])
+@requires_auth
 def upload_backup(id):
     target = db.get_target(id)
     if target is None:
@@ -150,6 +197,7 @@ def upload_backup(id):
     return render_template("upload_backup.html", target=target)
 
 @app.route("/target/<id>/edit", methods=["GET", "POST"])
+@requires_auth
 def edit_target(id):
     target = db.get_target(id)
     if target is None:
@@ -163,6 +211,7 @@ def edit_target(id):
     return render_template("edit_target.html", target=target)
 
 @app.route("/target/<id>/delete", methods=["GET", "POST"])
+@requires_auth
 def delete_target(id):
     target = db.get_target(id)
     if target is None:
@@ -173,6 +222,7 @@ def delete_target(id):
     return render_template("delete_target.html", target=target)
 
 @app.route("/target/<id>/delete_all", methods=["GET", "POST"])
+@requires_auth
 def delete_target_backups(id):
     target = db.get_target(id)
     if target is None:
@@ -187,6 +237,7 @@ def delete_target_backups(id):
 #
 
 @app.route("/backup/<id>/delete", methods=["GET", "POST"])
+@requires_auth
 def delete_backup(id):
     backup = db.get_backup(id)
     if backup is None:
@@ -197,6 +248,7 @@ def delete_backup(id):
     return render_template("delete_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
 
 @app.route("/backup/<id>/recycle", methods=["GET", "POST"])
+@requires_auth
 def recycle_backup(id):
     backup = db.get_backup(id)
     if backup is None:
@@ -209,6 +261,7 @@ def recycle_backup(id):
     return render_template("recycle_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
 
 @app.route("/backup/<id>/unrecycle", methods=["GET", "POST"])
+@requires_auth
 def unrecycle_backup(id):
     backup = db.get_backup(id)
     if backup is None:

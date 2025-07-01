@@ -28,3 +28,9 @@ for every new migration, for example:
 ./migrate.py 003_backup_recycled.sql
 ...
 ```
+
+## Setting up authentication
+
+1. Enable it in your config
+1. Run `passwd.py` and enter the password you'd like to use
+1. that's it

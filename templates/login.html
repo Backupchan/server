@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Login</h1>
+    <p>This Backup-chan is protected by a password. Enter it to access.</p>
+    {% if incorrect %}
+    <p class="error-message">Access denied</p>
+    {% endif %}
+    <form action="{{ url_for('login') }}" method="post">
+        <input type="password" name="password" placeholder="Enter it here">
+        <input type="submit" value="Login">
+    </form>
+</body>
+</html>

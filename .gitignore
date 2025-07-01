@@ -3,3 +3,4 @@ config.jsonc
 *.swp
 __pycache__/
 *.db-journal
+auth.json
