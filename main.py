@@ -4,12 +4,14 @@ import database
 import file_manager
 import serverapi
 import serverconfig
+import recycle_daemon
 import traceback
 import sys
 import datetime
 import uuid
 import os
 import logging
+import threading
 from flask import Flask, render_template, request, redirect, url_for, abort
 
 # Set up logging for other modules
@@ -19,6 +21,8 @@ config = serverconfig.get_server_config()
 db = database.Database(config.get("db_path"), config.get("db"))
 file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
+daemon = recycle_daemon.RecycleDaemon(db, server_api, config.get("daemon_interval"))
+threading.Thread(target=daemon.run).start()
 
 app = Flask(__name__)
 
@@ -98,6 +102,11 @@ def handle_post_unrecycle_backup(backup_id: str):
 @app.route("/")
 def homepage():
     return redirect(url_for("list_targets"))
+
+@app.route("/daemon-recheck")
+def daemon_recheck():
+    daemon.force_recheck()
+    return "Forced daemon re-check. Inspect the log for details."
 
 #
 # Target endpoints

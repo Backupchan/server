@@ -24,5 +24,8 @@
     },
 
     // Recycle bin directory path
-    "recycle_bin_path": "./Recycle-bin"
+    "recycle_bin_path": "./Recycle-bin",
+
+    // Interval for checking targets for recycling, in minutes
+    "daemon_interval": 60
 }

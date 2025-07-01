@@ -14,7 +14,7 @@ This is the server portion of Backup-chan, an automatic backup system.
     ```
     * Now you can exit the shell by entering `\q`
 1. Install program dependencies: `pip install -r requirements.txt`
-1. Copy `config.jsonc.example` to `config.jsonc`. Modify as necessary. Make sure to change the options under `db` especially.
+1. Copy `config.jsonc.example` to `config.jsonc`. Modify as necessary. Unless stated otherwise, most options have default values.
 1. Run `migrate.py` to create required tables database.
 1. Run `main.py` to start the server.
 

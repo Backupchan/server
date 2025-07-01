@@ -12,5 +12,6 @@ def get_server_config():
     server_config.add_option("temp_save_path", str, "/tmp/backupchan")
     server_config.add_option("db", dict, {})
     server_config.add_option("recycle_bin_path", str, "./Recycle-bin")
+    server_config.add_option("daemon_interval", int, 60)
     server_config.parse()
     return server_config
