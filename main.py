@@ -2,6 +2,7 @@
 
 import database
 import file_manager
+import serverapi
 import serverconfig
 import traceback
 import sys
@@ -17,6 +18,7 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(leve
 config = serverconfig.get_server_config()
 db = database.Database(config.get("db_path"), config.get("db"))
 file_manager = file_manager.FileManager(db)
+server_api = serverapi.ServerAPI(db, file_manager)
 
 app = Flask(__name__)
 
@@ -35,14 +37,7 @@ def handle_post_new_target() -> str | None:
 def handle_post_edit_target(target_id: str) -> str | None:
     app.logger.info(f"Handle POST edit target with data: {request.form}")
     try:
-        target = db.get_target(target_id)
-        old_location = target.location
-        old_name_template = target.name_template
-        new_location = request.form["location"]
-        new_name_template = request.form["name_template"]
-        db.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], new_location, new_name_template)
-        if old_name_template != new_name_template or old_location != old_location:
-            file_manager.update_backup_locations(target, new_name_template, new_location, old_name_template, old_location)
+        server_api.edit_target(target_id, request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], reqyest.form["location"], request.form["name_template"])
     except Exception as exc:
         print(traceback.format_exc(), file=sys.stderr)
         return str(exc)
@@ -50,9 +45,6 @@ def handle_post_edit_target(target_id: str) -> str | None:
 
 def handle_post_delete_target(target_id: str):
     app.logger.info(f"Handle POST delete target with data: {request.form}")
-    if bool(request.form.get("delete_files")):
-        file_manager.delete_target_backups(target_id)
-    db.delete_target(target_id)
 
 def move_uploaded_backup() -> str:
     uploaded_file = request.files["backup_file"]
@@ -62,6 +54,7 @@ def move_uploaded_backup() -> str:
     return temp_path
 
 def handle_post_upload_backup(target_id: str) -> str | None:
+    # TODO not sure if this can be extracted to server api as well
     app.logger.info(f"Handle POST upload backup with data: {request.form}")
     backup_id = ""
     try:
@@ -84,15 +77,11 @@ def handle_post_upload_backup(target_id: str) -> str | None:
 
 def handle_post_delete_backup(backup_id: str):
     app.logger.info(f"Handle POST delete backup with data: {request.form}")
-    if bool(request.form.get("delete_files")):
-        file_manager.delete_backup(backup_id)
-    db.delete_backup(backup_id)
+    server_api.delete_backup(backup_id, bool(request.form.get("delete_files")))
 
 def handle_post_delete_target_backups(target_id: str):
     app.logger.info(f"Handle POST delete target backups with data: {request.form}")
-    if bool(request.form.get("delete_files")):
-        file_manager.delete_target_backups(target_id)
-    db.delete_target_backups(target_id)
+    server_api.delete_backup(target_id, bool(request.form.get("delete_files")))
 
 #
 # Endpoints
