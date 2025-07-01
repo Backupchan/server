@@ -45,7 +45,7 @@ class WebUI:
                 password = request.form["password"]
                 if check_password_hash(self.passwd_hash, password):
                     session["authed"] = True
-                    return redirect(url_for("list_targets"))
+                    return redirect(url_for("webui.list_targets"))
                 else:
                     return render_template("login.html", incorrect=True)
             return render_template("login.html")
@@ -57,7 +57,7 @@ class WebUI:
         @self.blueprint.route("/")
         @requires_auth
         def homepage():
-            return redirect(url_for("list_targets"))
+            return redirect(url_for("webui.list_targets"))
 
         @self.blueprint.route("/daemon-recheck")
         @requires_auth
@@ -81,7 +81,7 @@ class WebUI:
             if request.method == "POST":
                 error_message = self.handle_post_new_target()
                 if error_message is None:
-                    return redirect(url_for("list_targets"))
+                    return redirect(url_for("webui.list_targets"))
                 else:
                     return render_template("edit_target.html", target=None, error_message=error_message)
             return render_template("edit_target.html", target=None)
@@ -105,7 +105,7 @@ class WebUI:
             if request.method == "POST":
                 error_message = self.handle_post_upload_backup(id)
                 if error_message is None:
-                    return redirect(url_for("view_target", id=id))
+                    return redirect(url_for("webui.view_target", id=id))
                 else:
                     return render_template("upload_backup.html", target=target, error_message=error_message)
             return render_template("upload_backup.html", target=target)
@@ -119,7 +119,7 @@ class WebUI:
             if request.method == "POST":
                 error_message = self.handle_post_edit_target(id)
                 if error_message is None:
-                    return redirect(url_for("view_target", id=id))
+                    return redirect(url_for("webui.view_target", id=id))
                 else:
                     return render_template("edit_target.html", target=target, error_message=error_message)
             return render_template("edit_target.html", target=target)
@@ -132,7 +132,7 @@ class WebUI:
                 abort(404)
             if request.method == "POST":
                 self.handle_post_delete_target(id) # shouldn't really fail
-                return redirect(url_for("list_targets"))
+                return redirect(url_for("webui.list_targets"))
             return render_template("delete_target.html", target=target)
 
         @self.blueprint.route("/target/<id>/delete_all", methods=["GET", "POST"])
@@ -143,7 +143,7 @@ class WebUI:
                 abort(404)
             if request.method == "POST":
                 self.handle_post_delete_target_backups(id)
-                return redirect(url_for("view_target", id=id))
+                return redirect(url_for("webui.view_target", id=id))
             return render_template("delete_target_backups.html", target=target)
 
         #
@@ -158,7 +158,7 @@ class WebUI:
                 abort(404)
             if request.method == "POST":
                 self.handle_post_delete_backup(id)
-                return redirect(url_for("view_target", id=backup.target_id))
+                return redirect(url_for("webui.view_target", id=backup.target_id))
             return render_template("delete_backup.html", backup=backup, target_name=self.db.get_target(backup.target_id).name)
 
         @self.blueprint.route("/backup/<id>/recycle", methods=["GET", "POST"])
@@ -171,7 +171,7 @@ class WebUI:
                 abort(400)
             if request.method == "POST":
                 self.handle_post_recycle_backup(id)
-                return redirect(url_for("view_target", id=backup.target_id))
+                return redirect(url_for("webui.view_target", id=backup.target_id))
             return render_template("recycle_backup.html", backup=backup, target_name=self.db.get_target(backup.target_id).name)
 
         @self.blueprint.route("/backup/<id>/unrecycle", methods=["GET", "POST"])
@@ -184,7 +184,7 @@ class WebUI:
                 abort(400)
             if request.method == "POST":
                 self.handle_post_unrecycle_backup(id)
-                return redirect(url_for("view_target", id=backup.target_id))
+                return redirect(url_for("webui.view_target", id=backup.target_id))
             return render_template("unrecycle_backup.html", backup=backup, target_name=self.db.get_target(backup.target_id).name)
         
         @self.blueprint.route("/recycle_bin")
@@ -201,7 +201,7 @@ class WebUI:
         def recycle_bin_clear():
             if request.method == "POST":
                 self.handle_post_recycle_bin_clear()
-                return redirect(url_for("recycle_bin"))
+                return redirect(url_for("webui.recycle_bin"))
             return render_template("recycle_bin_clear.html")
 
     #
