@@ -131,7 +131,8 @@ class FileManager:
 
             fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
             if target.target_type == models.BackupType.SINGLE:
-                for path in Path(target.location).glob(nameformat.parse(target.name_template, backup.id, backup.created_at.isoformat())):
+                base_location = self.recycle_bin_path if backup.is_recycled else target.location
+                for path in Path(base_location).glob(nameformat.parse(target.name_template, backup.id, backup.created_at.isoformat())):
                     path.unlink()
             else:
                 shutil.rmtree(fs_location)
