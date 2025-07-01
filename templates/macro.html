@@ -13,18 +13,18 @@
         (broken value)
     {% endif %}
     </b><br>
+    {% if target.recycle_criteria != "none" %}
     Recycle action:
     <b>
-    {% if target.recycle_action is not none %}
-        {% if target.recycle_action == "delete" %}
-            Delete
-        {% elif target.recycle_action == "recycle" %}
-            Move to recycle bin
-        {% else %}
-            (broken value)
-        {% endif %}
+    {% if target.recycle_action == "delete" %}
+        Delete
+    {% elif target.recycle_action == "recycle" %}
+        Move to recycle bin
+    {% else %}
+        (broken value)
     {% endif %}
     </b><br>
+    {% endif %}
     Type:
     <b>
     {% if target.target_type == "single" %}
