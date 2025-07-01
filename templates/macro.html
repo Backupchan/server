@@ -50,3 +50,15 @@
     <a href="{{ url_for('webui.recycle_backup', id=backup.id) }}">Recycle</a>
     {% endif %}
 {% endmacro %}
+
+{% macro navbar() %}
+    <nav>
+        <ul id="navbar">
+            <li id="backupchan-heading">Backup-chan</li>
+            <li><a href="{{ url_for('webui.list_targets') }}">Targets</a></li>
+            <li><a href="#">Recycle bin</a></li>
+            <li><a href="#">Logs</a></li>
+            <li><a href="#">Stats</a></li>
+        </ul>
+    </nav>
+{% endmacro %}

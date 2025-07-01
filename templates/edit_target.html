@@ -1,3 +1,4 @@
+{% from "macro.html" import navbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,53 +8,56 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    {% if target is none %}
-    <h1>New target</h1>
-    <form action="{{ url_for('webui.new_target') }}" method="post">
-    {% else %}
-    <h1>Edit target</h1>
-    {% if error_message is not none %}
-    <span class="error-message">{{ error_message }}</span>
-    {% endif %}
-    <form action="{{ url_for('webui.edit_target', id=target.id) }}" method="post">
-    {% endif %}
-        <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required><p></p>
-        <span>Recycle criteria:</span>&nbsp;
-        <select name="recycle_criteria" required>
-            <option value="none" {% if target is none or target.recycle_criteria == "none" %}selected="selected"{% endif %}>None</option>
-            <option value="count" {% if target is not none and target.recycle_criteria == "count" %}selected="selected"{% endif %}>Count: When multiple backups are present</option>
-            <option value="age" {% if target is not none and target.recycle_criteria == "age" %}selected="selected"{% endif %}>Age: When backups are old enough</option>
-        </select>
-        <p></p>
-        <span>Recycle value:</span>
-        <input type="number" name="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %} required><p></p>
-        <ul>
-            <li>If you chose 'count', then backups will be recycled after this many backups reached.</li>
-            <li>If you chose 'age', then backups will be recycled after this many days.</li>
-        </ul>
-        <span>Recycle action:</span>&nbsp;
-        <select name="recycle_action" required>
-            <option value="delete" {% if target is not none and target.recycle_criteria == "delete" %}selected="selected"{% endif %}>Delete (permanently delete once criteria met)</option>
-            <option value="recycle" {% if target is none or target.recycle_criteria == "recycle" %}selected="selected" {% endif %}>Recycle (move to recycle bin once criteria met)</option>
-        </select><p></p>
-        <span>Backup type:</span>&nbsp;
-        <select name="backup_type" {% if target is not none %}disabled{% else %}required{% endif %}>
-            <option value="single" {% if target is none or target.target_type == "single" %}selected="selected"{% endif %}>Single file</option>
-            <option value="multi" {% if target is not none and target.target_type == "multi" %}selected="selected"{% endif %}>Multiple files</option>
-        </select><p></p>
-        <span>Backup location:</span> <input type="text" name="location" {% if target is not none %}value="{{ target.location }}"{% endif %} required><p></p>
-        <ul>
-            <li>Path to store backups (e.g. <span class="monospace">/var/backups</span>)</li>
-            <li>The user account running Backup-chan must have read and write access to access this location.</li>
-            <li>If the path does not exist, Backup-chan will try to create it.</li>
-        </ul>
-        <span>Name template:</span> <input type="text" name="name_template" {% if target is not none %}value="{{ target.name_template }}"{% endif %} required><br>
-        <ul>
-            <li>The name template is the template for individual backup names.</li>
-            <li>It must contain either the creation date (<span class="monospace">$D</span>) or the ID of the backup (<span class="monospace">$I</span>).</li>
-            <li>Example: <span class="monospace">backup-$I-$D</span></li>
-        </ul><p></p>
-        <input type="submit" value="{% if target is none%}Create target{% else %}Submit changes{% endif %}">
-    </form>
+    {{ navbar() }}
+    <div id="container">
+        {% if target is none %}
+        <h1>New target</h1>
+        <form action="{{ url_for('webui.new_target') }}" method="post">
+        {% else %}
+        <h1>Edit target</h1>
+        {% if error_message is not none %}
+        <span class="error-message">{{ error_message }}</span>
+        {% endif %}
+        <form action="{{ url_for('webui.edit_target', id=target.id) }}" method="post">
+        {% endif %}
+            <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required><p></p>
+            <span>Recycle criteria:</span>&nbsp;
+            <select name="recycle_criteria" required>
+                <option value="none" {% if target is none or target.recycle_criteria == "none" %}selected="selected"{% endif %}>None</option>
+                <option value="count" {% if target is not none and target.recycle_criteria == "count" %}selected="selected"{% endif %}>Count: When multiple backups are present</option>
+                <option value="age" {% if target is not none and target.recycle_criteria == "age" %}selected="selected"{% endif %}>Age: When backups are old enough</option>
+            </select>
+            <p></p>
+            <span>Recycle value:</span>
+            <input type="number" name="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %} required><p></p>
+            <ul>
+                <li>If you chose 'count', then backups will be recycled after this many backups reached.</li>
+                <li>If you chose 'age', then backups will be recycled after this many days.</li>
+            </ul>
+            <span>Recycle action:</span>&nbsp;
+            <select name="recycle_action" required>
+                <option value="delete" {% if target is not none and target.recycle_criteria == "delete" %}selected="selected"{% endif %}>Delete (permanently delete once criteria met)</option>
+                <option value="recycle" {% if target is none or target.recycle_criteria == "recycle" %}selected="selected" {% endif %}>Recycle (move to recycle bin once criteria met)</option>
+            </select><p></p>
+            <span>Backup type:</span>&nbsp;
+            <select name="backup_type" {% if target is not none %}disabled{% else %}required{% endif %}>
+                <option value="single" {% if target is none or target.target_type == "single" %}selected="selected"{% endif %}>Single file</option>
+                <option value="multi" {% if target is not none and target.target_type == "multi" %}selected="selected"{% endif %}>Multiple files</option>
+            </select><p></p>
+            <span>Backup location:</span> <input type="text" name="location" {% if target is not none %}value="{{ target.location }}"{% endif %} required><p></p>
+            <ul>
+                <li>Path to store backups (e.g. <span class="monospace">/var/backups</span>)</li>
+                <li>The user account running Backup-chan must have read and write access to access this location.</li>
+                <li>If the path does not exist, Backup-chan will try to create it.</li>
+            </ul>
+            <span>Name template:</span> <input type="text" name="name_template" {% if target is not none %}value="{{ target.name_template }}"{% endif %} required><br>
+            <ul>
+                <li>The name template is the template for individual backup names.</li>
+                <li>It must contain either the creation date (<span class="monospace">$D</span>) or the ID of the backup (<span class="monospace">$I</span>).</li>
+                <li>Example: <span class="monospace">backup-$I-$D</span></li>
+            </ul><p></p>
+            <input type="submit" value="{% if target is none%}Create target{% else %}Submit changes{% endif %}">
+        </form>
+    </div>
 </body>
 </html>

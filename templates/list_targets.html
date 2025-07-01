@@ -1,4 +1,4 @@
-{% from "macro.html" import target_print %}
+{% from "macro.html" import target_print, navbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,15 +8,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Targets</h1>
-    <p>There {% if num_targets == 1 %}is{% else %}are{% endif %} currently {{ num_targets }} target{% if num_targets != 1 %}s{% endif %}, storing a total of {{ num_backups }} backups. <a href="{{ url_for('webui.new_target') }}">Create a new target</a></p>
-    <ol>
-    {% for target in targets %}
-        <li>
-            {{ target_print(target) }}
-            <a href="{{ url_for('webui.view_target', id=target.id) }}">View target</a>
-        </li>
-    {% endfor %}
-    </ol>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Targets</h1>
+        <p>There {% if num_targets == 1 %}is{% else %}are{% endif %} currently {{ num_targets }} target{% if num_targets != 1 %}s{% endif %}, storing a total of {{ num_backups }} backups. <a href="{{ url_for('webui.new_target') }}">Create a new target</a></p>
+        <ol>
+        {% for target in targets %}
+            <li>
+                {{ target_print(target) }}
+                <ul><li><a href="{{ url_for('webui.view_target', id=target.id) }}">View target</a></li></ul>
+            </li>
+        {% endfor %}
+        </ol>
+    </div>
 </body>
 </html>

@@ -1,3 +1,4 @@
+{% from "macro.html" import navbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,21 +8,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Upload backup</h1>
-    <p>You are about to upload a backup to the target <b>{{ target.name }}</b>.</p>
-    {% if error_message is not none %}
-    <span class="error-message">{{ error_message }}</span>
-    {% endif %}
-    <form action="{{ url_for('webui.upload_backup', id=target.id) }}" method="post" enctype="multipart/form-data">
-        {% if target.target_type == "multi" %}
-        <p>This is a <i>multi-file</i> target. Upload files as a <span class="monospace">.zip</span>, <span class="monospace">tar.gz</span>, <span class="monospace">.tar</span> or <span class="monospace">.tar.xz</span> archive.</p>
-        {% elif target.target_type == "single" %}
-        <p>This is a <i>single-file</i> target. Upload a single file.</p>
-        {% else %}
-        <p>This is <i>neither a multi-file nor single-file</i> target. This should not happen.</p>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Upload backup</h1>
+        <p>You are about to upload a backup to the target <b>{{ target.name }}</b>.</p>
+        {% if error_message is not none %}
+        <span class="error-message">{{ error_message }}</span>
         {% endif %}
-        <input type="file" name="backup_file"><p></p>
-        <input type="submit" value="Upload">
-    </form>
+        <form action="{{ url_for('webui.upload_backup', id=target.id) }}" method="post" enctype="multipart/form-data">
+            {% if target.target_type == "multi" %}
+            <p>This is a <i>multi-file</i> target. Upload files as a <span class="monospace">.zip</span>, <span class="monospace">tar.gz</span>, <span class="monospace">.tar</span> or <span class="monospace">.tar.xz</span> archive.</p>
+            {% elif target.target_type == "single" %}
+            <p>This is a <i>single-file</i> target. Upload a single file.</p>
+            {% else %}
+            <p>This is <i>neither a multi-file nor single-file</i> target. This should not happen.</p>
+            {% endif %}
+            <input type="file" name="backup_file"><p></p>
+            <input type="submit" value="Upload">
+        </form>
+    </div>
 </body>
 </html>

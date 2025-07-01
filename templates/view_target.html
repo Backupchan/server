@@ -1,4 +1,4 @@
-{% from "macro.html" import target_print, backup_print %}
+{% from "macro.html" import target_print, backup_print, navbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,34 +8,37 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Target details: {{ target.name }}</h1>
-    {{ target_print(target) }}
-    <ul>
-        <li><a href="{{ url_for('webui.upload_backup', id=target.id) }}">Upload backup</a></li>
-        <li><a href="{{ url_for('webui.edit_target', id=target.id) }}">Edit target</a></li>
-        <li><a href="{{ url_for('webui.delete_target', id=target.id) }}">Delete target</a></li>
-        <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
-    </ul>
-    <p>This target has <b>{{ num_backups }}</b> backups.</p>
-    <ol>
-    {% for backup in active_backups %}
-        <li>
-            {{ backup_print(backup) }}
-        </li>
-    {% endfor %}
-    </ol>
-
-    {% if has_recycled_backups %}
-    <details>
-        <summary>Recycled backups</summary>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Target details: {{ target.name }}</h1>
+        {{ target_print(target) }}
+        <ul>
+            <li><a href="{{ url_for('webui.upload_backup', id=target.id) }}">Upload backup</a></li>
+            <li><a href="{{ url_for('webui.edit_target', id=target.id) }}">Edit target</a></li>
+            <li><a href="{{ url_for('webui.delete_target', id=target.id) }}">Delete target</a></li>
+            <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
+        </ul>
+        <p>This target has <b>{{ num_backups }}</b> backups.</p>
         <ol>
-        {% for backup in recycled_backups %}
+        {% for backup in active_backups %}
             <li>
                 {{ backup_print(backup) }}
             </li>
         {% endfor %}
         </ol>
-    </details>
-    {% endif %}
+
+        {% if has_recycled_backups %}
+        <details>
+            <summary>Recycled backups</summary>
+            <ol>
+            {% for backup in recycled_backups %}
+                <li>
+                    {{ backup_print(backup) }}
+                </li>
+            {% endfor %}
+            </ol>
+        </details>
+        {% endif %}
+    </div>
 </body>
 </html>

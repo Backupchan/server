@@ -1,3 +1,4 @@
+{% from "macro.html" import navbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +8,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Recycle backup</h1>
-    <p>Backup with ID <b class="monospace">{{ backup.id }}</b> created at <b>{{ backup.pretty_created_at() }}</b>, belonging to target <b>{{ target_name }}</b> will be moved into the recycle bin. Are you okay with that?</p>
-    <form action="{{ url_for('webui.recycle_backup', id=backup.id) }}" method="post">
-        <input type="submit" value="Recycle">
-    </form>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Recycle backup</h1>
+        <p>Backup with ID <b class="monospace">{{ backup.id }}</b> created at <b>{{ backup.pretty_created_at() }}</b>, belonging to target <b>{{ target_name }}</b> will be moved into the recycle bin. Are you okay with that?</p>
+        <form action="{{ url_for('webui.recycle_backup', id=backup.id) }}" method="post">
+            <input type="submit" value="Recycle">
+        </form>
+    </div>
 </body>
 </html>
