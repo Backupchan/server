@@ -1,4 +1,4 @@
-{% from "macro.html" import target_print %}
+{% from "macro.html" import target_print, backup_print %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,14 +18,24 @@
     </ul>
     <p>This target has <b>{{ num_backups }}</b> backups.</p>
     <ol>
-    {% for backup in backups %}
+    {% for backup in active_backups %}
         <li>
-            ID: <b class="monospace">{{ backup.id }}</b><br>
-            Created at: <b>{{ backup.pretty_created_at() }}</b><br>
-            Uploaded <b>{% if backup.manual %}manually{% else %}automatically{% endif %}</b><br>
-            <a href="{{ url_for('delete_backup', id=backup.id) }}">Delete</a>
+            {{ backup_print(backup) }}
         </li>
     {% endfor %}
-    </ul>
+    </ol>
+
+    {% if has_recycled_backups %}
+    <details>
+        <summary>Recycled backups</summary>
+        <ol>
+        {% for backup in recycled_backups %}
+            <li>
+                {{ backup_print(backup) }}
+            </li>
+        {% endfor %}
+        </ol>
+    </details>
+    {% endif %}
 </body>
 </html>

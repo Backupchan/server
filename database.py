@@ -146,6 +146,11 @@ class Database:
         self.connection.commit()
         self.logger.info("Delete backup {%s}", id)
 
+    def recycle_backup(self, id: str, recycled: bool):
+        self.cursor.execute("UPDATE backups SET is_recycled = ? WHERE id = ?", (recycled, id))
+        self.connection.commit()
+        self.logger.info("Recycle backup {%s} to %s", id, recycled)
+
     def list_backups(self) -> list[models.Backup]:
         self.cursor.execute("SELECT * FROM backups")
         rows = self.cursor.fetchall()
@@ -153,6 +158,11 @@ class Database:
 
     def list_backups_target(self, target_id: str) -> list[models.Backup]:
         self.cursor.execute("SELECT * FROM backups WHERE target_id = ?", (target_id,))
+        rows = self.cursor.fetchall()
+        return [models.Backup(*row) for row in rows]
+
+    def list_backups_target_is_recycled(self, target_id: str, is_recycled: bool) -> list[models.Backup]:
+        self.cursor.execute("SELECT * FROM backups WHERE target_id = ? AND is_recycled = ?", (target_id, is_recycled))
         rows = self.cursor.fetchall()
         return [models.Backup(*row) for row in rows]
 
@@ -175,8 +185,8 @@ class Database:
 
         # Name template must be unique to this target if it shares location with another target.
         for target in self.list_targets():
-            if target.location == location and target.name_template == name_template and target.id != target_id:
-                raise DatabaseError("New target location collides with another target")
+            if target.name_template == name_template and target.id != target_id:
+                raise DatabaseError("Name template is not unique to this target")
 
         # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
         if not is_valid_path(name_template, False):

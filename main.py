@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(leve
 
 config = serverconfig.get_server_config()
 db = database.Database(config.get("db_path"), config.get("db"))
-file_manager = file_manager.FileManager(db)
+file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 
 app = Flask(__name__)
@@ -83,6 +83,14 @@ def handle_post_delete_target_backups(target_id: str):
     app.logger.info(f"Handle POST delete target backups with data: {request.form}")
     server_api.delete_backup(target_id, bool(request.form.get("delete_files")))
 
+def handle_post_recycle_backup(backup_id: str):
+    app.logger.info(f"Handle POST recycle backup with data: {request.form}") # TODO function for logging this?
+    server_api.recycle_backup(backup_id)
+
+def handle_post_unrecycle_backup(backup_id: str):
+    app.logger.info(f"Handle POST unrecycle backup with data: {request.form}")
+    server_api.unrecycle_backup(backup_id)
+
 #
 # Endpoints
 #
@@ -115,8 +123,9 @@ def view_target(id):
     target = db.get_target(id)
     if target is None:
         abort(404)
-    backups = db.list_backups_target(id)
-    return render_template("view_target.html", target=target, backups=backups, num_backups = len(backups))
+    active_backups = db.list_backups_target_is_recycled(id, False)
+    recycled_backups = db.list_backups_target_is_recycled(id, True)
+    return render_template("view_target.html", target=target, active_backups=active_backups, recycled_backups=recycled_backups, num_backups=len(active_backups) + len(recycled_backups), has_recycled_backups=len(recycled_backups) > 0)
 
 @app.route("/target/<id>/upload", methods=["GET", "POST"])
 def upload_backup(id):
@@ -177,6 +186,34 @@ def delete_backup(id):
         handle_post_delete_backup(id)
         return redirect(url_for("view_target", id=backup.target_id))
     return render_template("delete_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
+
+@app.route("/backup/<id>/recycle", methods=["GET", "POST"])
+def recycle_backup(id):
+    backup = db.get_backup(id)
+    if backup is None:
+        abort(404)
+    if backup.is_recycled:
+        abort(400)
+    if request.method == "POST":
+        handle_post_recycle_backup(id)
+        return redirect(url_for("view_target", id=backup.target_id))
+    return render_template("recycle_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
+
+@app.route("/backup/<id>/unrecycle", methods=["GET", "POST"])
+def unrecycle_backup(id):
+    backup = db.get_backup(id)
+    if backup is None:
+        abort(404)
+    if not backup.is_recycled:
+        abort(400)
+    if request.method == "POST":
+        handle_post_unrecycle_backup(id)
+        return redirect(url_for("view_target", id=backup.target_id))
+    return render_template("unrecycle_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
+
+#
+#
+#
 
 if __name__ == "__main__":
     app.run(debug=config.get("webui_debug"))

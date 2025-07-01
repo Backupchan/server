@@ -27,3 +27,11 @@ class ServerAPI:
         if delete_files:
             self.fm.delete_backup(backup_id)
         self.db.delete_backup(backup_id)
+
+    def recycle_backup(self, backup_id: str):
+        self.fm.recycle_backup(backup_id)
+        self.db.recycle_backup(backup_id, True)
+
+    def unrecycle_backup(self, backup_id: str):
+        self.fm.unrecycle_backup(backup_id)
+        self.db.recycle_backup(backup_id, False)

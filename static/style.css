@@ -6,3 +6,8 @@
     font-weight: bold;
     color: red;
 }
+
+details {
+    width: fit-content;
+    cursor: pointer;
+}

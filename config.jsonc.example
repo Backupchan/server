@@ -21,5 +21,8 @@
         "host": "127.0.0.1",
         "port": 3306,
         "database": "backupchan"
-    }
+    },
+
+    // Recycle bin directory path
+    "recycle_bin_path": "./Recycle-bin"
 }

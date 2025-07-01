@@ -42,7 +42,9 @@ def extract_archive(fs_location: str, filename: str):
 def get_fs_location(location: str, name_template: str, backup_id: str, backup_creation_str: str) -> str:
     return os.path.join(location, nameformat.parse(name_template, backup_id, backup_creation_str))
 
-def get_backup_fs_location(backup: models.Backup, target: models.BackupTarget) -> str:
+def get_backup_fs_location(backup: models.Backup, target: models.BackupTarget, recycle_bin_path: str) -> str:
+    if backup.is_recycled:
+        return get_fs_location(recycle_bin_path, target.name_template, backup.id, backup.created_at.isoformat())
     return get_fs_location(target.location, target.name_template, backup.id, backup.created_at.isoformat())
 
 def find_single_backup_file(base_path: str) -> str | None:
@@ -56,8 +58,9 @@ def find_single_backup_file(base_path: str) -> str | None:
     return None
 
 class FileManager:
-    def __init__(self, db: database.Database):
+    def __init__(self, db: database.Database, recycle_bin_path: str):
         self.db = db
+        self.recycle_bin_path = recycle_bin_path
         self.logger = logging.getLogger(__name__)
 
     def add_backup(self, backup_id: str, filename: str):
@@ -75,7 +78,7 @@ class FileManager:
         if target is None:
             return FileManagerError(f"Backup {backup_id} points to nonexistent target")
 
-        fs_location = get_backup_fs_location(backup, target)
+        fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
 
         # If it's single-file, append the extension as well.
         if target.target_type == models.BackupType.SINGLE:
@@ -122,7 +125,7 @@ class FileManager:
 
         self.logger.info("Deleting backup {%s}", backup_id)
 
-        fs_location = get_backup_fs_location(backup, target)
+        fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
         if target.target_type == models.BackupType.SINGLE:
             for path in Path(target.location).glob(nameformat.parse(target.name_template, backup.id, backup.created_at.isoformat())):
                 path.unlink()
@@ -149,6 +152,11 @@ class FileManager:
             old_fs_location = get_fs_location(old_location, old_name_template, backup.id, backup.created_at.isoformat())
             new_fs_location = get_fs_location(new_location, new_name_template, backup.id, backup.created_at.isoformat())
 
+            if backup.is_recycled:
+                # In this case, it only matters if the name template changed.
+                old_fs_location = get_fs_location(self.recycle_bin_path, old_name_template, backup.id, backup.created_at.isoformat())
+                new_fs_location = get_fs_location(self.recycle_bin_path, new_name_template, backup.id, backup.created_at.isoformat())
+
             if target.target_type == models.BackupType.SINGLE:
                 old_fs_location = find_single_backup_file(old_fs_location)
                 if old_fs_location is None:
@@ -160,3 +168,61 @@ class FileManager:
             shutil.move(old_fs_location, new_fs_location)
 
         self.logger.info("Finished moving")
+
+    def recycle_backup(self, backup_id: models.Backup):
+        # TODO should make functions to get backup and target all in one from 1 functoin call
+        backup = self.db.get_backup(backup_id)
+        if backup is None:
+            raise FileManagerError(f"Backup {backup_id} does not exist")
+
+        target = self.db.get_target(backup.target_id)
+        if target is None:
+            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+
+        self.logger.info("Recycle backup {%s}", backup_id)
+        self.recycle_bin_mkdir()
+
+        # Doing this manually since the backup might be marked as recycled or not. This module shouldn't care.
+        backup_location = get_fs_location(target.location, target.name_template, backup_id, backup.created_at.isoformat())
+        recycle_location = get_fs_location(self.recycle_bin_path, target.name_template, backup_id, backup.created_at.isoformat())
+
+        if target.target_type == models.BackupType.SINGLE:
+            backup_location = find_single_backup_file(backup_location)
+            if backup_location is None:
+                raise FileManagerError(f"Could not find backup file for backup {backup_id}")
+            recycle_location += "".join(Path(backup_location).suffixes)
+
+        self.logger.info("Move %s -> %s", backup_location, recycle_location)
+
+        shutil.move(backup_location, recycle_location)
+
+        self.logger.info("Finished recycling")
+
+    def unrecycle_backup(self, backup_id: models.Backup):
+        backup = self.db.get_backup(backup_id)
+        if backup is None:
+            raise FileManagerError(f"Backup {backup_id} does not exist")
+
+        target = self.db.get_target(backup.target_id)
+        if target is None:
+            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+
+        self.logger.info("Unrecycle backup {%s}", backup_id)
+
+        backup_location = get_fs_location(self.recycle_bin_path, target.name_template, backup_id, backup.created_at.isoformat())
+        original_location = get_fs_location(target.location, target.name_template, backup_id, backup.created_at.isoformat())
+
+        if target.target_type == models.BackupType.SINGLE:
+            backup_location = find_single_backup_file(backup_location)
+            if backup_location is None:
+                raise FileManagerError(f"Could not find backup file for backup {backup_id}")
+            original_location += "".join(Path(backup_location).suffixes)
+
+        self.logger.info("Move %s -> %s", backup_location, original_location)
+
+        shutil.move(backup_location, original_location)
+
+        self.logger.info("Finished unrecycling")
+
+    def recycle_bin_mkdir(self):
+        os.makedirs(self.recycle_bin_path, exist_ok=True)

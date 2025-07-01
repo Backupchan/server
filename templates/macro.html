@@ -38,3 +38,15 @@
     Location: <b class="monospace">{{ target.location }}</b><br>
     Name template: <b class="monospace">{{ target.name_template }}</b><br>
 {% endmacro %}
+
+{% macro backup_print(backup) %}
+    ID: <b class="monospace">{{ backup.id }}</b><br>
+    Created at: <b>{{ backup.pretty_created_at() }}</b><br>
+    Uploaded <b>{% if backup.manual %}manually{% else %}automatically{% endif %}</b><br>
+    <a href="{{ url_for('delete_backup', id=backup.id) }}">Delete</a> |&nbsp;
+    {% if backup.is_recycled %}
+    <a href="{{ url_for('unrecycle_backup', id=backup.id) }}">Unrecycle</a>
+    {% else %}
+    <a href="{{ url_for('recycle_backup', id=backup.id) }}">Recycle</a>
+    {% endif %}
+{% endmacro %}

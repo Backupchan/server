@@ -38,6 +38,7 @@ class Backup:
     target_id: str
     created_at: datetime
     manual: bool
+    is_recycled: bool
 
     def pretty_created_at(self) -> str:
         return self.created_at.strftime("%B %d, %Y %H:%M")
