@@ -12,7 +12,7 @@
     {% if error_message is not none %}
     <span class="error-message">{{ error_message }}</span>
     {% endif %}
-    <form action="{{ url_for('upload_backup', id=target.id) }}" method="post" enctype="multipart/form-data">
+    <form action="{{ url_for('webui.upload_backup', id=target.id) }}" method="post" enctype="multipart/form-data">
         {% if target.target_type == "multi" %}
         <p>This is a <i>multi-file</i> target. Upload files as a <span class="monospace">.zip</span>, <span class="monospace">tar.gz</span>, <span class="monospace">.tar</span> or <span class="monospace">.tar.xz</span> archive.</p>
         {% elif target.target_type == "single" %}

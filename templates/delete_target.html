@@ -9,7 +9,7 @@
 <body>
     <h1>Delete target</h1>
     <p>The target <b>{{ target.name }}</b> is about to be deleted. Are you okay with that?</p>
-    <form method="post" action="{{ url_for('delete_target', id=target.id) }}">
+    <form method="post" action="{{ url_for('webui.delete_target', id=target.id) }}">
         <input type="checkbox" name="delete_files" value="delete_files"> <label for="delete_files">Also delete backup files</label><p></p>
         <input type="submit" value="Delete">
     </form>

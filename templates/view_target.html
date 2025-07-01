@@ -11,10 +11,10 @@
     <h1>Target details: {{ target.name }}</h1>
     {{ target_print(target) }}
     <ul>
-        <li><a href="{{ url_for('upload_backup', id=target.id) }}">Upload backup</a></li>
-        <li><a href="{{ url_for('edit_target', id=target.id) }}">Edit target</a></li>
-        <li><a href="{{ url_for('delete_target', id=target.id) }}">Delete target</a></li>
-        <li><a href="{{ url_for('delete_target_backups', id=target.id) }}">Delete all backups</a></li>
+        <li><a href="{{ url_for('webui.upload_backup', id=target.id) }}">Upload backup</a></li>
+        <li><a href="{{ url_for('webui.edit_target', id=target.id) }}">Edit target</a></li>
+        <li><a href="{{ url_for('webui.delete_target', id=target.id) }}">Delete target</a></li>
+        <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
     </ul>
     <p>This target has <b>{{ num_backups }}</b> backups.</p>
     <ol>

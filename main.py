@@ -5,15 +5,10 @@ import file_manager
 import serverapi
 import serverconfig
 import recycle_daemon
-import traceback
-import sys
-import datetime
-import uuid
-import os
+import webui
 import logging
 import threading
 import json
-import functools
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, session
 from werkzeug.security import check_password_hash
@@ -21,6 +16,7 @@ from werkzeug.security import check_password_hash
 # Set up logging for other modules
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
 
+# Initializing modules
 config = serverconfig.get_server_config()
 db = database.Database(config.get("db_path"), config.get("db"))
 file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
@@ -28,6 +24,7 @@ server_api = serverapi.ServerAPI(db, file_manager)
 daemon = recycle_daemon.RecycleDaemon(db, server_api, config.get("daemon_interval"))
 threading.Thread(target=daemon.run).start()
 
+# Retreive password hash if auth is enabled
 password_hash = ""
 if config.get("webui_auth"):
     with open("./auth.json", "r", encoding="utf-8") as auth_json:
@@ -39,243 +36,10 @@ app = Flask(__name__)
 # This does mean that everyone gets logged out everytime the server restarts.
 app.secret_key = secrets.token_hex(32)
 
-#
-# POST request handlers
-#
-
-def handle_post_new_target() -> str | None:
-    app.logger.info(f"Handle POST new target with data: {request.form}")
-    try:
-        db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
-    except Exception as exc:
-        return str(exc)
-    return None
-
-def handle_post_edit_target(target_id: str) -> str | None:
-    app.logger.info(f"Handle POST edit target with data: {request.form}")
-    try:
-        server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
-    except Exception as exc:
-        print(traceback.format_exc(), file=sys.stderr)
-        return str(exc)
-    return None
-
-def handle_post_delete_target(target_id: str):
-    app.logger.info(f"Handle POST delete target with data: {request.form}")
-
-def move_uploaded_backup() -> str:
-    uploaded_file = request.files["backup_file"]
-    temp_path = f"{config.get('temp_save_path')}/{uuid.uuid4().hex}_{uploaded_file.filename}"
-    os.makedirs(config.get("temp_save_path"), exist_ok=True)
-    uploaded_file.save(temp_path)
-    return temp_path
-
-def handle_post_upload_backup(target_id: str) -> str | None:
-    # TODO not sure if this can be extracted to server api as well
-    app.logger.info(f"Handle POST upload backup with data: {request.form}")
-    backup_id = ""
-    try:
-        backup_id = db.add_backup(target_id, datetime.datetime.now(), True) # Always manual via the browser
-        backup_filename = move_uploaded_backup()
-        app.logger.info(f"Uploaded file saved as {backup_filename}")
-    except Exception as exc:
-        db.delete_backup(backup_id)
-        print(traceback.format_exc(), file=sys.stderr)
-        return str(exc)
-
-    try:
-        file_manager.add_backup(backup_id, backup_filename)
-    except Exception as exc:
-        # if this fails we delete the freaking backup
-        db.delete_backup(backup_id)
-        print(traceback.format_exc(), file=sys.stderr)
-        return str(exc)
-    return None
-
-def handle_post_delete_backup(backup_id: str):
-    app.logger.info(f"Handle POST delete backup with data: {request.form}")
-    server_api.delete_backup(backup_id, bool(request.form.get("delete_files")))
-
-def handle_post_delete_target_backups(target_id: str):
-    app.logger.info(f"Handle POST delete target backups with data: {request.form}")
-    server_api.delete_backup(target_id, bool(request.form.get("delete_files")))
-
-def handle_post_recycle_backup(backup_id: str):
-    app.logger.info(f"Handle POST recycle backup with data: {request.form}") # TODO function for logging this?
-    server_api.recycle_backup(backup_id)
-
-def handle_post_unrecycle_backup(backup_id: str):
-    app.logger.info(f"Handle POST unrecycle backup with data: {request.form}")
-    server_api.unrecycle_backup(backup_id)
-
-#
-# Authentication
-#
-
-def requires_auth(f):
-    @functools.wraps(f)
-    def decorated(*args, **kwargs):
-        print("HEY IM CALLED")
-        if not session.get("authed"):
-            return redirect("/login")
-        return f(*args, **kwargs)
-    return decorated
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        password = request.form["password"]
-        if check_password_hash(password_hash, password):
-            session["authed"] = True
-            return redirect(url_for("list_targets"))
-        else:
-            return render_template("login.html", incorrect=True)
-    return render_template("login.html")
-
-#
-# Endpoints
-#
-
-@app.route("/test")
-def test():
-    return str(session)
-
-@app.route("/")
-@requires_auth
-def homepage():
-    return redirect(url_for("list_targets"))
-
-@app.route("/daemon-recheck")
-@requires_auth
-def daemon_recheck():
-    daemon.force_recheck()
-    return "Forced daemon re-check. Inspect the log for details."
-
-#
-# Target endpoints
-#
-
-@app.route("/targets")
-@requires_auth
-def list_targets():
-    targets = db.list_targets()
-    return render_template("list_targets.html", targets=targets, num_targets=db.count_targets(), num_backups=db.count_backups())
-
-@app.route("/target/new", methods=["GET", "POST"])
-@requires_auth
-def new_target():
-    if request.method == "POST":
-        error_message = handle_post_new_target()
-        if error_message is None:
-            return redirect(url_for("list_targets"))
-        else:
-            return render_template("edit_target.html", target=None, error_message=error_message)
-    return render_template("edit_target.html", target=None)
-
-@app.route("/target/<id>")
-@requires_auth
-def view_target(id):
-    target = db.get_target(id)
-    if target is None:
-        abort(404)
-    active_backups = db.list_backups_target_is_recycled(id, False)
-    recycled_backups = db.list_backups_target_is_recycled(id, True)
-    return render_template("view_target.html", target=target, active_backups=active_backups, recycled_backups=recycled_backups, num_backups=len(active_backups) + len(recycled_backups), has_recycled_backups=len(recycled_backups) > 0)
-
-@app.route("/target/<id>/upload", methods=["GET", "POST"])
-@requires_auth
-def upload_backup(id):
-    target = db.get_target(id)
-    if target is None:
-        abort(404)
-    if request.method == "POST":
-        error_message = handle_post_upload_backup(id)
-        if error_message is None:
-            return redirect(url_for("view_target", id=id))
-        else:
-            return render_template("upload_backup.html", target=target, error_message=error_message)
-    return render_template("upload_backup.html", target=target)
-
-@app.route("/target/<id>/edit", methods=["GET", "POST"])
-@requires_auth
-def edit_target(id):
-    target = db.get_target(id)
-    if target is None:
-        abort(404)
-    if request.method == "POST":
-        error_message = handle_post_edit_target(id)
-        if error_message is None:
-            return redirect(url_for("view_target", id=id))
-        else:
-            return render_template("edit_target.html", target=target, error_message=error_message)
-    return render_template("edit_target.html", target=target)
-
-@app.route("/target/<id>/delete", methods=["GET", "POST"])
-@requires_auth
-def delete_target(id):
-    target = db.get_target(id)
-    if target is None:
-        abort(404)
-    if request.method == "POST":
-        handle_post_delete_target(id) # shouldn't really fail
-        return redirect(url_for("list_targets"))
-    return render_template("delete_target.html", target=target)
-
-@app.route("/target/<id>/delete_all", methods=["GET", "POST"])
-@requires_auth
-def delete_target_backups(id):
-    target = db.get_target(id)
-    if target is None:
-        abort(404)
-    if request.method == "POST":
-        handle_post_delete_target_backups(id)
-        return redirect(url_for("view_target", id=id))
-    return render_template("delete_target_backups.html", target=target)
-
-#
-# Backup endpoints
-#
-
-@app.route("/backup/<id>/delete", methods=["GET", "POST"])
-@requires_auth
-def delete_backup(id):
-    backup = db.get_backup(id)
-    if backup is None:
-        abort(404)
-    if request.method == "POST":
-        handle_post_delete_backup(id)
-        return redirect(url_for("view_target", id=backup.target_id))
-    return render_template("delete_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
-
-@app.route("/backup/<id>/recycle", methods=["GET", "POST"])
-@requires_auth
-def recycle_backup(id):
-    backup = db.get_backup(id)
-    if backup is None:
-        abort(404)
-    if backup.is_recycled:
-        abort(400)
-    if request.method == "POST":
-        handle_post_recycle_backup(id)
-        return redirect(url_for("view_target", id=backup.target_id))
-    return render_template("recycle_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
-
-@app.route("/backup/<id>/unrecycle", methods=["GET", "POST"])
-@requires_auth
-def unrecycle_backup(id):
-    backup = db.get_backup(id)
-    if backup is None:
-        abort(404)
-    if not backup.is_recycled:
-        abort(400)
-    if request.method == "POST":
-        handle_post_unrecycle_backup(id)
-        return redirect(url_for("view_target", id=backup.target_id))
-    return render_template("unrecycle_backup.html", backup=backup, target_name=db.get_target(backup.target_id).name)
-
-#
-#
-#
+if config.get("webui_enable"):
+    # Initialize Web UI
+    webui = webui.WebUI(db, file_manager, server_api, daemon, config, password_hash)
+    app.register_blueprint(webui.blueprint)
 
 if __name__ == "__main__":
-    app.run(debug=config.get("webui_debug"))
+    app.run(debug=config.get("web_debug"))

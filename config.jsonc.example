@@ -2,9 +2,12 @@
     // Filename of your database
     "db_path": "./backupchan.db",
 
-    // Whether or not to enable debug mode on web interface
+    // Enable or disable Web UI
+    "webui_enable": True,
+
+    // Enables Flask debug mode
     // Only enable if you're developing.
-    "webui_debug": False,
+    "web_debug": False,
 
     // Temporary location for uploaded files
     // Must be writable and readable

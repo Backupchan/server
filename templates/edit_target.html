@@ -9,13 +9,13 @@
 <body>
     {% if target is none %}
     <h1>New target</h1>
-    <form action="{{ url_for('new_target') }}" method="post">
+    <form action="{{ url_for('webui.new_target') }}" method="post">
     {% else %}
     <h1>Edit target</h1>
     {% if error_message is not none %}
     <span class="error-message">{{ error_message }}</span>
     {% endif %}
-    <form action="{{ url_for('edit_target', id=target.id) }}" method="post">
+    <form action="{{ url_for('webui.edit_target', id=target.id) }}" method="post">
     {% endif %}
         <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required><p></p>
         <span>Recycle criteria:</span>&nbsp;

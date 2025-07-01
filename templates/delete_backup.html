@@ -9,7 +9,7 @@
 <body>
     <h1>Delete backup</h1>
     <p>Backup with ID <b class="monospace">{{ backup.id }}</b> created at <b>{{ backup.pretty_created_at() }}</b>, belonging to target <b>{{ target_name }}</b> will be deleted. Are you okay with that?</p>
-    <form action="{{ url_for('delete_backup', id=backup.id) }}" method="post">
+    <form action="{{ url_for('webui.delete_backup', id=backup.id) }}" method="post">
         <input type="checkbox" name="delete_files" value="delete_files"> <label for="delete_files">Also delete backup files</label><p></p>
         <input type="submit" value="Delete">
     </form>
