@@ -1,7 +1,7 @@
 # TODO move a few other random util functions here
 
 SIZE_UNITS = [
-    "B", "KiB", "MiB", "GiB"
+    "B", "KiB", "MiB", "GiB", "TiB"
 ]
 
 def humanread_file_size(size: float):
