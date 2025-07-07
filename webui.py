@@ -286,7 +286,7 @@ class WebUI:
 
     def handle_post_delete_target_backups(self, target_id: str):
         self.logger.info(f"Handle POST delete target backups with data: {request.form}")
-        self.server_api.delete_backup(target_id, bool(request.form.get("delete_files")))
+        self.server_api.delete_target_backups(target_id, bool(request.form.get("delete_files")))
 
     def handle_post_recycle_backup(self, backup_id: str):
         self.logger.info(f"Handle POST recycle backup with data: {request.form}") # TODO function for logging this?

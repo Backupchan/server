@@ -27,6 +27,11 @@ class ServerAPI:
                 self.fm.delete_target_backups(target_id)
             self.db.delete_target(target_id)
 
+    def delete_target_backups(self, target_id: str, delete_files: bool):
+        with self.lock:
+            for backup in self.db.list_backups_target(target_id):
+                self.delete_backup(backup.id, delete_files)
+
     def delete_backup(self, backup_id: str, delete_files: bool):
         with self.lock:
             if delete_files:
