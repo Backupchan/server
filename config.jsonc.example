@@ -1,7 +1,4 @@
 {
-    // Filename of your database
-    "db_path": "./backupchan.db",
-
     // Enable or disable Web UI
     "webui_enable": True,
 
