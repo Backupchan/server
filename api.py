@@ -69,3 +69,40 @@ class API:
             data = request.get_json()
             self.server_api.delete_target(id, data["delete_files"])
             return jsonify(success=True), 204
+
+        @self.blueprint.route("/target/<id>/all", methods=["DELETE"])
+        @requires_auth
+        def delete_target_backups(id):
+            data = request.get_json()
+            self.server_api.delete_target_backups(id, data["delete_files"])
+            return jsonify(success=True), 204
+
+        @self.blueprint.route("/backup/<id>", methods=["DELETE"])
+        @requires_auth
+        def delete_backup(id):
+            data = request.get_json()
+            self.server_api.delete_backup(id, data["delete_files"])
+            return jsonify(success=True), 204
+
+        @self.blueprint.route("/backup/<id>", methods=["PATCH"])
+        @requires_auth
+        def recycle_backup(id):
+            data = request.get_json()
+            if data["is_recycled"]:
+                self.server_api.recycle_backup(id)
+            else:
+                self.server_api.unrecycle_backup(id)
+            return jsonify(success=True), 204
+
+        @self.blueprint.route("/recycle_bin", methods=["GET"])
+        @requires_auth
+        def recycle_bin():
+            recycle_bin = self.db.list_backups_is_recycled(True)
+            return json.dumps([dataclasses.asdict(backup) for backup in recycle_bin])
+
+        @self.blueprint.route("/recycle_bin", methods=["DELETE"])
+        @requires_auth
+        def recycle_bin_clear():
+            data = request.get_json()
+            self.server_api.recycle_bin_clear(data["delete_files"])
+            return jsonify(success=True), 204
