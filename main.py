@@ -7,6 +7,7 @@ import serverconfig
 import recycle_daemon
 import stats
 import webui
+import api
 import logging
 import threading
 import json
@@ -42,6 +43,9 @@ if config.get("webui_enable"):
     # Initialize Web UI
     webui = webui.WebUI(db, file_manager, server_api, daemon, stats, config, password_hash)
     app.register_blueprint(webui.blueprint)
+
+api = api.API(db, server_api)
+app.register_blueprint(api.blueprint, url_prefix="/api")
 
 if __name__ == "__main__":
     app.run(debug=config.get("web_debug"))

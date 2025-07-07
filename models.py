@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 from datetime import datetime
+import json
 import nameformat
 
 class BackupRecycleCriteria(str, Enum):
