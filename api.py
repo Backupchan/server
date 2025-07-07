@@ -43,7 +43,7 @@ class API:
             targets = self.db.list_targets()
             return json.dumps([dataclasses.asdict(target) for target in targets])
 
-        @self.blueprint.route("/target/new", methods=["POST"])
+        @self.blueprint.route("/target", methods=["POST"])
         @requires_auth
         def new_target():
             data = request.get_json()
@@ -56,14 +56,14 @@ class API:
             target = self.db.get_target(id)
             return json.dumps(dataclasses.asdict(target))
 
-        @self.blueprint.route("/target/<id>/edit", methods=["POST"])
+        @self.blueprint.route("/target/<id>", methods=["PATCH"])
         @requires_auth
         def edit_target(id):
             data = request.get_json()
             self.db.edit_target(id, data["name"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"])
             return jsonify(success=True), 204
 
-        @self.blueprint.route("/target/<id>/delete", methods=["POST"])
+        @self.blueprint.route("/target/<id>", methods=["DELETE"])
         @requires_auth
         def delete_target(id):
             data = request.get_json()
