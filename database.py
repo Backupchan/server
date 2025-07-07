@@ -193,6 +193,11 @@ class Database:
             self.cursor.execute("SELECT COUNT(*) FROM backups")
             return self.cursor.fetchone()[0]
 
+    def count_recycled_backups(self) -> int:
+        with self.lock:
+            self.cursor.execute("SELECT COUNT(*) FROM backups WHERE is_recycled = TRUE")
+            return self.cursor.fetchone()[0]
+
     #
     # Miscellaneous
     #

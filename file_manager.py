@@ -58,6 +58,15 @@ def find_single_backup_file(base_path: str) -> str | None:
             return file
     return None
 
+def get_directory_size(path: Path)-> int:
+    total = 0
+    for dirpath, _, filenames in os.walk(path):
+        for filename in filenames:
+            filepath = Path(dirpath) / filename
+            if filepath.is_file():
+                total += filepath.stat().st_size
+    return total
+
 class FileManager:
     def __init__(self, db: database.Database, recycle_bin_path: str):
         self.db = db
@@ -236,3 +245,44 @@ class FileManager:
     def recycle_bin_mkdir(self):
         with self.lock:
             os.makedirs(self.recycle_bin_path, exist_ok=True)
+
+    #
+    # Statistics
+    # They return the value in bytes.
+    #
+
+    def get_backup_size(self, backup_id: str) -> int:
+        backup = self.db.get_backup(backup_id)
+        if backup is None:
+            raise FileManagerError(f"Backup {backup_id} does not exist")
+
+        target = self.db.get_target(backup.target_id)
+        if target is None:
+            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+
+        fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
+
+        if target.target_type == models.BackupType.SINGLE:
+            fs_location = find_single_backup_file(fs_location)
+            if fs_location is None:
+                raise FileManagerError(f"Could not find backup file for backup {backup_id}")
+            return Path(fs_location).stat().st_size
+
+        if not os.path.exists(fs_location):
+            raise FileManagerError(f"Backup {backup_id} does not exist on-disk")
+
+        return get_directory_size(Path(fs_location))
+
+    def get_target_size(self, target_id: str) -> int:
+        target = self.db.get_target(target_id)
+        if target is None:
+            raise FileManagerError(f"Target {target_id} does not exists")
+
+        backups = self.db.list_backups_target(target_id)
+        return self.get_backup_list_size(backups)
+
+    def get_backup_list_size(self, backups: list[models.Backup]) -> int:
+        total = 0
+        for backup in backups:
+            total += self.get_backup_size(backup.id)
+        return total

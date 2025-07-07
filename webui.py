@@ -2,11 +2,13 @@ import database
 import file_manager
 import serverapi
 import recycle_daemon
+import stats
+import config
+import utility
 import functools
 import logging
 import sys
 import traceback
-import config
 import uuid
 import os
 import datetime
@@ -14,11 +16,12 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from werkzeug.security import check_password_hash
 
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, daemon: recycle_daemon.RecycleDaemon, config: config.Config, passwd_hash: str | None):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, daemon: recycle_daemon.RecycleDaemon, stats: stats.Stats, config: config.Config, passwd_hash: str | None):
         self.db = db
         self.fm = fm
         self.server_api = server_api
         self.daemon = daemon
+        self.stats = stats
         self.config = config
         self.passwd_hash = passwd_hash
         self.logger = logging.getLogger(__name__)
@@ -64,6 +67,25 @@ class WebUI:
         def daemon_recheck():
             self.daemon.force_recheck()
             return "Forced daemon re-check. Inspect the log for details."
+
+        @self.blueprint.route("/stats")
+        @requires_auth
+        def view_stats():
+            total_target_size = self.stats.total_target_size()
+            total_target_size_str = utility.humanread_file_size(total_target_size)
+            total_recycle_bin_size = self.stats.total_recycle_bin_size()
+            total_recycle_bin_size_str = utility.humanread_file_size(total_recycle_bin_size)
+            total_targets = self.db.count_targets()
+            total_backups = self.db.count_backups()
+            total_recycled_backups = self.db.count_recycled_backups()
+            return render_template("view_stats.html",
+                                   total_target_size=total_target_size_str,
+                                   total_target_size_bytes=total_target_size,
+                                   total_recycle_bin_size=total_recycle_bin_size_str,
+                                   total_recycle_bin_size_bytes=total_recycle_bin_size,
+                                   total_targets=total_targets,
+                                   total_backups=total_backups,
+                                   total_recycled_backups=total_recycled_backups)
 
         #
         # Target endpoints
