@@ -44,7 +44,7 @@ if config.get("webui_enable"):
     webui = webui.WebUI(db, file_manager, server_api, daemon, stats, config, password_hash)
     app.register_blueprint(webui.blueprint)
 
-api = api.API(db, server_api)
+api = api.API(db, server_api, config, file_manager)
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
 if __name__ == "__main__":
