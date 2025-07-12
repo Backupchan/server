@@ -82,6 +82,7 @@ class FileManager:
             # Checks
             #
 
+            # TODO it might be worth separating these into its own function
             backup = self.db.get_backup(backup_id)
             if backup is None:
                 raise FileManagerError(f"Backup {backup_id} does not exist")
@@ -185,7 +186,7 @@ class FileManager:
 
             self.logger.info("Finished moving")
 
-    def recycle_backup(self, backup_id: models.Backup):
+    def recycle_backup(self, backup_id: int):
         # TODO should make functions to get backup and target all in one from 1 functoin call
         with self.lock:
             backup = self.db.get_backup(backup_id)

@@ -72,7 +72,7 @@ class API:
         @requires_auth
         def list_targets():
             targets = self.db.list_targets()
-            return jsonify(success=True, [dataclasses.asdict(target) for target in targets])
+            return jsonify(success=True, targets=[dataclasses.asdict(target) for target in targets]), 200
 
         @self.blueprint.route("/target", methods=["POST"])
         @requires_auth
@@ -83,7 +83,7 @@ class API:
                 return verify_result
 
             try:
-                self.db.add_target(data["name"], data["backup_type"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"])
+                target_id = self.db.add_target(data["name"], data["backup_type"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"])
             except Exception as exc:
                 # TODO to recognize between invalid requests and internal errors,
                 #      run validation in this function.
@@ -92,7 +92,7 @@ class API:
                 # also TODO show wtf kinda error happened instead of just 500ing
                 self.logger.error("Failed to add target", exc_info=exc)
                 return jsonify(success=False), 500
-            return jsonify(success=True), 201
+            return jsonify(success=True, id=target_id), 201
 
         @self.blueprint.route("/target/<id>", methods=["GET"])
         @requires_auth
@@ -100,7 +100,8 @@ class API:
             target = self.db.get_target(id)
             if target is None:
                 return jsonify(success=False), 404
-            return jsonify(success=True, dataclasses.asdict(target))
+            backups = self.db.list_backups_target(id)
+            return jsonify(success=True, target=dataclasses.asdict(target), backups=[dataclasses.asdict(backup) for backup in backups]), 200
 
         @self.blueprint.route("/target/<id>", methods=["PATCH"])
         @requires_auth
@@ -115,7 +116,7 @@ class API:
                 return verify_result
 
             self.db.edit_target(id, data["name"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"])
-            return jsonify(success=True), 204
+            return jsonify(success=True), 200
 
         @self.blueprint.route("/target/<id>/upload", methods=["POST"])
         @requires_auth
@@ -126,7 +127,7 @@ class API:
                 return jsonify(success=False), 404
 
             # Verify that user supplied data
-            data = request.get_json()
+            data = request.form
             verify_result = verify_data_present(data, ["manual"])
             if verify_result is not None:
                 return verify_result
@@ -164,7 +165,7 @@ class API:
                 self.logger.error("Failed to add backup file", exc_info=exc) # TODO log exceptions like this everywhere
                 return failure_response("Failed to add backup file"), 500
             
-            return jsonify(success=True), 204
+            return jsonify(success=True, id=backup_id), 200
 
         @self.blueprint.route("/target/<id>", methods=["DELETE"])
         @requires_auth
@@ -175,7 +176,7 @@ class API:
                 return verify_result
 
             self.server_api.delete_target(id, data["delete_files"])
-            return jsonify(success=True), 204
+            return jsonify(success=True), 200
 
         @self.blueprint.route("/target/<id>/all", methods=["DELETE"])
         @requires_auth
@@ -190,7 +191,7 @@ class API:
                 return verify_result
 
             self.server_api.delete_target_backups(id, data["delete_files"])
-            return jsonify(success=True), 204
+            return jsonify(success=True), 200
 
         @self.blueprint.route("/backup/<id>", methods=["DELETE"])
         @requires_auth
@@ -205,7 +206,7 @@ class API:
                 return verify_result
 
             self.server_api.delete_backup(id, data["delete_files"])
-            return jsonify(success=True), 204
+            return jsonify(success=True), 200
 
         @self.blueprint.route("/backup/<id>", methods=["PATCH"])
         @requires_auth
@@ -223,13 +224,13 @@ class API:
                 self.server_api.recycle_backup(id)
             else:
                 self.server_api.unrecycle_backup(id)
-            return jsonify(success=True), 204
+            return jsonify(success=True), 200
 
         @self.blueprint.route("/recycle_bin", methods=["GET"])
         @requires_auth
         def recycle_bin():
             recycle_bin = self.db.list_backups_is_recycled(True)
-            return jsonify(success=True, data=[dataclasses.asdict(backup) for backup in recycle_bin])
+            return jsonify(success=True, backups=[dataclasses.asdict(backup) for backup in recycle_bin]), 200
 
         @self.blueprint.route("/recycle_bin", methods=["DELETE"])
         @requires_auth
@@ -240,4 +241,4 @@ class API:
                 return verify_result
 
             self.server_api.recycle_bin_clear(data["delete_files"])
-            return jsonify(success=True), 204
+            return jsonify(success=True), 200

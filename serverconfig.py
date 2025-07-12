@@ -4,8 +4,8 @@ Creates a configuration interface specific for the server.
 
 import config
 
-def get_server_config():
-    server_config = config.Config("./config.jsonc")
+def get_server_config(defaults_only=False):
+    server_config = config.Config(None if defaults_only else "./config.jsonc")
     server_config.add_option("db_path", str, "./backupchan.db")
     server_config.add_option("webui_enable", bool, True)
     server_config.add_option("web_debug", bool, False)
@@ -14,5 +14,6 @@ def get_server_config():
     server_config.add_option("recycle_bin_path", str, "./Recycle-bin")
     server_config.add_option("daemon_interval", int, 60)
     server_config.add_option("webui_auth", bool, False)
-    server_config.parse()
+    if not defaults_only:
+        server_config.parse()
     return server_config

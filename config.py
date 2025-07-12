@@ -22,8 +22,8 @@ class Config:
         self.config[name] = default
 
     def parse(self):
-        if not os.path.exists("./config.jsonc"):
-            raise ConfigException("Config file config.jsonc not found.")
+        if not os.path.exists(self.file):
+            raise ConfigException("Config file not found.")
 
         with open(self.file, "r", encoding="utf-8") as config_json:
             config = json5.parse(config_json.read())[0]

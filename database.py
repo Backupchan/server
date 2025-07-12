@@ -62,7 +62,7 @@ class Database:
         recycle_action: models.BackupRecycleAction | None,
         location: str,
         name_template: str
-    ):
+    ) -> str:
         with self.lock:
             self.validate_target(name, name_template, location, None)
 
@@ -71,6 +71,7 @@ class Database:
             self.connection.commit()
 
             self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
+            return target_id
 
     def edit_target(
         self,
