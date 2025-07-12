@@ -177,9 +177,9 @@ class Database:
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
-    def list_backups_is_recycled(self, is_recycled: bool) -> list[models.Backup]:
+    def list_recycled_backups(self) -> list[models.Backup]:
         with self.lock:
-            self.cursor.execute("SELECT * FROM backups WHERE is_recycled = ?", (is_recycled,))
+            self.cursor.execute("SELECT * FROM backups WHERE is_recycled = TRUE")
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 

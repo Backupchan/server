@@ -14,7 +14,7 @@ class Stats:
         return total
 
     def total_recycle_bin_size(self) -> int:
-        recycled_backups = self.db.list_backups_is_recycled(True) # TODO currently only used with the True argument. Consider simplifying to "list_recycled_backups"
+        recycled_backups = self.db.list_recycled_backups()
         return self.fm.get_backup_list_size(recycled_backups)
 
     # not worth putting total backups and targets count since they can be easily accessed from the database

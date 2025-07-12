@@ -250,7 +250,7 @@ class API:
         @self.blueprint.route("/recycle_bin", methods=["GET"])
         @requires_auth
         def recycle_bin():
-            recycle_bin = self.db.list_backups_is_recycled(True)
+            recycle_bin = self.db.list_recycled_backups()
             return jsonify(success=True, backups=[dataclasses.asdict(backup) for backup in recycle_bin]), 200
 
         @self.blueprint.route("/recycle_bin", methods=["DELETE"])

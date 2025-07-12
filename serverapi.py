@@ -50,6 +50,6 @@ class ServerAPI:
 
     def recycle_bin_clear(self, delete_files: bool):
         with self.lock:
-            recycled_backups = self.db.list_backups_is_recycled(True)
+            recycled_backups = self.db.list_recycled_backups()
             for backup in recycled_backups:
                 self.delete_backup(backup.id, delete_files)

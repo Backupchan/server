@@ -107,10 +107,10 @@ class MockDatabase(database.Database):
                 backups.append(backup)
         return backups
     
-    def list_backups_is_recycled(self, is_recycled: bool) -> list[models.Backup]:
+    def list_recycled_backups(self) -> list[models.Backup]:
         backups = []
         for backup in self.backups:
-            if backup.is_recycled == is_recycled:
+            if backup.is_recycled:
                 backups.append(backup)
         return backups
     
@@ -125,7 +125,7 @@ class MockDatabase(database.Database):
         return len(self.backups)
     
     def count_recycled_backups(self) -> int:
-        return len(self.list_backups_is_recycled(True))
+        return len(self.list_recycled_backups()
     
     def __del__(self):
         pass # Override because this does not initialize a real db connection.

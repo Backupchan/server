@@ -212,7 +212,7 @@ class WebUI:
         @self.blueprint.route("/recycle_bin")
         @requires_auth
         def recycle_bin():
-            backups = self.db.list_backups_is_recycled(True)
+            backups = self.db.list_recycled_backups()
             backups_and_targets = []
             for backup in backups:
                 backups_and_targets.append({"backup": backup, "target": self.db.get_target(backup.target_id)})

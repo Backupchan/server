@@ -172,7 +172,7 @@ def test_recycle_bin_clear(client):
     response = client.delete("/api/recycle_bin", json={"delete_files": True})
     assert response.status_code == 200
     
-    recycle_bin = db.list_backups_is_recycled(True)
+    recycle_bin = db.list_recycled_backups()
     assert len(recycle_bin) == 0
 
 def test_auth(client):
