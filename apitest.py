@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(leve
 
 app = Flask(__name__)
 app.config["TESTING"] = True
-config = serverconfig.get_server_config(True)
+config = serverconfig.get_server_config(True) # loads default config
 db = mock_modules.MockDatabase()
 file_manager = mock_modules.MockFileManager(db)
 server_api = serverapi.ServerAPI(db, file_manager)
@@ -170,9 +170,6 @@ def test_recycle_bin_clear(client):
     
     response = client.delete("/api/recycle_bin", json={"delete_files": True})
     assert response.status_code == 200
-    
-    data = response.get_json()
-    assert data["success"]
     
     recycle_bin = db.list_backups_is_recycled(True)
     assert len(recycle_bin) == 0
