@@ -34,3 +34,5 @@ for every new migration, for example:
 1. Enable it in your config
 1. Run `passwd.py` and enter the password you'd like to use
 1. that's it
+
+See `API.md` for details on creating and managing an API key.

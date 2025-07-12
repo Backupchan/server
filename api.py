@@ -50,17 +50,38 @@ class API:
         self.logger = logging.getLogger(__name__)
 
         self.blueprint = Blueprint("api", __name__)
+        self.init_auth()
         self.add_routes()
-
+    
+    def init_auth(self):
+        self.key = None
+        if os.path.exists("apikey.json"):
+            with open("apikey.json") as file:
+                file_json = json.load(file)
+                if "key" not in file_json:
+                    self.logger.warning("API key file is incorrect. Authentication will be disabled.")
+                else:
+                    self.key = file_json["key"]
 
     def add_routes(self):
         #
-        # Authentication (TODO)
+        # Authentication
         #
 
         def requires_auth(f):
             @functools.wraps(f)
             def decorated(*args, **kwargs):
+                if self.key is None:
+                    return f(*args, **kwargs)
+                
+                auth_header = request.headers.get("Authorization")
+                if not auth_header or not auth_header.startswith("Bearer "):
+                    return failure_response("Unauthorized"), 401
+                
+                token = auth_header.removeprefix("Bearer ").strip()
+                if token != self.key:
+                    return failure_response("Invalid API key"), 403
+                
                 return f(*args, **kwargs)
             return decorated
 

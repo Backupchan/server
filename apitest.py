@@ -20,6 +20,7 @@ db = mock_modules.MockDatabase()
 file_manager = mock_modules.MockFileManager(db)
 server_api = serverapi.ServerAPI(db, file_manager)
 api = api.API(db, server_api, config, file_manager)
+api.key = None
 
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
@@ -173,3 +174,19 @@ def test_recycle_bin_clear(client):
     
     recycle_bin = db.list_backups_is_recycled(True)
     assert len(recycle_bin) == 0
+
+def test_auth(client):
+    db.reset()
+    api.key = "kantai_collection"
+    
+    # With valid token
+    response = client.get("/api/target", headers={"Authorization": "Bearer kantai_collection"})
+    assert response.status_code == 200
+    
+    # With no token
+    response = client.get("/api/target")
+    assert response.status_code == 401
+    
+    # With invalid token
+    response = client.get("/api/target", headers={"Authorization": "Bearer efijwefoij"})
+    assert response.status_code == 403

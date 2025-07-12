@@ -5,3 +5,4 @@ __pycache__/
 *.db-journal
 auth.json
 *.bak
+apikey.json
