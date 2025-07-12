@@ -82,14 +82,7 @@ class FileManager:
             # Checks
             #
 
-            # TODO it might be worth separating these into its own function
-            backup = self.db.get_backup(backup_id)
-            if backup is None:
-                raise FileManagerError(f"Backup {backup_id} does not exist")
-
-            target = self.db.get_target(backup.target_id)
-            if target is None:
-                return FileManagerError(f"Backup {backup_id} points to nonexistent target")
+            backup, target = self.get_backup_and_target(backup_id)
 
             fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
 
@@ -129,13 +122,7 @@ class FileManager:
 
     def delete_backup(self, backup_id: str):
         with self.lock:
-            backup = self.db.get_backup(backup_id)
-            if backup is None:
-                raise FileManagerError(f"Backup {backup_id} does not exist")
-
-            target = self.db.get_target(backup.target_id)
-            if target is None:
-                raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+            backup, target = self.get_backup_and_target(backup_id)
 
             self.logger.info("Deleting backup {%s}", backup_id)
 
@@ -149,9 +136,7 @@ class FileManager:
 
     def delete_target_backups(self, target_id: str):
         with self.lock:
-            target = self.db.get_target(target_id)
-            if target is None:
-                raise FileManagerError(f"Target {target_id} does not exist")
+            target = self.get_target(target_id)
 
             self.logger.info("Deleting all backups for target {%s}", target_id)
             backups = self.db.list_backups_target(target_id)
@@ -187,15 +172,8 @@ class FileManager:
             self.logger.info("Finished moving")
 
     def recycle_backup(self, backup_id: int):
-        # TODO should make functions to get backup and target all in one from 1 functoin call
         with self.lock:
-            backup = self.db.get_backup(backup_id)
-            if backup is None:
-                raise FileManagerError(f"Backup {backup_id} does not exist")
-
-            target = self.db.get_target(backup.target_id)
-            if target is None:
-                raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+            backup, target = self.get_backup_and_target(backup_id)
 
             self.logger.info("Recycle backup {%s}", backup_id)
             self.recycle_bin_mkdir()
@@ -218,13 +196,7 @@ class FileManager:
 
     def unrecycle_backup(self, backup_id: models.Backup):
         with self.lock:
-            backup = self.db.get_backup(backup_id)
-            if backup is None:
-                raise FileManagerError(f"Backup {backup_id} does not exist")
-
-            target = self.db.get_target(backup.target_id)
-            if target is None:
-                raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+            backup, target = self.get_backup_and_target(backup_id)
 
             self.logger.info("Unrecycle backup {%s}", backup_id)
 
@@ -253,13 +225,7 @@ class FileManager:
     #
 
     def get_backup_size(self, backup_id: str) -> int:
-        backup = self.db.get_backup(backup_id)
-        if backup is None:
-            raise FileManagerError(f"Backup {backup_id} does not exist")
-
-        target = self.db.get_target(backup.target_id)
-        if target is None:
-            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+        backup, target = self.get_backup_and_target(backup_id)
 
         fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
 
@@ -275,9 +241,7 @@ class FileManager:
         return get_directory_size(Path(fs_location))
 
     def get_target_size(self, target_id: str) -> int:
-        target = self.db.get_target(target_id)
-        if target is None:
-            raise FileManagerError(f"Target {target_id} does not exists")
+        target = self.get_target(target_id)
 
         backups = self.db.list_backups_target(target_id)
         return self.get_backup_list_size(backups)
@@ -287,3 +251,24 @@ class FileManager:
         for backup in backups:
             total += self.get_backup_size(backup.id)
         return total
+
+    #
+    # These allow accessing things from the database while making sure nothing's broken
+    #
+    
+    def get_backup_and_target(self, backup_id: str) -> tuple[models.Backup, models.BackupTarget]:
+        backup = self.db.get_backup(backup_id)
+        if backup is None:
+            raise FileManagerError(f"Backup {backup_id} does not exist")
+
+        target = self.db.get_target(backup.target_id)
+        if target is None:
+            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+        
+        return backup, target
+    
+    def get_target(self, target_id: str) -> models.BackupTarget:
+        target = self.db.get_target(target_id)
+        if target is None:
+            raise FileManagerError(f"Target {target_id} does not exists")
+        return target
