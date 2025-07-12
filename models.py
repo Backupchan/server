@@ -1,5 +1,5 @@
 """
-Application models. Read db.sql for explanation of what each field represents.
+Application models. Read database SQL files for explanation of what each field represents.
 """
 
 from dataclasses import dataclass

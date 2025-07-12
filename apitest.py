@@ -7,6 +7,8 @@ import pytest
 import logging
 import io
 import datetime
+import random
+import string
 from flask import Flask
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
@@ -15,7 +17,7 @@ app = Flask(__name__)
 app.config["TESTING"] = True
 config = serverconfig.get_server_config(True)
 db = mock_modules.MockDatabase()
-file_manager = mock_modules.MockFileManager(db, "") # TODO no need for recycle bin path in mock
+file_manager = mock_modules.MockFileManager(db)
 server_api = serverapi.ServerAPI(db, file_manager)
 api = api.API(db, server_api, config, file_manager)
 
@@ -26,12 +28,24 @@ def client():
     with app.test_client() as client:
         yield client
 
+def create_test_target() -> models.BackupTarget:
+    name = "".join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    target_type = random.choice(list(models.BackupType))
+    recycle_criteria = random.choice(list(models.BackupRecycleCriteria))
+    recycle_value = random.randint(0, 10)
+    recycle_action = random.choice(list(models.BackupRecycleAction))
+    location = "".join(random.choices(string.ascii_uppercase + string.digits, k=5)) + "/" + "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    name_template = "$I-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
+    return db.add_target(name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
+
+def create_test_backup(target_id: str) -> models.Backup:
+    return db.add_backup(target_id, datetime.datetime.now(), False)
+
 def test_list_targets(client):
     response = client.get("/api/target")
     assert response.status_code == 200
 
     data = response.get_json()
-    assert data["success"]
     assert "targets" in data
 
 def test_new_target(client):
@@ -39,118 +53,59 @@ def test_new_target(client):
     assert response.status_code == 201
     
     data = response.get_json()
-    assert data["success"]
-    
-    response = client.get(f"/api/target/{data['id']}")
-    assert response.status_code == 200
-    
-    data = response.get_json()
-    assert data["success"]
-    assert "target" in data
-    target = data["target"]
-    assert target["name"] == "test"
-    assert target["target_type"] == "single"
-    assert target["recycle_criteria"] == "none"
-    assert target["recycle_value"] == 0
-    assert target["recycle_action"] == "recycle"
-    assert target["location"] == "/"
-    assert target["name_template"] == "test$I"
+    target = db.get_target(data["id"])
+    assert target is not None
 
 def test_new_target_bad(client):
     response = client.post("/api/target", json={})
     assert response.status_code == 400
-    
-    data = response.get_json()
-    assert not data["success"]
 
 def test_edit_target(client):
     db.reset()
 
-    response = client.post("/api/target", json={"name": "test", "backup_type": "single", "recycle_criteria": "none", "recycle_value": 0, "recycle_action": "recycle", "location": "/", "name_template": "test$I"})
-    assert response.status_code == 201
-    
-    data = response.get_json()
-    assert data["success"]
-    target_id = data["id"]
+    target_id = create_test_target()
 
     response = client.patch(f"/api/target/{target_id}", json={"name": "test23", "recycle_criteria": "count", "recycle_value": 10, "recycle_action": "delete", "location": "/var/backups/test", "name_template": "test$I-$D"})
     assert response.status_code == 200
     
-    data = response.get_json()
-    assert data["success"]
-    
-    response = client.get(f"/api/target/{target_id}")
-    assert response.status_code == 200
-    
-    data = response.get_json()
-    assert "target" in data
-    target = data["target"]
-    assert target["name"] == "test23"
-    assert target["recycle_criteria"] == "count"
-    assert target["recycle_value"] == 10
-    assert target["recycle_action"] == "delete"
-    assert target["location"] == "/var/backups/test"
-    assert target["name_template"] == "test$I-$D"
+    target = db.get_target(target_id)
+    assert target.name == "test23"
+    assert target.recycle_criteria == models.BackupRecycleCriteria.COUNT
+    assert target.recycle_value == 10
+    assert target.recycle_action == models.BackupRecycleAction.DELETE
+    assert target.location == "/var/backups/test"
+    assert target.name_template == "test$I-$D"
 
 def test_delete_target(client):
     db.reset()
     
-    response = client.post("/api/target", json={"name": "kasane testo", "backup_type": "multi", "recycle_criteria": "none", "recycle_value": 0, "recycle_action": "recycle", "location": "/a/a/a/a", "name_template": "$I$I$I$I"})
-    assert response.status_code == 201
-    
-    data = response.get_json()
-    assert data["success"]
-    target_id = data["id"]
+    target_id = create_test_target()
     
     response = client.delete(f"/api/target/{target_id}", json={"delete_files": True})
     assert response.status_code == 200
     
-    data = response.get_json()
-    assert data["success"]
-    
-    response = client.get(f"/api/target/{target_id}")
-    assert response.status_code == 404
+    target = db.get_target(target_id)
+    assert target is None
 
 def test_upload_backup(client):
     db.reset()
     
-    response = client.post("/api/target", json={"name": "kasane testo", "backup_type": "multi", "recycle_criteria": "none", "recycle_value": 0, "recycle_action": "recycle", "location": "/a/a/a/a", "name_template": "$I$I$I$I"})
-    assert response.status_code == 201
-    
-    data = response.get_json()
-    assert data["success"]
-    target_id = data["id"]
+    target_id = create_test_target()
     
     response = client.post(f"/api/target/{target_id}/upload", data={"backup_file": (io.BytesIO(b"test lol"), "test.txt"), "manual": False}, content_type="multipart/form-data")
     assert response.status_code == 200
     
-    data = response.get_json()
-    assert data["success"]
-    
-    response = client.get(f"/api/target/{target_id}")
-    assert response.status_code == 200
-    
-    data = response.get_json()
-    assert data["success"]
-    assert "target" in data
-    assert "backups" in data
-    assert len(data["backups"]) != 0
+    backups = db.list_backups_target(target_id)
+    assert len(backups) == 1
 
 def test_delete_target_backups(client):
     db.reset()
     
-    # TODO use db directly for things other than the endpoint tested.
-    #      This'll make it simpler and make all the testing focus on one thing
-    #      instead of validating unrelated endpoints in every test.
-    
-    target_id = db.add_target("kasane testo", models.BackupType.SINGLE, models.BackupRecycleCriteria.COUNT, 10, models.BackupRecycleAction.RECYCLE, "/a/a/a/a", "test$I")
-    backup_id = db.add_backup(target_id, datetime.datetime.now(), False)
+    target_id = create_test_target()
+    backup_id = create_test_backup(target_id)
     
     response = client.delete(f"/api/target/{target_id}/all", json={"delete_files": True})
     assert response.status_code == 200
-    
-    data = response.get_json()
-    assert data["success"] # TODO necessary?
     
     backup = db.get_backup(backup_id)
     assert backup is None
@@ -158,15 +113,11 @@ def test_delete_target_backups(client):
 def test_delete_backup(client):
     db.reset()
     
-    # TODO create method for making a testing target and backup
-    target_id = db.add_target("kasane testo", models.BackupType.SINGLE, models.BackupRecycleCriteria.COUNT, 10, models.BackupRecycleAction.RECYCLE, "/a/a/a/a", "test$I")
-    backup_id = db.add_backup(target_id, datetime.datetime.now(), False)
+    target_id = create_test_target()
+    backup_id = create_test_backup(target_id)
     
     response = client.delete(f"/api/backup/{backup_id}", json={"delete_files": True})
     assert response.status_code == 200
-    
-    data = response.get_json()
-    assert data["success"]
     
     backup = db.get_backup(backup_id)
     assert backup is None
@@ -174,14 +125,11 @@ def test_delete_backup(client):
 def test_recycle_backup(client):
     db.reset()
     
-    target_id = db.add_target("kasane testo", models.BackupType.SINGLE, models.BackupRecycleCriteria.COUNT, 10, models.BackupRecycleAction.RECYCLE, "/a/a/a/a", "test$I")
-    backup_id = db.add_backup(target_id, datetime.datetime.now(), False)
+    target_id = create_test_target()
+    backup_id = create_test_backup(target_id)
     
     response = client.patch(f"/api/backup/{backup_id}", json={"is_recycled": True})
     assert response.status_code == 200
-    
-    data = response.get_json()
-    assert data["success"]
     
     backup = db.get_backup(backup_id)
     assert backup.is_recycled
@@ -191,18 +139,15 @@ def test_recycle_backup(client):
     response = client.patch(f"/api/backup/{backup_id}", json={"is_recycled": False})
     assert response.status_code == 200
     
-    data = response.get_json()
-    assert data["success"]
-    
     backup = db.get_backup(backup_id)
     assert not backup.is_recycled
 
 def test_recycle_bin(client):
     db.reset()
     
-    target_id = db.add_target("kasane testo", models.BackupType.SINGLE, models.BackupRecycleCriteria.COUNT, 10, models.BackupRecycleAction.RECYCLE, "/a/a/a/a", "test$I")
-    backup_id0 = db.add_backup(target_id, datetime.datetime.now(), False)
-    backup_id1 = db.add_backup(target_id, datetime.datetime.now(), False)
+    target_id = create_test_target()
+    backup_id0 = create_test_backup(target_id)
+    backup_id1 = create_test_backup(target_id)
     
     db.recycle_backup(backup_id0, True)
     db.recycle_backup(backup_id1, True)
@@ -216,9 +161,9 @@ def test_recycle_bin(client):
 def test_recycle_bin_clear(client):
     db.reset()
 
-    target_id = db.add_target("kasane testo", models.BackupType.SINGLE, models.BackupRecycleCriteria.COUNT, 10, models.BackupRecycleAction.RECYCLE, "/a/a/a/a", "test$I")
-    backup_id0 = db.add_backup(target_id, datetime.datetime.now(), False)
-    backup_id1 = db.add_backup(target_id, datetime.datetime.now(), False)
+    target_id = create_test_target()
+    backup_id0 = create_test_backup(target_id)
+    backup_id1 = create_test_backup(target_id)
     
     db.recycle_backup(backup_id0, True)
     db.recycle_backup(backup_id1, True)

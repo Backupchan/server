@@ -131,7 +131,7 @@ class MockDatabase(database.Database):
         pass # Override because this does not initialize a real db connection.
 
 class MockFileManager(file_manager.FileManager):
-    def __init__(self, db: MockDatabase, recycle_bin_path: str):
+    def __init__(self, db: MockDatabase):
         self.db = db
         self.logger = logging.getLogger("mockfm")
     
