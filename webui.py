@@ -263,7 +263,7 @@ class WebUI:
         self.post_log("upload backup")
         backup_id = ""
         try:
-            backup_id = self.db.add_backup(target_id, datetime.datetime.now(), True) # Always manual via the browser
+            backup_id = self.db.add_backup(target_id, True) # Always manual via the browser
             backup_filename = self.move_uploaded_backup()
             self.logger.info(f"Uploaded file saved as {backup_filename}")
         except Exception as exc:

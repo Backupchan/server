@@ -128,7 +128,10 @@ class Database:
     # Backup methods
     #
 
-    def add_backup(self, target_id: str, created_at: datetime, manual: bool) -> str:
+    def add_backup(self, target_id: str, manual: bool, created_at: datetime | None = None) -> str:
+        if created_at is None:
+            created_at = datetime.now()
+        
         with self.lock:
             # Target ID must already exist.
             self.cursor.execute("SELECT id FROM targets WHERE id = ?", (target_id,))

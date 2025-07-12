@@ -40,7 +40,7 @@ def create_test_target() -> models.BackupTarget:
     return db.add_target(name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
 
 def create_test_backup(target_id: str) -> models.Backup:
-    return db.add_backup(target_id, datetime.datetime.now(), False)
+    return db.add_backup(target_id, False)
 
 def test_list_targets(client):
     response = client.get("/api/target")

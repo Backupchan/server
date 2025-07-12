@@ -171,9 +171,7 @@ class API:
 
             # Create backup in the database
             try:
-                # TODO do we really need to pass a creation date manually?
-                #      Naturally, all backups created should have a current timestamp.
-                backup_id = self.db.add_backup(id, datetime.datetime.now(), is_manual)
+                backup_id = self.db.add_backup(id, is_manual)
             except Exception as exc:
                 self.logger.error("Failed to add backup to database", exc_info=exc)
                 return failure_response("Failed to add backup to database"), 500

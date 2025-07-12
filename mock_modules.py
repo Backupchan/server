@@ -76,7 +76,10 @@ class MockDatabase(database.Database):
             if backup.target_id == id:
                 self.backups.remove(backup)
     
-    def add_backup(self, target_id: str, created_at: datetime, manual: bool) -> str:
+    def add_backup(self, target_id: str, manual: bool, created_at: datetime | None = None) -> str:
+        if created_at is None:
+            created_at = datetime.now()
+        
         backup_id = str(uuid.uuid4())
         backup = models.Backup(backup_id, target_id, created_at, manual, False)
         self.backups.append(backup)
@@ -125,7 +128,7 @@ class MockDatabase(database.Database):
         return len(self.backups)
     
     def count_recycled_backups(self) -> int:
-        return len(self.list_recycled_backups()
+        return len(self.list_recycled_backups())
     
     def __del__(self):
         pass # Override because this does not initialize a real db connection.
