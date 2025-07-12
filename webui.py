@@ -231,7 +231,7 @@ class WebUI:
     #
 
     def handle_post_new_target(self) -> str | None:
-        self.logger.info(f"Handle POST new target with data: {request.form}")
+        self.post_log("new target")
         try:
             self.db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
         except Exception as exc:
@@ -239,7 +239,7 @@ class WebUI:
         return None
 
     def handle_post_edit_target(self, target_id: str) -> str | None:
-        self.logger.info(f"Handle POST edit target with data: {request.form}")
+        self.post_log("edit target")
         try:
             self.server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"])
         except Exception as exc:
@@ -248,7 +248,7 @@ class WebUI:
         return None
 
     def handle_post_delete_target(self, target_id: str):
-        self.logger.info(f"Handle POST delete target with data: {request.form}")
+        self.post_log("delete target")
         self.server_api.delete_target(target_id, bool(request.form.get("delete_files")))
 
     def move_uploaded_backup(self) -> str:
@@ -260,7 +260,7 @@ class WebUI:
 
     def handle_post_upload_backup(self, target_id: str) -> str | None:
         # TODO not sure if this can be extracted to server api as well
-        self.logger.info(f"Handle POST upload backup with data: {request.form}")
+        self.post_log("upload backup")
         backup_id = ""
         try:
             backup_id = self.db.add_backup(target_id, datetime.datetime.now(), True) # Always manual via the browser
@@ -281,21 +281,24 @@ class WebUI:
         return None
 
     def handle_post_delete_backup(self, backup_id: str):
-        self.logger.info(f"Handle POST delete backup with data: {request.form}")
+        self.post_log("delete backup")
         self.server_api.delete_backup(backup_id, bool(request.form.get("delete_files")))
 
     def handle_post_delete_target_backups(self, target_id: str):
-        self.logger.info(f"Handle POST delete target backups with data: {request.form}")
+        self.post_log("delete target backups")
         self.server_api.delete_target_backups(target_id, bool(request.form.get("delete_files")))
 
     def handle_post_recycle_backup(self, backup_id: str):
-        self.logger.info(f"Handle POST recycle backup with data: {request.form}") # TODO function for logging this?
+        self.post_log("recycle backup")
         self.server_api.recycle_backup(backup_id)
 
     def handle_post_unrecycle_backup(self, backup_id: str):
-        self.logger.info(f"Handle POST unrecycle backup with data: {request.form}")
+        self.post_log("unrecycle backup")
         self.server_api.unrecycle_backup(backup_id)
 
     def handle_post_recycle_bin_clear(self):
-        self.logger.info(f"Handler POST recycle bin clear with data: {request.form}")
+        self.post_log("recycle bin clear")
         self.server_api.recycle_bin_clear(bool(request.form.get("delete_files")))
+    
+    def post_log(self, message: str):
+        self.logger.info(f"Handle POST {message} with data: {request.form}")
