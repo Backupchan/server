@@ -34,28 +34,31 @@ you have to pass the API key through the `API` initializer.
 
 List every target.
 
-Example output:
+#### Example output
 
 ```json
-[
-    {
-        "id": "00000000-0000-0000-0000-000000000000",
-        "name": "My backup",
-        "target_type": "multi",
-        "recycle_criteria": "count",
-        "recycle_value": 10,
-        "recycle_action": "recycle",
-        "location": "/var/backups/MyBackup",
-        "name_template": "backup-$I-$D"
-    }
-]
+{
+    "success": true,
+    "targets": [
+        {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "name": "My backup",
+            "target_type": "multi",
+            "recycle_criteria": "count",
+            "recycle_value": 10,
+            "recycle_action": "recycle",
+            "location": "/var/backups/MyBackup",
+            "name_template": "backup-$I-$D"
+        }
+    ]
+}
 ```
 
-### POST `/api/target/upload`
+### POST `/api/target`
 
 Create a new target.
 
-Example payload:
+#### Example payload
 
 ```json
 {
@@ -69,22 +72,56 @@ Example payload:
 }
 ```
 
+#### Example output
+
+```json
+{
+    "success": true,
+    "id": "00000000-0000-0000-0000-000000000000"
+}
+```
+
 ### GET `/api/target/<ID>`
 
 View a target with the specified ID.
 
-Example output:
+#### Example output
 
 ```json
 {
-    "id": "00000000-0000-0000-0000-000000000000",
-    "name": "My backup",
-    "target_type": "multi",
-    "recycle_criteria": "count",
-    "recycle_value": 10,
-    "recycle_action": "recycle",
-    "location": "/var/backups/MyBackup",
-    "name_template": "backup-$I-$D"
+    "success": true,
+    "target": {
+        "id": "00000000-0000-0000-0000-000000000000",
+        "name": "My backup",
+        "target_type": "multi",
+        "recycle_criteria": "count",
+        "recycle_value": 10,
+        "recycle_action": "recycle",
+        "location": "/var/backups/MyBackup",
+        "name_template": "backup-$I-$D"
+    }
+}
+```
+
+### POST `/target/<ID>/upload`
+
+Upload a new backup.
+
+This endpoint uses the Content-Type `multipart/form-data`.
+
+#### Example payload
+
+```
+backup_file: File you want to upload.
+manual: true/false, whether the upload was manual or not.
+```
+
+#### Example output
+
+```json
+{
+    "success": true,
+    "id": "00000000-0000-0000-0000-000000000000"
 }
 ```
 
@@ -92,7 +129,7 @@ Example output:
 
 Edit an existing target. A target's type cannot be modified after creaton.
 
-Example payload:
+#### Example payload
 
 ```json
 {
@@ -105,10 +142,55 @@ Example payload:
 }
 ```
 
+#### Example output
+
+```json
+{
+    "success": true
+}
+```
+
 ### DELETE `/api/target/<id>`
 
 Delete an existing target. `delete_files` must be supplied in the payload
 to indicate whether or not to permanently delete backup files as well.
+
+#### Example payload
+
+```json
+{
+    "delete_files": true
+}
+```
+
+#### Example output
+
+```json
+{
+    "success": true
+}
+```
+
+### DELETE `/api/target/<id>/all`
+
+Delete every backup from an existing target. `delete_files` must be supplied
+to indicate whether or not to permanently delete backup files as well.
+
+#### Example payload
+
+```json
+{
+    "delete_files": true
+}
+```
+
+#### Example output
+
+```json
+{
+    "success": true
+}
+```
 
 ## Backup endpoints
 
@@ -117,15 +199,39 @@ to indicate whether or not to permanently delete backup files as well.
 Delete an existing backup. `delete_files` must be supplied in the payload
 to indicate whether or not to permanently delete backup files as well.
 
+#### Example payload
+
+```json
+{
+    "delete_files": true
+}
+```
+
+#### Example output
+
+```json
+{
+    "success": true
+}
+```
+
 ### PATCH `/api/backup/<id>`
 
 Recycle or restore an existing backup.
 
-Example payload:
+#### Example payload
 
 ```json
 {
     "is_recycled": true
+}
+```
+
+#### Example output
+
+```json
+{
+    "success": true
 }
 ```
 
@@ -135,13 +241,41 @@ Example payload:
 
 List contents of the recycle bin.
 
+#### Example output
+
+```json
+{
+    "success": true,
+    "backups": [
+        {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "target_id": "00000000-0000-0000-0000-001000000000",
+            "created_at": "2025-07-11T12:57:17+00:00",
+            "manual": false,
+            "is_recycled": true
+        }
+    ]
+}
+```
+
 ### DELETE `/api/recycle_bin`
 
 Delete every backup in the recycle bin. `delete_files` must be supplied in
 the payload to indicate whether or not to permanently delete backup files
 as well.
 
-### POST `/target/<ID>/upload`
+#### Example payload
 
-Upload a new backup. Requires a `backup_file` to be present as a file
-through `multipart/form-data` and `manual` boolean in JSON payload.
+```json
+{
+    "delete_files": true
+}
+```
+
+#### Example output
+
+```json
+{
+    "success": true
+}
+```
