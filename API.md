@@ -4,6 +4,10 @@ This is the documentaton for the JSON API for use in client applications and scr
 
 If you are using Python for your client application, you should use the API library instead.
 
+## Testing
+
+The API is tested using `pytest`. Once installed, run `pytest apitest.py` to test the API.
+
 ## Authentication
 
 Authentication for the API can be done using an API key. Each instance of Backup-chan can
