@@ -2,7 +2,7 @@
 Application models. Read database SQL files for explanation of what each field represents.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import Optional
 from datetime import datetime
@@ -43,3 +43,8 @@ class Backup:
 
     def pretty_created_at(self) -> str:
         return self.created_at.strftime("%B %d, %Y %H:%M")
+
+    def asdict(self) -> dict:
+        backup = asdict(self)
+        backup["created_at"] = self.created_at.isoformat()
+        return backup

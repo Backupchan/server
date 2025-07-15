@@ -122,7 +122,7 @@ class API:
             if target is None:
                 return jsonify(success=False), 404
             backups = self.db.list_backups_target(id)
-            return jsonify(success=True, target=dataclasses.asdict(target), backups=[dataclasses.asdict(backup) for backup in backups]), 200
+            return jsonify(success=True, target=dataclasses.asdict(target), backups=[backup.asdict() for backup in backups]), 200
 
         @self.blueprint.route("/target/<id>", methods=["PATCH"])
         @requires_auth
@@ -249,7 +249,7 @@ class API:
         @requires_auth
         def recycle_bin():
             recycle_bin = self.db.list_recycled_backups()
-            return jsonify(success=True, backups=[dataclasses.asdict(backup) for backup in recycle_bin]), 200
+            return jsonify(success=True, backups=[backup.asdict() for backup in recycle_bin]), 200
 
         @self.blueprint.route("/recycle_bin", methods=["DELETE"])
         @requires_auth
