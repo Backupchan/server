@@ -167,6 +167,8 @@ class API:
                 self.logger.error("Failed to create file temp path", exc_info=exc)
                 return failure_response("Failed to create file temp path"), 500
 
+            uploaded_file.save(temp_path)
+
             backup_id = None
 
             # Create backup in the database
