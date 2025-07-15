@@ -99,7 +99,16 @@ View a target with the specified ID.
         "recycle_action": "recycle",
         "location": "/var/backups/MyBackup",
         "name_template": "backup-$I-$D"
-    }
+    },
+    "backups": [
+        {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "target_id": "00000000-0000-0000-0000-001000000000",
+            "created_at": "2025-07-11T12:57:17+00:00",
+            "manual": false,
+            "is_recycled": false
+        }
+    ]
 }
 ```
 
