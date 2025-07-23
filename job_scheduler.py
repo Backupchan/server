@@ -38,7 +38,10 @@ class JobScheduler:
         for job in self.jobs:
             if now >= job.next_run or job.force_flag:
                 self.logger.info("Run job %s", job.name)
-                job.run()
+                try:
+                    job.run()
+                except Exception as exc:
+                    self.logger.error("Exception raised when running job %s", job.name, exc_info=exc)
                 job.next_run = now + job.interval
 
     def add_job(self, job: ScheduledJob):
