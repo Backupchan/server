@@ -1,7 +1,7 @@
 import database
 import file_manager
 import serverapi
-import recycle_daemon
+import job_scheduler
 import stats
 import config
 import utility
@@ -16,11 +16,11 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from werkzeug.security import check_password_hash
 
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, daemon: recycle_daemon.RecycleDaemon, stats: stats.Stats, config: config.Config, passwd_hash: str | None):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: job_scheduler.JobScheduler, stats: stats.Stats, config: config.Config, passwd_hash: str | None):
         self.db = db
         self.fm = fm
         self.server_api = server_api
-        self.daemon = daemon
+        self.job_scheduler = job_scheduler
         self.stats = stats
         self.config = config
         self.passwd_hash = passwd_hash
@@ -62,11 +62,11 @@ class WebUI:
         def homepage():
             return redirect(url_for("webui.list_targets"))
 
-        @self.blueprint.route("/daemon-recheck")
+        @self.blueprint.route("/force-run-job/<name>")
         @requires_auth
-        def daemon_recheck():
-            self.daemon.force_run()
-            return "Forced daemon re-check. Inspect the log for details."
+        def daemon_recheck(name: str):
+            self.job_scheduler.force_run_job(name)
+            return f"Job {name} forced to run. Check log for details."
 
         @self.blueprint.route("/stats")
         @requires_auth

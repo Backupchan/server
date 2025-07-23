@@ -43,7 +43,7 @@ app.secret_key = secrets.token_hex(32)
 
 if config.get("webui_enable"):
     # Initialize Web UI
-    webui = webui.WebUI(db, file_manager, server_api, daemon, stats, config, password_hash)
+    webui = webui.WebUI(db, file_manager, server_api, scheduler, stats, config, password_hash)
     app.register_blueprint(webui.blueprint)
 
 api = api.API(db, server_api, config, file_manager)

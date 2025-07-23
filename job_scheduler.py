@@ -38,6 +38,7 @@ class JobScheduler:
         for job in self.jobs:
             if now >= job.next_run or job.force_flag:
                 self.logger.info("Run job %s", job.name)
+                job.force_flag = False
                 try:
                     job.run()
                 except Exception as exc:
@@ -46,3 +47,10 @@ class JobScheduler:
 
     def add_job(self, job: ScheduledJob):
         self.jobs.append(job)
+
+    def force_run_job(self, name: str):
+        for job in self.jobs:
+            if job.name == name:
+                job.force_run()
+                return
+        self.logger.warn(f"Requested to force-run job {name}, but no such job found.")
