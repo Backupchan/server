@@ -9,8 +9,11 @@ import webui
 import api
 import jobs
 import logging
+import logging.handlers
 import json
 import secrets
+import os
+import sys
 from flask import Flask, render_template, request, redirect, url_for, abort, session
 from werkzeug.security import check_password_hash
 
@@ -18,7 +21,23 @@ from werkzeug.security import check_password_hash
 # Set up logging for other modules
 #
 
-logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
+# TODO make log configurable
+
+if not os.path.isdir("./log"):
+    os.mkdir("./log")
+
+formatter = logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
+
+file_handler = logging.handlers.RotatingFileHandler("log/backupchan.log", maxBytes=2000000, backupCount=5)
+file_handler.setFormatter(formatter)
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(formatter)
+
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+root_logger.addHandler(file_handler)
+root_logger.addHandler(console_handler)
 
 #
 # Initializing modules
