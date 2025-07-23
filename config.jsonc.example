@@ -26,6 +26,9 @@
     // Interval for checking targets for recycling, in seconds
     "recycle_job_interval": 3600,
 
+    // Interval for updating backup filesize counts
+    "backup_filesize_job_interval": 7200,
+
     // Whether or not to enable authentication on webui
     // Set password by running passwd.py
     "webui_auth": true

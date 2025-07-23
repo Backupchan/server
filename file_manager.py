@@ -38,7 +38,7 @@ def extract_archive(fs_location: str, filename: str):
         with tarfile.TarFile(filename, "r:*") as tar_file:
             tar_file.extractall(fs_location)
         return
-    raise FileManagerError("Unsupported archive format")
+    raise FileManagerExtractArchiveError("Unsupported archive format")
 
 def get_fs_location(location: str, name_template: str, backup_id: str, backup_creation_str: str) -> str:
     return os.path.join(location, nameformat.parse(name_template, backup_id, backup_creation_str))

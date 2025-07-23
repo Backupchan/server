@@ -9,9 +9,6 @@ import threading
 
 class RecycleJob(jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, server_api: serverapi.ServerAPI):
-        """
-        Interval is in minutes.
-        """
         super().__init__(interval, __name__.split(".")[-1])
 
         self.db = db

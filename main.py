@@ -14,20 +14,35 @@ import secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, session
 from werkzeug.security import check_password_hash
 
+#
 # Set up logging for other modules
+#
+
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
 
+#
 # Initializing modules
+#
+
 config = serverconfig.get_server_config()
 db = database.Database(config.get("db_path"), config.get("db"))
 file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
+
+#
+# Initializing scheduled jobs
+#
+
 scheduler = jobs.JobScheduler()
 scheduler.add_job(jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
+scheduler.add_job(jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
 scheduler.start()
 
+#
 # Retreive password hash if auth is enabled
+#
+
 password_hash = ""
 if config.get("webui_auth"):
     with open("./auth.json", "r", encoding="utf-8") as auth_json:
@@ -35,14 +50,24 @@ if config.get("webui_auth"):
 
 app = Flask(__name__)
 
+#
 # Make a new secret key each time the server is started.
 # This does mean that everyone gets logged out everytime the server restarts.
+# (except if you're using the client as that uses the api key which is static)
+#
 app.secret_key = secrets.token_hex(32)
 
 if config.get("webui_enable"):
+    #
     # Initialize Web UI
+    #
+
     webui = webui.WebUI(db, file_manager, server_api, scheduler, stats, config, password_hash)
     app.register_blueprint(webui.blueprint)
+
+#
+# Initialize the API
+#
 
 api = api.API(db, server_api, config, file_manager)
 app.register_blueprint(api.blueprint, url_prefix="/api")
