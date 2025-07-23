@@ -1,6 +1,7 @@
 *.db
 config.jsonc
 *.swp
+*.swo
 __pycache__/
 *.db-journal
 auth.json
