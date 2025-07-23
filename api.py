@@ -185,6 +185,8 @@ class API:
                 self.db.delete_backup(backup_id)
                 self.logger.error("Failed to add backup file", exc_info=exc) # TODO log exceptions like this everywhere
                 return failure_response("Failed to add backup file"), 500
+
+            self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
             
             return jsonify(success=True, id=backup_id), 200
 

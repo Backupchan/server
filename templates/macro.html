@@ -45,6 +45,7 @@
     Belongs to: <a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a><br>
     {% endif %}
     Created at: <b>{{ backup.pretty_created_at() }}</b><br>
+    Size: <b>{{ backup.pretty_filesize() }}</b><br>
     Uploaded <b>{% if backup.manual %}manually{% else %}automatically{% endif %}</b><br>
     <a href="{{ url_for('webui.delete_backup', id=backup.id) }}">Delete</a> |
     {% if backup.is_recycled %}

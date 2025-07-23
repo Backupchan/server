@@ -8,6 +8,7 @@ from typing import Optional
 from datetime import datetime
 import json
 import nameformat
+import utility
 
 class BackupRecycleCriteria(str, Enum):
     NONE = "none"
@@ -40,9 +41,13 @@ class Backup:
     created_at: datetime
     manual: bool
     is_recycled: bool
+    filesize: int
 
     def pretty_created_at(self) -> str:
         return self.created_at.strftime("%B %d, %Y %H:%M")
+
+    def pretty_filesize(self) -> str:
+        return utility.humanread_file_size(self.filesize)
 
     def asdict(self) -> dict:
         backup = asdict(self)

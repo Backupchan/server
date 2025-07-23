@@ -139,11 +139,16 @@ class Database:
                 raise DatabaseError(f"Target with id '{target_id}' does not exist")
 
             backup_id = str(uuid.uuid4())
-            self.cursor.execute("INSERT INTO backups (id, target_id, created_at, manual) VALUES (?, ?, ?, ?)", (backup_id, target_id, created_at, manual))
+            self.cursor.execute("INSERT INTO backups VALUES (?, ?, ?, ?, ?, ?)", (backup_id, target_id, created_at, manual, False, 0))
             self.connection.commit()
 
             self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target_id, str(created_at), str(manual))
             return backup_id
+
+    def set_backup_filesize(self, backup_id: str, filesize: int):
+        with self.lock:
+            self.cursor.execute("UPDATE backups SET filesize = ? WHERE id = ?", (filesize, backup_id))
+            self.connection.commit()
 
     def get_backup(self, id: str) -> None | models.Backup:
         """

@@ -9,4 +9,4 @@ def humanread_file_size(size: float):
     while size > 1024:
         size /= 1024
         i += 1
-    return f"{size} {SIZE_UNITS[i]}"
+    return f"{size:.2f} {SIZE_UNITS[i]}"

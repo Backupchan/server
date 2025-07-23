@@ -278,6 +278,9 @@ class WebUI:
             self.db.delete_backup(backup_id)
             print(traceback.format_exc(), file=sys.stderr)
             return str(exc)
+
+        self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
+
         return None
 
     def handle_post_delete_backup(self, backup_id: str):

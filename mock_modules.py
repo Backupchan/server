@@ -81,10 +81,13 @@ class MockDatabase(database.Database):
             created_at = datetime.now()
         
         backup_id = str(uuid.uuid4())
-        backup = models.Backup(backup_id, target_id, created_at, manual, False)
+        backup = models.Backup(backup_id, target_id, created_at, manual, False, 123456)
         self.backups.append(backup)
         self.logger.info("Add backup %s", backup)
         return backup_id
+
+    def set_backup_filesize(self, backup_id: str, filesize: int):
+        self.get_backup(backup_id).filesize = filesize
     
     def get_backup(self, id: str) -> None | models.Backup:
         for backup in self.backups:
