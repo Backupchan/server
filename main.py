@@ -8,8 +8,8 @@ import recycle_daemon
 import stats
 import webui
 import api
+import job_scheduler
 import logging
-import threading
 import json
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, session
@@ -24,8 +24,10 @@ db = database.Database(config.get("db_path"), config.get("db"))
 file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
-daemon = recycle_daemon.RecycleDaemon(db, server_api, config.get("daemon_interval"))
-threading.Thread(target=daemon.run).start()
+daemon = recycle_daemon.RecycleDaemon(config.get("daemon_interval"), db, server_api)
+scheduler = job_scheduler.JobScheduler()
+scheduler.add_job(daemon)
+scheduler.start()
 
 # Retreive password hash if auth is enabled
 password_hash = ""

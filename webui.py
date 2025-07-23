@@ -65,7 +65,7 @@ class WebUI:
         @self.blueprint.route("/daemon-recheck")
         @requires_auth
         def daemon_recheck():
-            self.daemon.force_recheck()
+            self.daemon.force_run()
             return "Forced daemon re-check. Inspect the log for details."
 
         @self.blueprint.route("/stats")
