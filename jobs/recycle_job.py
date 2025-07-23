@@ -1,4 +1,4 @@
-import job_scheduler
+import jobs
 import time
 import serverapi
 import database
@@ -7,12 +7,12 @@ import models
 import datetime
 import threading
 
-class RecycleDaemon(job_scheduler.ScheduledJob):
+class RecycleJob(jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, server_api: serverapi.ServerAPI):
         """
         Interval is in minutes.
         """
-        super().__init__(interval, __name__)
+        super().__init__(interval, __name__.split(".")[-1])
 
         self.db = db
         self.server_api = server_api

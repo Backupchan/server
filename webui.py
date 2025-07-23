@@ -1,7 +1,7 @@
 import database
 import file_manager
 import serverapi
-import job_scheduler
+import jobs
 import stats
 import config
 import utility
@@ -16,7 +16,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from werkzeug.security import check_password_hash
 
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: job_scheduler.JobScheduler, stats: stats.Stats, config: config.Config, passwd_hash: str | None):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: jobs.JobScheduler, stats: stats.Stats, config: config.Config, passwd_hash: str | None):
         self.db = db
         self.fm = fm
         self.server_api = server_api

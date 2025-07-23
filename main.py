@@ -4,11 +4,10 @@ import database
 import file_manager
 import serverapi
 import serverconfig
-import recycle_daemon
 import stats
 import webui
 import api
-import job_scheduler
+import jobs
 import logging
 import json
 import secrets
@@ -24,9 +23,8 @@ db = database.Database(config.get("db_path"), config.get("db"))
 file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
-daemon = recycle_daemon.RecycleDaemon(config.get("daemon_interval"), db, server_api)
-scheduler = job_scheduler.JobScheduler()
-scheduler.add_job(daemon)
+scheduler = jobs.JobScheduler()
+scheduler.add_job(jobs.RecycleJob(config.get("daemon_interval"), db, server_api))
 scheduler.start()
 
 # Retreive password hash if auth is enabled
