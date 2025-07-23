@@ -24,7 +24,7 @@ file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
 scheduler = jobs.JobScheduler()
-scheduler.add_job(jobs.RecycleJob(config.get("daemon_interval"), db, server_api))
+scheduler.add_job(jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
 scheduler.start()
 
 # Retreive password hash if auth is enabled
