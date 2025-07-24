@@ -1,5 +1,4 @@
 import jobs
-import time
 import serverapi
 import database
 import logging
@@ -13,7 +12,6 @@ class RecycleJob(jobs.ScheduledJob):
 
         self.db = db
         self.server_api = server_api
-        self.interval = interval
         self.lock = threading.Lock()
 
     def run(self):

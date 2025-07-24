@@ -56,6 +56,7 @@ stats = stats.Stats(db, file_manager)
 scheduler = jobs.JobScheduler()
 scheduler.add_job(jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
 scheduler.add_job(jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
+scheduler.add_job(jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
 scheduler.start()
 
 #

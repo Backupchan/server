@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS targets (
 CREATE TABLE IF NOT EXISTS backups (
     id CHAR(36) PRIMARY KEY, -- UUID
     target_id CHAR(36) NOT NULL,
-    created_at TEXT NOT NULL, -- TODO use DATETIME. we can because we mariadb now
+    created_at TEXT NOT NULL,
     manual INTEGER NOT NULL CHECK (manual IN (0, 1)), -- Boolean integer
     FOREIGN KEY (target_id) REFERENCES targets(id) ON DELETE CASCADE
 );

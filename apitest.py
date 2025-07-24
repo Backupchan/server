@@ -50,7 +50,7 @@ def test_list_targets(client):
     assert "targets" in data
 
 def test_new_target(client):
-    response = client.post("/api/target", json={"name": "test", "backup_type": "single", "recycle_criteria": "none", "recycle_value": 0, "recycle_action": "recycle", "location": "/", "name_template": "test$I"})
+    response = client.post("/api/target", json={"name": "test", "backup_type": "single", "recycle_criteria": "none", "recycle_value": 0, "recycle_action": "recycle", "location": "/", "name_template": "test$I", "deduplicate": True})
     assert response.status_code == 201
     
     data = response.get_json()
@@ -66,7 +66,7 @@ def test_edit_target(client):
 
     target_id = create_test_target()
 
-    response = client.patch(f"/api/target/{target_id}", json={"name": "test23", "recycle_criteria": "count", "recycle_value": 10, "recycle_action": "delete", "location": "/var/backups/test", "name_template": "test$I-$D"})
+    response = client.patch(f"/api/target/{target_id}", json={"name": "test23", "recycle_criteria": "count", "recycle_value": 10, "recycle_action": "delete", "location": "/var/backups/test", "name_template": "test$I-$D", "deduplicate": False})
     assert response.status_code == 200
     
     target = db.get_target(target_id)

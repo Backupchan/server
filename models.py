@@ -33,6 +33,7 @@ class BackupTarget:
     recycle_action: BackupRecycleAction
     location: str
     name_template: str
+    deduplicate: bool
 
 @dataclass
 class Backup:

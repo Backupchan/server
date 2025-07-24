@@ -25,10 +25,10 @@ class MockDatabase(database.Database):
         self.backups = []
         self.logger.info("Reset")
 
-    def add_target(self, name: str, target_type: models.BackupType, recycle_criteria: models.BackupRecycleCriteria, recycle_value: int | None, recycle_action: models.BackupRecycleAction | None, location: str, name_template: str) -> str:
+    def add_target(self, name: str, target_type: models.BackupType, recycle_criteria: models.BackupRecycleCriteria, recycle_value: int | None, recycle_action: models.BackupRecycleAction | None, location: str, name_template: str, deduplicate: bool) -> str:
         self.validate_target(name, name_template, location, None)
         target_id = str(uuid.uuid4())
-        target = models.BackupTarget(target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
+        target = models.BackupTarget(target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate)
         self.targets.append(target)
         self.logger.info("Add target: %s", target)
         return target_id
@@ -41,7 +41,8 @@ class MockDatabase(database.Database):
         recycle_value: int | None,
         recycle_action: models.BackupRecycleAction | None,
         location: str,
-        name_template: str
+        name_template: str,
+        deduplicate: bool
     ):
         self.validate_target(name, name_template, location, id)
         target = self.get_target(id)
@@ -51,6 +52,7 @@ class MockDatabase(database.Database):
         target.recycle_action = recycle_action
         target.location = location
         target.name_template = name_template
+        target.deduplicate = deduplicate
         self.logger.info("Edit target {%s} to %s", id, target)
     
     def get_target(self, id: str) -> models.BackupTarget:
@@ -177,40 +179,40 @@ class MockFileManager(file_manager.FileManager):
     def recycle_backup(self, backup_id: int):
         backup = self.db.get_backup(backup_id)
         if backup is None:
-            raise FileManagerError(f"Backup {backup_id} does not exist")
+            raise file_manager.FileManagerError(f"Backup {backup_id} does not exist")
 
         target = self.db.get_target(backup.target_id)
         if target is None:
-            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+            raise file_manager.FileManagerError(f"Backup {backup_id} points to nonexistent target")
         
         self.logger.info("Recycle backup {%s}", backup_id)
     
     def unrecycle_backup(self, backup_id: int):
         backup = self.db.get_backup(backup_id)
         if backup is None:
-            raise FileManagerError(f"Backup {backup_id} does not exist")
+            raise file_manager.FileManagerError(f"Backup {backup_id} does not exist")
 
         target = self.db.get_target(backup.target_id)
         if target is None:
-            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+            raise file_manager.FileManagerError(f"Backup {backup_id} points to nonexistent target")
         
         self.logger.info("Unrecycle backup {%s}", backup_id)
     
     def get_backup_size(self, backup_id: str) -> int:
         backup = self.db.get_backup(backup_id)
         if backup is None:
-            raise FileManagerError(f"Backup {backup_id} does not exist")
+            raise file_manager.FileManagerError(f"Backup {backup_id} does not exist")
 
         target = self.db.get_target(backup.target_id)
         if target is None:
-            raise FileManagerError(f"Backup {backup_id} points to nonexistent target")
+            raise file_manager.FileManagerError(f"Backup {backup_id} points to nonexistent target")
 
         return 123456
     
     def get_target_size(self, target_id: str) -> int:
         target = self.db.get_target(target_id)
         if target is None:
-            raise FileManagerError(f"Target {target_id} does not exist")
+            raise file_manager.FileManagerError(f"Target {target_id} does not exist")
         
         return 123456
     

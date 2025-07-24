@@ -61,16 +61,17 @@ class Database:
         recycle_value: int | None,
         recycle_action: models.BackupRecycleAction | None,
         location: str,
-        name_template: str
+        name_template: str,
+        deduplicate: bool
     ) -> str:
         with self.lock:
             self.validate_target(name, name_template, location, None)
 
             target_id = str(uuid.uuid4())
-            self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template))
+            self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate))
             self.connection.commit()
 
-            self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
+            self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate)
             return target_id
 
     def edit_target(
@@ -81,15 +82,16 @@ class Database:
         recycle_value: int | None,
         recycle_action: models.BackupRecycleAction | None,
         location: str,
-        name_template: str
+        name_template: str,
+        deduplicate: bool
     ):
         with self.lock:
             self.validate_target(name, name_template, location, id)
 
-            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ? WHERE id = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, id))
+            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ? WHERE id = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, id))
             self.connection.commit()
 
-            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s", id, name, recycle_criteria, recycle_value, recycle_action, location, name_template)
+            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s", id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate)
 
     def list_targets(self) -> list[models.BackupTarget]:
         # TODO add some way to do pagination

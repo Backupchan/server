@@ -37,6 +37,14 @@
     </b><br>
     Location: <b class="monospace">{{ target.location }}</b><br>
     Name template: <b class="monospace">{{ target.name_template }}</b><br>
+    Deduplication
+    <b>
+    {% if target.deduplicate %}
+        on
+    {% else %}
+        off
+    {% endif %}
+    </b>
 {% endmacro %}
 
 {% macro backup_print(backup, target=none) %}

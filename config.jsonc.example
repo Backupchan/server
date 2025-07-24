@@ -24,10 +24,13 @@
     "recycle_bin_path": "./Recycle-bin",
 
     // Interval for checking targets for recycling, in seconds
-    "recycle_job_interval": 3600,
+    "recycle_job_interval": 3600, // 1hr
 
     // Interval for updating backup filesize counts
-    "backup_filesize_job_interval": 7200,
+    "backup_filesize_job_interval": 7200, // 2hrs
+
+    // Interval for deleting duplicate backups
+    "deduplicate_job_interval": 18000, // 5hrs
 
     // Whether or not to enable authentication on webui
     // Set password by running passwd.py

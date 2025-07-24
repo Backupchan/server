@@ -48,7 +48,8 @@ List every target.
             "recycle_value": 10,
             "recycle_action": "recycle",
             "location": "/var/backups/MyBackup",
-            "name_template": "backup-$I-$D"
+            "name_template": "backup-$I-$D",
+            "deduplicate": true
         }
     ]
 }
@@ -68,7 +69,8 @@ Create a new target.
     "recycle_value": 10,
     "recycle_action": "recycle", // recycle or delete
     "location": "/path/to/backups",
-    "name_template": "name-template-$I-$D"
+    "name_template": "name-template-$I-$D",
+    "deduplicate": true
 }
 ```
 
@@ -98,7 +100,8 @@ View a target with the specified ID.
         "recycle_value": 10,
         "recycle_action": "recycle",
         "location": "/var/backups/MyBackup",
-        "name_template": "backup-$I-$D"
+        "name_template": "backup-$I-$D",
+        "deduplicate": true
     },
     "backups": [
         {
@@ -150,7 +153,8 @@ Edit an existing target. A target's type cannot be modified after creaton.
     "recycle_value": 10,
     "recycle_action": "recycle", // recycle or delete
     "location": "/path/to/backups",
-    "name_template": "name-template-$I-$D"
+    "name_template": "name-template-$I-$D",
+    "deduplicate": false
 }
 ```
 

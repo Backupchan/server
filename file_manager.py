@@ -7,6 +7,7 @@ import shutil
 import zipfile
 import tarfile
 import threading
+import hashlib
 from pathlib import Path
 
 class FileManagerError(Exception):
@@ -38,7 +39,7 @@ def extract_archive(fs_location: str, filename: str):
         with tarfile.TarFile(filename, "r:*") as tar_file:
             tar_file.extractall(fs_location)
         return
-    raise FileManagerExtractArchiveError("Unsupported archive format")
+    raise FileManagerError("Unsupported archive format")
 
 def get_fs_location(location: str, name_template: str, backup_id: str, backup_creation_str: str) -> str:
     return os.path.join(location, nameformat.parse(name_template, backup_id, backup_creation_str))
@@ -66,6 +67,23 @@ def get_directory_size(path: Path)-> int:
             if filepath.is_file():
                 total += filepath.stat().st_size
     return total
+
+def file_hash(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as file:
+        while chunk := file.read(8192):
+            h.update(chunk)
+    return h.hexdigest()
+
+def directory_hash(path: str) -> str:
+    h = hashlib.sha256()
+    for root, _, files in sorted(os.walk(path)):
+        for filename in sorted(files):
+            filepath = os.path.join(root, filename)
+            relpath = os.path.relpath(filepath, path)
+            h.update(relpath.encode())
+            h.update(file_hash(filepath).encode())
+    return h.hexdigest()
 
 class FileManager:
     def __init__(self, db: database.Database, recycle_bin_path: str):
@@ -136,7 +154,7 @@ class FileManager:
 
     def delete_target_backups(self, target_id: str):
         with self.lock:
-            target = self.get_target(target_id)
+            self.get_target(target_id)
 
             self.logger.info("Deleting all backups for target {%s}", target_id)
             backups = self.db.list_backups_target(target_id)
@@ -194,7 +212,7 @@ class FileManager:
 
             self.logger.info("Finished recycling")
 
-    def unrecycle_backup(self, backup_id: models.Backup):
+    def unrecycle_backup(self, backup_id: str):
         with self.lock:
             backup, target = self.get_backup_and_target(backup_id)
 
@@ -215,13 +233,29 @@ class FileManager:
 
             self.logger.info("Finished unrecycling")
 
+    def get_backup_hash(self, backup_id: str):
+        with self.lock:
+            backup, target = self.get_backup_and_target(backup_id)
+
+            backup_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
+            if target.target_type == models.BackupType.SINGLE:
+                # TODO wrap this in function too
+                backup_location = find_single_backup_file(backup_location)
+                if backup_location is None:
+                    raise FileManagerError(f"Could not find backup file for backup {backup_id}")
+                return file_hash(backup_location)
+            return directory_hash(backup_location)
+
     def recycle_bin_mkdir(self):
         with self.lock:
             os.makedirs(self.recycle_bin_path, exist_ok=True)
 
     #
     # Statistics
+    #
     # They return the value in bytes.
+    # These recalculate the size every time they're called, see filesize column
+    # in backups table for general filesize measuring.
     #
 
     def get_backup_size(self, backup_id: str) -> int:
@@ -270,5 +304,5 @@ class FileManager:
     def get_target(self, target_id: str) -> models.BackupTarget:
         target = self.db.get_target(target_id)
         if target is None:
-            raise FileManagerError(f"Target {target_id} does not exists")
+            raise FileManagerError(f"Target {target_id} does not exist")
         return target
