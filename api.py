@@ -110,9 +110,8 @@ class API:
                 #      run validation in this function.
                 #      Though this would run validation twice.
                 #      A solution is to manually run validate_target first, not in add_target.
-                # also TODO show wtf kinda error happened instead of just 500ing
                 self.logger.error("Failed to add target", exc_info=exc)
-                return jsonify(success=False), 500
+                return failure_response(str(exc)), 500
             return jsonify(success=True, id=target_id), 201
 
         @self.blueprint.route("/target/<id>", methods=["GET"])
