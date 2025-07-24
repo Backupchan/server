@@ -16,7 +16,14 @@ This is the server portion of Backup-chan, an automatic backup system.
 1. Install program dependencies: `pip install -r requirements.txt`
 1. Copy `config.jsonc.example` to `config.jsonc`. Modify as necessary. Unless stated otherwise, most options have default values.
 1. Run `migrate.py` to create required tables database.
-1. Run `main.py` to start the server.
+
+## Running the server
+
+If you're running for development purposes, simply running `main.py` should be enough.
+
+If you plan to use this installation in a production environment (with your real backups), you should use a WSGI server. See
+[here](https://flask.palletsprojects.com/en/stable/deploying/) on how to set one up. **Remember to start only one worker,
+otherwise every job will start multiple times.**
 
 ## Running migrations
 
