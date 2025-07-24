@@ -264,3 +264,18 @@ class API:
 
             self.server_api.recycle_bin_clear(data["delete_files"])
             return jsonify(success=True), 200
+
+        @self.blueprint.route("/log", methods=["GET"])
+        @requires_auth
+        def get_log():
+            tail = 0
+            if "tail" in request.args:
+                tail = int(request.args["tail"])
+
+            log_content = ""
+            with open("./log/backupchan.log", "r") as log_file:
+                if tail == 0:
+                    log_content = log_file.read()
+                else:
+                    log_content = "".join(log_file.readlines()[-tail:])
+            return jsonify(success=True, log=log_content)

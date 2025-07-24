@@ -90,6 +90,7 @@ class WebUI:
         @self.blueprint.route("/log")
         @requires_auth
         def view_log():
+            # TODO function for this
             tail = 0
             if "tail" in request.args:
                 tail = int(request.args["tail"])
