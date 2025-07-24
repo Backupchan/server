@@ -54,7 +54,7 @@ class WebUI:
             return render_template("login.html")
 
         #
-        # Endpoints
+        # Miscellaneous endpoints
         #
 
         @self.blueprint.route("/")
@@ -86,6 +86,21 @@ class WebUI:
                                    total_targets=total_targets,
                                    total_backups=total_backups,
                                    total_recycled_backups=total_recycled_backups)
+
+        @self.blueprint.route("/log")
+        @requires_auth
+        def view_log():
+            tail = 0
+            if "tail" in request.args:
+                tail = int(request.args["tail"])
+
+            log_content = ""
+            with open("./log/backupchan.log", "r") as log_file:
+                if tail == 0:
+                    log_content = log_file.read()
+                else:
+                    log_content = "".join(log_file.readlines()[-tail:])
+            return render_template("log.html", content=log_content, tail=tail)
 
         #
         # Target endpoints

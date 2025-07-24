@@ -90,3 +90,8 @@ a:hover {
 #container h1 {
     text-decoration: underline;
 }
+
+.big-monospace {
+    font-family: monospace;
+    background-color: lightgrey;
+}
