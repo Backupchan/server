@@ -37,7 +37,7 @@ def create_test_target() -> models.BackupTarget:
     recycle_action = random.choice(list(models.BackupRecycleAction))
     location = "".join(random.choices(string.ascii_uppercase + string.digits, k=5)) + "/" + "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
     name_template = "$I-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
-    return db.add_target(name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template)
+    return db.add_target(name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, True)
 
 def create_test_backup(target_id: str) -> models.Backup:
     return db.add_backup(target_id, False)
