@@ -65,8 +65,13 @@ scheduler.start()
 
 password_hash = ""
 if config.get("webui_auth"):
-    with open("./auth.json", "r", encoding="utf-8") as auth_json:
-        password_hash = json.load(auth_json)["passwd_hash"]
+    try:
+        with open("./auth.json", "r", encoding="utf-8") as auth_json:
+            password_hash = json.load(auth_json)["passwd_hash"]
+    except FileNotFoundError:
+        logging.getLogger().error("WebUI authentication enabled, but no auth.json file found. Authentication will be disabled.")
+    except json.JSONDecodeError as exc:
+        logging.getLogger().error(f"Failed to parse auth.json: {exc}. Authentication will be disabled.")
 
 app = Flask(__name__)
 
