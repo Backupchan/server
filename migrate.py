@@ -10,7 +10,7 @@ def main():
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("migration", help="Migration to apply. To run all migrations, don't pass this option.", type=str, default="")
+    parser.add_argument("migration", nargs="?", help="Migration to run. To run all migrations, don't enter anything.", type=str, default="")
     args = parser.parse_args()
 
     migration = args.migration.strip()
