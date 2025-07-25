@@ -1,10 +1,10 @@
 {
     // Enable or disable Web UI
-    "webui_enable": True,
+    "webui_enable": true,
 
     // Enables Flask debug mode
     // Only enable if you're developing.
-    "web_debug": False,
+    "web_debug": false,
 
     // Temporary location for uploaded files
     // Must be writable and readable
