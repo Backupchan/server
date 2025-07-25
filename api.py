@@ -135,7 +135,7 @@ class API:
             if verify_result is not None:
                 return verify_result
 
-            self.db.edit_target(id, data["name"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"], data["deduplicate"])
+            self.server_api.edit_target(id, data["name"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"], data["deduplicate"])
             return jsonify(success=True), 200
 
         @self.blueprint.route("/target/<id>/upload", methods=["POST"])
