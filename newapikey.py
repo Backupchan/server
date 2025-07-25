@@ -22,6 +22,7 @@ def main():
     
     if os.path.exists(APIKEY_FILE) and not args.overwrite:
         print("API key file already exists. Pass --overwrite to allow overwriting.", file=sys.stderr)
+        sys.exit(1)
     
     key = generate()
     save(key)
