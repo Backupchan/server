@@ -15,7 +15,7 @@ This is the server portion of Backup-chan, an automatic backup system.
     * Now you can exit the shell by entering `\q`
 1. Install program dependencies: `pip install -r requirements.txt`
 1. Copy `config.jsonc.example` to `config.jsonc`. Modify as necessary. Unless stated otherwise, most options have default values.
-1. Run `migrate.py` to create required tables database.
+1. Run `migrate.py` to create required database tables.
 
 ## Running the server
 
@@ -25,10 +25,12 @@ If you plan to use this installation in a production environment (with your real
 [here](https://flask.palletsprojects.com/en/stable/deploying/) on how to set one up. **Remember to start only one worker,
 otherwise every job will start multiple times.**
 
+Once it's run, you can access the web UI through the browser or use a dedicated client.
+
 ## Running migrations
 
-As you update Backup-chan, the database might change as well. To apply any new migrations, run `migrate.py`
-for every new migration, for example:
+When updating Backup-chan, the database schema might change. New migrations are added into the `migrations` folder. Run new
+migrations like so:
 
 ```bash
 ./migrate.py 002_datetime_created_at.sql
@@ -40,6 +42,6 @@ for every new migration, for example:
 
 1. Enable it in your config
 1. Run `passwd.py` and enter the password you'd like to use
-1. that's it
+1. The password is now saved and can be used to log in.
 
 See `API.md` for details on creating and managing an API key.
