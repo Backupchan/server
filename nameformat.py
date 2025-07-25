@@ -10,5 +10,5 @@ def verify_name(name: str) -> bool:
 def parse(name: str, id: str, created_at: str) -> str:
     real_created_at = created_at
     if os.name == "nt":
-        real_created_at.replace(":", "_")
+        real_created_at = real_created_at.replace(":", "_")
     return name.replace("$I", id).replace("$D", real_created_at)
