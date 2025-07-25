@@ -36,7 +36,7 @@ def extract_archive(fs_location: str, filename: str):
             zip_file.extractall(fs_location)
         return
     elif suffixes == TAR_SUFFIXES or suffixes == TAR_GZ_SUFFIXES or suffixes == TAR_XZ_SUFFIXES:
-        with tarfile.TarFile(filename, "r:*") as tar_file:
+        with tarfile.open(filename, "r:*") as tar_file:
             tar_file.extractall(fs_location)
         return
     raise FileManagerError("Unsupported archive format")
