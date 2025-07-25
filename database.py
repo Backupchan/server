@@ -11,6 +11,7 @@ import platform
 import re
 import unicodedata
 import threading
+import os
 from datetime import datetime
 from pathlib import Path
 
