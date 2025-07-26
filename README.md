@@ -8,7 +8,7 @@ This is the server portion of Backup-chan, an automatic backup system.
 1. Create the Backup-chan database by running the following in the MariaDB shell (replace values depending on your setup):
     ```sql
     CREATE DATABASE dbname CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    CREATE USER 'yourusername'@'localhost' IDENTIFIED BY 'yourpassword';
+    CREATE USER 'yourusername'@'localhost' IDENTIFIED BY 'yourpassword'; -- Skip this if you already have a user.
     GRANT ALL PRIVILEGES ON dbname.* TO 'yourusername'@'localhost';
     FLUSH PRIVILEGES;
     ```
