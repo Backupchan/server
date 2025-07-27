@@ -37,7 +37,7 @@ class WebUI:
         def requires_auth(f):
             @functools.wraps(f)
             def decorated(*args, **kwargs):
-                if not self.config.get("webui_auth") or session.get("authed"):
+                if not self.passwd_hash or not self.config.get("webui_auth") or session.get("authed"):
                     return f(*args, **kwargs)
                 return redirect("/login")
             return decorated
