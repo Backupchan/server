@@ -116,6 +116,12 @@ class Database:
             row = self.cursor.fetchone()
             return None if row is None else models.BackupTarget(*row)
 
+    def get_target_size(self, id: str) -> int:
+        with self.lock:
+            self.cursor.execute("SELECT SUM(filesize) FROM backups WHERE target_id = ?", (id,))
+            return self.cursor.fetchone()[0] or 0
+
+
     def delete_target(self, id: str):
         with self.lock:
             self.cursor.execute("DELETE FROM targets WHERE id = ? OR alias = ?", (id, id))

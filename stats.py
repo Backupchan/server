@@ -10,11 +10,14 @@ class Stats:
         targets = self.db.list_targets()
         total = 0
         for target in targets:
-            total += self.fm.get_target_size(target.id)
+            total += self.db.get_target_size(target.id)
         return total
 
     def total_recycle_bin_size(self) -> int:
         recycled_backups = self.db.list_recycled_backups()
-        return self.fm.get_backup_list_size(recycled_backups)
+        total = 0
+        for backup in recycled_backups:
+            total += self.db.get_backup(backup.id).filesize
+        return total
 
     # not worth putting total backups and targets count since they can be easily accessed from the database
