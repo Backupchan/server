@@ -149,15 +149,15 @@ class Database:
         
         with self.lock:
             # Target ID must already exist.
-            self.cursor.execute("SELECT id FROM targets WHERE id = ? OR alias = ?", (target_id, target_id))
-            if self.cursor.fetchone() is None:
-                raise DatabaseError(f"Target with id '{target_id}' does not exist")
+            target = self.get_target(target_id)
+            if target is None:
+                raise DatabaseError(f"Target with id or alias '{target_id}' does not exist")
 
             backup_id = str(uuid.uuid4())
-            self.cursor.execute("INSERT INTO backups VALUES (?, ?, ?, ?, ?, ?)", (backup_id, target_id, created_at, manual, False, 0))
+            self.cursor.execute("INSERT INTO backups VALUES (?, ?, ?, ?, ?, ?)", (backup_id, target.id, created_at, manual, False, 0))
             self.connection.commit()
 
-            self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target_id, str(created_at), str(manual))
+            self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target.id, str(created_at), str(manual))
             return backup_id
 
     def set_backup_filesize(self, backup_id: str, filesize: int):
