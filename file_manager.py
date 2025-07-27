@@ -116,7 +116,7 @@ class FileManager:
             # If it's multi-file, check the extension
             # TODO is it worth checking the file content to check if it's a real zip/tar/whatever and not an imposter?
             if target.target_type == models.BackupType.MULTI and not is_archive_filename(filename):
-                return FileManagerError("Backup file is not a supported archive")
+                raise FileManagerError("Backup file is not a supported archive")
 
             #
             # Actual operation
