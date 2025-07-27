@@ -104,7 +104,7 @@ class API:
                 return verify_result
 
             try:
-                target_id = self.db.add_target(data["name"], data["backup_type"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"], data["deduplicate"])
+                target_id = self.db.add_target(data["name"], data["backup_type"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"], data["deduplicate"], data["alias"])
             except Exception as exc:
                 # TODO to recognize between invalid requests and internal errors,
                 #      run validation in this function.
@@ -135,7 +135,7 @@ class API:
             if verify_result is not None:
                 return verify_result
 
-            self.server_api.edit_target(id, data["name"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"], data["deduplicate"])
+            self.server_api.edit_target(id, data["name"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"], data["deduplicate"], data["alias"])
             return jsonify(success=True), 200
 
         @self.blueprint.route("/target/<id>/upload", methods=["POST"])

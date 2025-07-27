@@ -34,6 +34,7 @@ class BackupTarget:
     location: str
     name_template: str
     deduplicate: bool
+    alias: Optional[str]
 
 @dataclass
 class Backup:

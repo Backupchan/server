@@ -55,6 +55,7 @@ class Database:
 
     #
     # Target methods
+    # ID parameter accepts alias as well.
     #
 
     def add_target(
@@ -66,16 +67,17 @@ class Database:
         recycle_action: models.BackupRecycleAction | None,
         location: str,
         name_template: str,
-        deduplicate: bool
+        deduplicate: bool,
+        alias: str | None
     ) -> str:
         with self.lock:
-            self.validate_target(name, name_template, location, None)
+            self.validate_target(name, name_template, location, None, alias)
 
             target_id = str(uuid.uuid4())
-            self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate))
+            self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias))
             self.connection.commit()
 
-            self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate)
+            self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
             return target_id
 
     def edit_target(
@@ -87,15 +89,16 @@ class Database:
         recycle_action: models.BackupRecycleAction | None,
         location: str,
         name_template: str,
-        deduplicate: bool
+        deduplicate: bool,
+        alias: str | None
     ):
         with self.lock:
-            self.validate_target(name, name_template, location, id)
+            self.validate_target(name, name_template, location, id, alias)
 
-            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ? WHERE id = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, id))
+            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ?, alias = ? WHERE id = ? OR alias = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, id, id))
             self.connection.commit()
 
-            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s", id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate)
+            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
 
     def list_targets(self) -> list[models.BackupTarget]:
         # TODO add some way to do pagination
@@ -109,13 +112,13 @@ class Database:
         Returns None if the target wasn't found.
         """
         with self.lock:
-            self.cursor.execute("SELECT * FROM targets WHERE id = ?", (id,)) # stupid tuple
+            self.cursor.execute("SELECT * FROM targets WHERE id = ? OR alias = ?", (id, id))
             row = self.cursor.fetchone()
             return None if row is None else models.BackupTarget(*row)
 
     def delete_target(self, id: str):
         with self.lock:
-            self.cursor.execute("DELETE FROM targets WHERE id = ?", (id,))
+            self.cursor.execute("DELETE FROM targets WHERE id = ? OR alias = ?", (id, id))
             self.connection.commit()
             self.logger.info("Delete target {%s}", id)
 
@@ -140,7 +143,7 @@ class Database:
         
         with self.lock:
             # Target ID must already exist.
-            self.cursor.execute("SELECT id FROM targets WHERE id = ?", (target_id,))
+            self.cursor.execute("SELECT id FROM targets WHERE id = ? OR alias = ?", (target_id, target_id))
             if self.cursor.fetchone() is None:
                 raise DatabaseError(f"Target with id '{target_id}' does not exist")
 
@@ -217,7 +220,7 @@ class Database:
     # Miscellaneous
     #
 
-    def validate_target(self, name: str, name_template: str, location: str, target_id: str | None):
+    def validate_target(self, name: str, name_template: str, location: str, target_id: str | None, alias: str | None):
         with self.lock:
             # The name must not be empty.
             if len(name) == 0:
@@ -239,6 +242,12 @@ class Database:
             # Location must not contain illegal characters. '/' is okay.
             if not is_valid_path(location, True):
                 raise DatabaseError("Target location must not contain invalid characters")
+            
+            # Alias must be unique to this target (if present).
+            if alias is not None:
+                for target in self.list_targets():
+                    if target.alias == alias and target.id != target_id:
+                        raise DatabaseError("Alias is not unique to this target")
 
     def initialize_database(self):
         migrations_dir = Path("migrations")
