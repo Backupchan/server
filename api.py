@@ -92,7 +92,8 @@ class API:
         @self.blueprint.route("/target", methods=["GET"])
         @requires_auth
         def list_targets():
-            targets = self.db.list_targets()
+            page = int(request.args.get("page", 1))
+            targets = self.db.list_targets(page)
             return jsonify(success=True, targets=[dataclasses.asdict(target) for target in targets]), 200
 
         @self.blueprint.route("/target", methods=["POST"])
