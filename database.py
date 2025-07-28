@@ -46,8 +46,13 @@ class Database:
         return self.cursor.fetchone()[0]
 
     def validate_schema_version(self):
-        if self.get_schema_version() != Database.CURRENT_SCHEMA_VERSION:
-            raise DatabaseError("Schema version mismatch, update Backup-chan.")
+        try:
+            if self.get_schema_version() != Database.CURRENT_SCHEMA_VERSION:
+                raise DatabaseError("Schema version mismatch, update Backup-chan.")
+        except mariadb.ProgrammingError as exc:
+            if "schema_versions' doesn't exist" in str(exc):
+                raise DatabaseError("bro ur version so ancient you don't even have schema versions. update now")
+            raise
 
     #
     # Target methods
