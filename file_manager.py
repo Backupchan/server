@@ -164,7 +164,7 @@ class FileManager:
     def update_backup_locations(self, target: models.BackupTarget, new_name_template: str, new_location: str, old_name_template: str, old_location: str):
         with self.lock:
             self.logger.info("Starting move backups in target {%s}. Name template: '%s' -> '%s', location: '%s' -> '%s'", target.id, old_name_template, new_name_template, old_location, new_location)
-            self.db.validate_target(target.name, new_name_template, new_location, target.id)
+            self.db.validate_target(target.name, new_name_template, new_location, target.id, None)
 
             os.makedirs(new_location, exist_ok=True)
 
@@ -176,6 +176,9 @@ class FileManager:
                     # In this case, it only matters if the name template changed.
                     old_fs_location = get_fs_location(self.recycle_bin_path, old_name_template, backup.id, backup.created_at.isoformat())
                     new_fs_location = get_fs_location(self.recycle_bin_path, new_name_template, backup.id, backup.created_at.isoformat())
+
+                if old_fs_location == new_fs_location:
+                    self.logger.info("Skip moving backup {%s} (same source and destination)", backup.id)
 
                 if target.target_type == models.BackupType.SINGLE:
                     old_fs_location = find_single_backup_file(old_fs_location)
