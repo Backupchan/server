@@ -26,7 +26,7 @@ class JobScheduler:
 
     def start(self):
         self.logger.info("Start job scheduler")
-        threading.Thread(target=self.run).start()
+        threading.Thread(target=self.run, daemon=True).start()
 
     def run(self):
         while True:
