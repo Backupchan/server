@@ -7,6 +7,7 @@ import models
 import uuid
 import logging
 import nameformat
+import utility
 import platform
 import re
 import unicodedata
@@ -17,27 +18,6 @@ from pathlib import Path
 
 class DatabaseError(Exception):
     pass
-
-# TODO might be worth separating the two below functions to a separate module
-
-def is_printable_string(s: str) -> bool:
-    for char in s:
-        category = unicodedata.category(char)
-        if category.startswith("C"): # control chars start with c
-            return False
-    return True
-
-def is_valid_path(path: str, slash_ok: bool) -> bool:
-    if platform.system() == "Windows":
-        if not slash_ok and ("/" in path or "\\" in path):
-            return False
-        # Allow colon only as part of drive letter (like C:/ or D:\)
-        # Came up when I was testing on Windows.
-        drive, rest = os.path.splitdrive(path)
-        return not re.search(r'[<>:"|?*]', rest)
-
-    # Regardless of system, disallow non-printable characters for sanity.
-    return is_printable_string(path) and slash_ok or (not slash_ok and "/" not in path)
 
 class Database:
     """
@@ -262,7 +242,7 @@ class Database:
                 raise DatabaseError("Filename template must not contain invalid characters")
 
             # Location must not contain illegal characters. '/' is okay.
-            if not is_valid_path(location, True):
+            if not utility.is_valid_path(location, True):
                 raise DatabaseError("Target location must not contain invalid characters")
             
             # Alias must be unique to this target (if present).
