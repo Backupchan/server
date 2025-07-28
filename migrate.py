@@ -17,7 +17,7 @@ def main():
 
     print("The Backup-chan database will now be migrated.")
     server_config = serverconfig.get_server_config()
-    db = database.Database(server_config.get("db_path"), server_config.get("db"))
+    db = database.Database(server_config.get("db"))
     if migration == "":
         db.initialize_database()
     else:
