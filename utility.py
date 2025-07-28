@@ -1,3 +1,7 @@
+import platform
+import unicodedata
+import os
+
 # TODO move a few other random util functions here
 
 SIZE_UNITS = [
