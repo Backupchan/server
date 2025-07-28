@@ -63,7 +63,8 @@ class MockDatabase(database.Database):
                 return target
         return None
     
-    def list_targets(self) -> list[models.BackupTarget]:
+    # TODO pagination in mock
+    def list_targets(self, _ = None) -> list[models.BackupTarget]:
         return self.targets
     
     def delete_target(self, id: str):
