@@ -18,7 +18,7 @@ class ServerAPI:
             old_location = target.location
             old_name_template = target.name_template
             self.db.edit_target(target_id, new_name, new_recycle_criteria, new_recycle_value, new_recycle_action, new_location, new_name_template, deduplicate, alias)
-            if old_name_template != new_name_template or old_location != old_location:
+            if old_name_template != new_name_template or old_location != new_location:
                 self.fm.update_backup_locations(target, new_name_template, new_location, old_name_template, old_location)
 
     def delete_target(self, target_id: str, delete_files: bool):
