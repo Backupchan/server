@@ -44,7 +44,7 @@ root_logger.addHandler(console_handler)
 #
 
 config = serverconfig.get_server_config()
-db = database.Database(config.get("db_path"), config.get("db"))
+db = database.Database(config.get("db"))
 file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)

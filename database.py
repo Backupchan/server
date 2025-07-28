@@ -47,7 +47,7 @@ class Database:
 
     CURRENT_SCHEMA_VERSION = 8
 
-    def __init__(self, db_path: str, connection_config: dict):
+    def __init__(self, connection_config: dict):
         if connection_config == {}:
             raise DatabaseError("Database connection not configured")
 
