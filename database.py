@@ -243,7 +243,7 @@ class Database:
                     raise DatabaseError("Name template is not unique to this target")
 
             # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
-            if not is_valid_path(name_template, False):
+            if not utility.is_valid_path(name_template, False):
                 raise DatabaseError("Filename template must not contain invalid characters")
 
             # Location must not contain illegal characters. '/' is okay.
