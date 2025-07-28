@@ -110,8 +110,9 @@ class WebUI:
         @self.blueprint.route("/targets")
         @requires_auth
         def list_targets():
-            targets = self.db.list_targets()
-            return render_template("list_targets.html", targets=targets, num_targets=self.db.count_targets(), num_backups=self.db.count_backups())
+            page = int(request.args.get("page", 1))
+            targets = self.db.list_targets(page)
+            return render_template("list_targets.html", targets=targets, num_targets=self.db.count_targets(), num_backups=self.db.count_backups(), page=page)
 
         @self.blueprint.route("/target/new", methods=["GET", "POST"])
         @requires_auth

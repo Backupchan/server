@@ -34,5 +34,8 @@
 
     // Whether or not to enable authentication on webui
     // Set password by running passwd.py
-    "webui_auth": true
+    "webui_auth": true,
+
+    // How many targets to show per page in the list
+    "page_size": 10
 }

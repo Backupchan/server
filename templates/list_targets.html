@@ -20,6 +20,8 @@
             </li>
         {% endfor %}
         </ol>
+
+        <a href="{{ url_for('webui.list_targets', page=(page - 1)) }}">&lt; Previous Page</a> {{ page }} <a href="{{ url_for('webui.list_targets', page=(page + 1)) }}">Next Page &gt;</a>
     </div>
 </body>
 </html>

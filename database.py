@@ -47,12 +47,13 @@ class Database:
 
     CURRENT_SCHEMA_VERSION = 8
 
-    def __init__(self, connection_config: dict):
+    def __init__(self, connection_config: dict, page_size: int):
         if connection_config == {}:
             raise DatabaseError("Database connection not configured")
 
         self.connection = mariadb.connect(user=connection_config["user"], password=connection_config["password"], host=connection_config["host"], port=connection_config["port"], database=connection_config["database"])
         self.cursor = self.connection.cursor()
+        self.page_size = page_size
         self.lock = threading.RLock()
         self.logger = logging.getLogger(__name__)
 
@@ -115,10 +116,10 @@ class Database:
 
             self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
 
-    def list_targets(self) -> list[models.BackupTarget]:
-        # TODO add some way to do pagination
+    def list_targets(self, page: int = 1) -> list[models.BackupTarget]:
+        offset = (page - 1) * self.page_size
         with self.lock:
-            self.cursor.execute("SELECT * FROM targets")
+            self.cursor.execute("SELECT * FROM targets LIMIT ? OFFSET ?", (self.page_size, offset))
             rows = self.cursor.fetchall()
             return [models.BackupTarget(*row) for row in rows]
     
