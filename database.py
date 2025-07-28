@@ -89,12 +89,17 @@ class Database:
         alias: str | None
     ):
         with self.lock:
-            self.validate_target(name, name_template, location, id, alias)
+            target = self.get_target(id)
+            if target is None:
+                raise DatabaseError(f"Target with id or alias {id} does not exist")
+
+            target_id = target.id
+            self.validate_target(name, name_template, location, target_id, alias)
 
             self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ?, alias = ? WHERE id = ? OR alias = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, id, id))
             self.connection.commit()
 
-            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
+            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", target_id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
 
     def list_targets(self, page: int = 1) -> list[models.BackupTarget]:
         offset = (page - 1) * self.page_size
