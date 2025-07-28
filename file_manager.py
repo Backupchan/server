@@ -190,6 +190,10 @@ class FileManager:
 
                 shutil.move(old_fs_location, new_fs_location)
 
+            if os.path.isdir(old_location) and not any(os.scandir(old_location)):
+                self.logger.info("Old location directory empty, removing")
+                os.rmdir(old_location)
+
             self.logger.info("Finished moving")
 
     def recycle_backup(self, backup_id: int):
