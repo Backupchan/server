@@ -44,6 +44,9 @@ class Database:
     This class handles the communication with the database.
     It does not perform any actual file operations on backups.
     """
+
+    CURRENT_SCHEMA_VERSION = 8
+
     def __init__(self, db_path: str, connection_config: dict):
         if connection_config == {}:
             raise DatabaseError("Database connection not configured")
@@ -52,6 +55,18 @@ class Database:
         self.cursor = self.connection.cursor()
         self.lock = threading.RLock()
         self.logger = logging.getLogger(__name__)
+
+    #
+    # Schema version methods
+    #
+
+    def get_schema_version(self):
+        self.cursor.execute("SELECT version FROM schema_versions ORDER BY version DESC LIMIT 1;")
+        return self.cursor.fetchone()[0]
+
+    def validate_schema_version(self):
+        if self.get_schema_version() != Database.CURRENT_SCHEMA_VERSION:
+            raise DatabaseError("Schema version mismatch, update Backup-chan.")
 
     #
     # Target methods

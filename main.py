@@ -49,6 +49,8 @@ file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
 
+db.validate_schema_version()
+
 #
 # Initializing scheduled jobs
 #
