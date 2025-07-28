@@ -12,11 +12,11 @@ import traceback
 import uuid
 import os
 import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, abort, session
+from flask import Blueprint, render_template, request, redirect, url_for, abort, session, send_from_directory
 from werkzeug.security import check_password_hash
 
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: jobs.JobScheduler, stats: stats.Stats, config: config.Config, passwd_hash: str | None):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: jobs.JobScheduler, stats: stats.Stats, config: config.Config, passwd_hash: str | None, root_path: str):
         self.db = db
         self.fm = fm
         self.server_api = server_api
@@ -24,12 +24,14 @@ class WebUI:
         self.stats = stats
         self.config = config
         self.passwd_hash = passwd_hash
+        self.root_path = root_path
         self.logger = logging.getLogger(__name__)
 
         self.blueprint = Blueprint("webui", __name__)
         self.add_routes()
 
     def add_routes(self):
+
         #
         # Authentication
         #
@@ -61,6 +63,10 @@ class WebUI:
         @requires_auth
         def homepage():
             return redirect(url_for("webui.list_targets"))
+
+        @self.blueprint.route("/favicon.ico")
+        def favicon():
+            return send_from_directory(os.path.join(self.root_path, "static"), "favicon.ico", mimetype="vnd.microsoft.icon")
 
         @self.blueprint.route("/force-run-job/<name>")
         @requires_auth

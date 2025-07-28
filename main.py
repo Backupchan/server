@@ -89,7 +89,7 @@ if config.get("webui_enable"):
     # Initialize Web UI
     #
 
-    webui = webui.WebUI(db, file_manager, server_api, scheduler, stats, config, password_hash)
+    webui = webui.WebUI(db, file_manager, server_api, scheduler, stats, config, password_hash, app.root_path)
     app.register_blueprint(webui.blueprint)
 
 #
