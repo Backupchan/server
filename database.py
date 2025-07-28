@@ -102,6 +102,11 @@ class Database:
             self.cursor.execute("SELECT * FROM targets LIMIT ? OFFSET ?", (self.page_size, offset))
             rows = self.cursor.fetchall()
             return [models.BackupTarget(*row) for row in rows]
+
+    def list_targets_all(self) -> list[models.BackupTarget]:
+        self.cursor.execute("SELECT * FROM targets")
+        rows = self.cursor.fetchall()
+        return [models.BackupTarget(*row) for row in rows]
     
     def get_target(self, id: str) -> None | models.BackupTarget:
         """
