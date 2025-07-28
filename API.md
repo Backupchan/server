@@ -34,6 +34,8 @@ you have to pass the API key through the `API` initializer.
 
 List every target.
 
+Accepts a `page` argument for pagination: `/api/target?page=2`
+
 #### Example output
 
 ```json
@@ -49,7 +51,8 @@ List every target.
             "recycle_action": "recycle",
             "location": "/var/backups/MyBackup",
             "name_template": "backup-$I-$D",
-            "deduplicate": true
+            "deduplicate": true,
+            "alias": "mybackup"
         }
     ]
 }
@@ -70,7 +73,8 @@ Create a new target.
     "recycle_action": "recycle", // recycle or delete
     "location": "/path/to/backups",
     "name_template": "name-template-$I-$D",
-    "deduplicate": true
+    "deduplicate": true,
+    "alias": "target-alias" // or null if you don't want one
 }
 ```
 
@@ -101,7 +105,8 @@ View a target with the specified ID.
         "recycle_action": "recycle",
         "location": "/var/backups/MyBackup",
         "name_template": "backup-$I-$D",
-        "deduplicate": true
+        "deduplicate": true,
+        "alias": "mybackup"
     },
     "backups": [
         {
@@ -154,7 +159,8 @@ Edit an existing target. A target's type cannot be modified after creaton.
     "recycle_action": "recycle", // recycle or delete
     "location": "/path/to/backups",
     "name_template": "name-template-$I-$D",
-    "deduplicate": false
+    "deduplicate": false,
+    "alias": "new-alias" // or null to clear it
 }
 ```
 
