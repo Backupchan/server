@@ -1,6 +1,7 @@
 import platform
 import unicodedata
 import os
+import re
 
 # TODO move a few other random util functions here
 
