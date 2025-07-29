@@ -41,13 +41,13 @@ def extract_archive(fs_location: str, filename: str):
         return
     raise FileManagerError("Unsupported archive format")
 
-def get_fs_location(location: str, name_template: str, backup_id: str, backup_creation_str: str) -> str:
-    return os.path.join(location, nameformat.parse(name_template, backup_id, backup_creation_str))
+def get_fs_location(location: str, name_template: str, backup_id: str, backup_creation_str: str, manual: bool) -> str:
+    return os.path.join(location, nameformat.parse(name_template, backup_id, backup_creation_str, manual))
 
 def get_backup_fs_location(backup: models.Backup, target: models.BackupTarget, recycle_bin_path: str) -> str:
     if backup.is_recycled:
-        return get_fs_location(recycle_bin_path, target.name_template, backup.id, backup.created_at.isoformat())
-    return get_fs_location(target.location, target.name_template, backup.id, backup.created_at.isoformat())
+        return get_fs_location(recycle_bin_path, target.name_template, backup.id, backup.created_at.isoformat(), backup.manual)
+    return get_fs_location(target.location, target.name_template, backup.id, backup.created_at.isoformat(), backup.manual)
 
 def find_single_backup_file(base_path: str) -> str | None:
     base = Path(base_path)
@@ -147,7 +147,7 @@ class FileManager:
             fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
             if target.target_type == models.BackupType.SINGLE:
                 base_location = self.recycle_bin_path if backup.is_recycled else target.location
-                for path in Path(base_location).glob(nameformat.parse(target.name_template, backup.id, backup.created_at.isoformat())):
+                for path in Path(base_location).glob(nameformat.parse(target.name_template, backup.id, backup.created_at.isoformat(), backup.manual)):
                     path.unlink()
             else:
                 shutil.rmtree(fs_location)

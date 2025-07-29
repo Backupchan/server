@@ -58,8 +58,20 @@
             <span>Name template:</span> <input type="text" name="name_template" {% if target is not none %}value="{{ target.name_template }}"{% endif %} required><br>
             <ul>
                 <li>The name template is the template for individual backup names.</li>
-                <li>It must contain either the creation date (<span class="monospace">$D</span>) or the ID of the backup (<span class="monospace">$I</span>).</li>
-                <li>Example: <span class="monospace">backup-$I-$D</span></li>
+                <li>
+                    One of the following must be present in the name template:
+                    <ul>
+                        <li><span class="monospace">$I</span> the ID of the backup</li>
+                        <li><span class="monospace">$D</span> the date the backup was added</li>
+                    </ul>
+                </li>
+                <li>
+                    The following items are optional:
+                    <ul>
+                        <li><span class="monospace">$M</span> inserts <b class="monospace">auto</b> or <b class="monospace">manual</b> depending on whether the backup was marked as manual or not.
+                    </ul>
+                </li>
+                <li>Example: <span class="monospace">backup-$I-$D</span>, <span class="monospace">$M_backup_$D</span></li>
             </ul><p></p>
             <input type="checkbox" name="deduplicate" id="deduplicate" {% if target is not none and target.deduplicate %}checked{% endif %}>
             <label for="deduplicate">Enable backup deduplication</label><p></p>
