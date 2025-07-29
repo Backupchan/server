@@ -12,6 +12,7 @@ import traceback
 import uuid
 import os
 import datetime
+from version import PROGRAM_VERSION
 from flask import Blueprint, render_template, request, redirect, url_for, abort, session, send_from_directory
 from werkzeug.security import check_password_hash
 
@@ -91,7 +92,8 @@ class WebUI:
                                    total_recycle_bin_size_bytes=total_recycle_bin_size,
                                    total_targets=total_targets,
                                    total_backups=total_backups,
-                                   total_recycled_backups=total_recycled_backups)
+                                   total_recycled_backups=total_recycled_backups,
+                                   program_version=PROGRAM_VERSION)
 
         @self.blueprint.route("/log")
         @requires_auth

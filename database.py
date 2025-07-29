@@ -132,7 +132,6 @@ class Database:
             self.cursor.execute("SELECT SUM(filesize) FROM backups WHERE target_id = ?", (id,))
             return self.cursor.fetchone()[0] or 0
 
-
     def delete_target(self, id: str):
         with self.lock:
             self.cursor.execute("DELETE FROM targets WHERE id = ? OR alias = ?", (id, id))
