@@ -2,6 +2,7 @@ import mock_modules
 import api
 import serverapi
 import serverconfig
+import stats
 import models
 import pytest
 import logging
@@ -19,7 +20,8 @@ config = serverconfig.get_server_config(True) # loads default config
 db = mock_modules.MockDatabase()
 file_manager = mock_modules.MockFileManager(db)
 server_api = serverapi.ServerAPI(db, file_manager)
-api = api.API(db, server_api, config, file_manager)
+stats = stats.Stats(db, file_manager)
+api = api.API(db, server_api, config, file_manager, stats)
 api.key = None
 
 app.register_blueprint(api.blueprint, url_prefix="/api")
@@ -191,3 +193,20 @@ def test_auth(client):
     # With invalid token
     response = client.get("/api/target", headers={"Authorization": "Bearer efijwefoij"})
     assert response.status_code == 403
+
+    api.key = None
+
+def test_stats(client):
+    db.reset()
+
+    response = client.get("/api/stats")
+    assert response.status_code == 200
+
+    data = response.get_json()
+    assert "program_version" in data
+    assert isinstance(data["program_version"], str)
+
+    fields = ["total_target_size", "total_recycle_bin_size", "total_targets", "total_backups", "total_backups", "total_recycled_backups"]
+    for field in fields:
+        assert field in data
+        assert isinstance(data[field], int)

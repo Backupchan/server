@@ -2,6 +2,7 @@ import database
 import serverapi
 import config
 import file_manager
+import stats
 import logging
 import functools
 import json
@@ -9,6 +10,7 @@ import dataclasses
 import os
 import uuid
 import datetime
+from version import PROGRAM_VERSION
 from flask import Blueprint, jsonify, request, Response
 
 TARGET_REQUIRED_PARAMETERS = [
@@ -42,11 +44,12 @@ class API:
     """
     Refer to API.md for documentaton on the JSON API.
     """
-    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: config.Config, fm: file_manager.FileManager):
+    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: config.Config, fm: file_manager.FileManager, stats: stats.Stats):
         self.db = db
         self.server_api = server_api
         self.fm = fm
         self.config = config
+        self.stats = stats
         self.logger = logging.getLogger(__name__)
 
         self.blueprint = Blueprint("api", __name__)
@@ -289,3 +292,21 @@ class API:
                 else:
                     log_content = "".join(log_file.readlines()[-tail:])
             return jsonify(success=True, log=log_content)
+
+        @self.blueprint.route("/stats", methods=["GET"])
+        @requires_auth
+        def view_stats():
+            total_target_size = self.stats.total_target_size()
+            total_recycle_bin_size = self.stats.total_recycle_bin_size()
+            total_targets = self.db.count_targets()
+            total_backups = self.db.count_backups()
+            total_recycled_backups = self.db.count_recycled_backups()
+
+            return jsonify(success=True,
+                           program_version=PROGRAM_VERSION,
+                           total_target_size=total_target_size,
+                           total_recycle_bin_size=total_recycle_bin_size,
+                           total_targets=total_targets,
+                           total_backups=total_backups,
+                           total_recycled_backups=total_recycled_backups
+            )
