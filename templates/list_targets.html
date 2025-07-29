@@ -11,7 +11,7 @@
     {{ navbar() }}
     <div id="container">
         <h1>Targets</h1>
-        <p>There {% if num_targets == 1 %}is{% else %}are{% endif %} currently {{ num_targets }} target{% if num_targets != 1 %}s{% endif %}, storing a total of {{ num_backups }} backups. <a href="{{ url_for('webui.new_target') }}">Create a new target</a></p>
+        <p>There {% if num_targets == 1 %}is{% else %}are{% endif %} currently {% if num_targets == 0 %}no{% else %}{{ num_targets }}{% endif %} target{% if num_targets != 1 %}s{% endif %}{% if num_targets != 0 %}, storing a total of {{ num_backups }} backups{% endif %}. <a href="{{ url_for('webui.new_target') }}">Create a new target</a></p>
         <ol>
         {% for target in targets %}
             <li>
