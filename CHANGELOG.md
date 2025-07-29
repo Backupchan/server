@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 1.1.2
+
+* Fixed file manager-related errors.
+
 ## 1.1.1
 
 * Fixed `total_target_size` statistic being a string value.

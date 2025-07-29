@@ -169,13 +169,13 @@ class FileManager:
             os.makedirs(new_location, exist_ok=True)
 
             for backup in self.db.list_backups_target(target.id):
-                old_fs_location = get_fs_location(old_location, old_name_template, backup.id, backup.created_at.isoformat())
-                new_fs_location = get_fs_location(new_location, new_name_template, backup.id, backup.created_at.isoformat())
+                old_fs_location = get_fs_location(old_location, old_name_template, backup.id, backup.created_at.isoformat(), backup.manual)
+                new_fs_location = get_fs_location(new_location, new_name_template, backup.id, backup.created_at.isoformat(), backup.manual)
 
                 if backup.is_recycled:
                     # In this case, it only matters if the name template changed.
-                    old_fs_location = get_fs_location(self.recycle_bin_path, old_name_template, backup.id, backup.created_at.isoformat())
-                    new_fs_location = get_fs_location(self.recycle_bin_path, new_name_template, backup.id, backup.created_at.isoformat())
+                    old_fs_location = get_fs_location(self.recycle_bin_path, old_name_template, backup.id, backup.created_at.isoformat(), backup.manual)
+                    new_fs_location = get_fs_location(self.recycle_bin_path, new_name_template, backup.id, backup.created_at.isoformat(), backup.manual)
 
                 if old_fs_location == new_fs_location:
                     self.logger.info("Skip moving backup {%s} (same source and destination)", backup.id)
@@ -204,8 +204,8 @@ class FileManager:
             self.recycle_bin_mkdir()
 
             # Doing this manually since the backup might be marked as recycled or not. This module shouldn't care.
-            backup_location = get_fs_location(target.location, target.name_template, backup_id, backup.created_at.isoformat())
-            recycle_location = get_fs_location(self.recycle_bin_path, target.name_template, backup_id, backup.created_at.isoformat())
+            backup_location = get_fs_location(target.location, target.name_template, backup_id, backup.created_at.isoformat(), backup.manual)
+            recycle_location = get_fs_location(self.recycle_bin_path, target.name_template, backup_id, backup.created_at.isoformat(), backup.manual)
 
             if target.target_type == models.BackupType.SINGLE:
                 backup_location = find_single_backup_file(backup_location)
@@ -225,8 +225,8 @@ class FileManager:
 
             self.logger.info("Unrecycle backup {%s}", backup_id)
 
-            backup_location = get_fs_location(self.recycle_bin_path, target.name_template, backup_id, backup.created_at.isoformat())
-            original_location = get_fs_location(target.location, target.name_template, backup_id, backup.created_at.isoformat())
+            backup_location = get_fs_location(self.recycle_bin_path, target.name_template, backup_id, backup.created_at.isoformat(), backup.manual)
+            original_location = get_fs_location(target.location, target.name_template, backup_id, backup.created_at.isoformat(), backup.manual)
 
             if target.target_type == models.BackupType.SINGLE:
                 backup_location = find_single_backup_file(backup_location)
