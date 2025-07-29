@@ -139,6 +139,36 @@ class API:
             self.server_api.edit_target(id, data["name"], data["recycle_criteria"], data["recycle_value"], data["recycle_action"], data["location"], data["name_template"], data["deduplicate"], data["alias"])
             return jsonify(success=True), 200
 
+        @self.blueprint.route("/target/<id>", methods=["DELETE"])
+        @requires_auth
+        def delete_target(id):
+            data = request.get_json()
+            verify_result = verify_data_present(data, ["delete_files"])
+            if verify_result is not None:
+                return verify_result
+
+            self.server_api.delete_target(id, data["delete_files"])
+            return jsonify(success=True), 200
+
+        @self.blueprint.route("/target/<id>/all", methods=["DELETE"])
+        @requires_auth
+        def delete_target_backups(id):
+            target = self.db.get_target(id)
+            if target is None:
+                return jsonify(success=False), 404
+
+            data = request.get_json()
+            verify_result = verify_data_present(data, ["delete_files"])
+            if verify_result is not None:
+                return verify_result
+
+            self.server_api.delete_target_backups(id, data["delete_files"])
+            return jsonify(success=True), 200
+
+        #
+        # Backup endpoints
+        #
+
         @self.blueprint.route("/target/<id>/upload", methods=["POST"])
         @requires_auth
         def upload_backup(id):
@@ -190,31 +220,6 @@ class API:
             
             return jsonify(success=True, id=backup_id), 200
 
-        @self.blueprint.route("/target/<id>", methods=["DELETE"])
-        @requires_auth
-        def delete_target(id):
-            data = request.get_json()
-            verify_result = verify_data_present(data, ["delete_files"])
-            if verify_result is not None:
-                return verify_result
-
-            self.server_api.delete_target(id, data["delete_files"])
-            return jsonify(success=True), 200
-
-        @self.blueprint.route("/target/<id>/all", methods=["DELETE"])
-        @requires_auth
-        def delete_target_backups(id):
-            target = self.db.get_target(id)
-            if target is None:
-                return jsonify(success=False), 404
-
-            data = request.get_json()
-            verify_result = verify_data_present(data, ["delete_files"])
-            if verify_result is not None:
-                return verify_result
-
-            self.server_api.delete_target_backups(id, data["delete_files"])
-            return jsonify(success=True), 200
 
         @self.blueprint.route("/backup/<id>", methods=["DELETE"])
         @requires_auth
@@ -248,6 +253,10 @@ class API:
             else:
                 self.server_api.unrecycle_backup(id)
             return jsonify(success=True), 200
+
+        #
+        # Miscellaneous endpoints
+        #
 
         @self.blueprint.route("/recycle_bin", methods=["GET"])
         @requires_auth
