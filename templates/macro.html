@@ -58,6 +58,7 @@
     Created at: <b>{{ backup.pretty_created_at() }}</b><br>
     Size: <b>{{ backup.pretty_filesize() }}</b><br>
     Uploaded <b>{% if backup.manual %}manually{% else %}automatically{% endif %}</b><br>
+    <a href="{{ url_for('webui.download_backup', id=backup.id) }}">Download</a> |
     <a href="{{ url_for('webui.delete_backup', id=backup.id) }}">Delete</a> |
     {% if backup.is_recycled %}
     <a href="{{ url_for('webui.unrecycle_backup', id=backup.id) }}">Restore</a>

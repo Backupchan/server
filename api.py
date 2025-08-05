@@ -1,5 +1,6 @@
 import database
 import serverapi
+import download
 import configtony
 import file_manager
 import stats
@@ -223,6 +224,18 @@ class API:
             
             return jsonify(success=True, id=backup_id), 200
 
+        @self.blueprint.route("/backup/<id>/download", methods=["GET"])
+        @requires_auth
+        def download_backup(id):
+            backup = self.db.get_backup(id)
+            if backup is None:
+                return jsonify(success=False), 404
+
+            target = self.db.get_target(backup.target_id)
+            if target is None:
+                return jsonify(success=False), 404
+
+            return send_file(download.get_download_path(backup, target, self.fm.recycle_bin_path, self.config.get("temp_save_path"), self.fm), as_attachment=True)
 
         @self.blueprint.route("/backup/<id>", methods=["DELETE"])
         @requires_auth

@@ -3,6 +3,7 @@ import file_manager
 import serverapi
 import jobs
 import stats
+import download
 import configtony
 import functools
 import logging
@@ -13,8 +14,10 @@ import os
 import datetime
 from version import PROGRAM_VERSION
 from backupchan_server import utility
-from flask import Blueprint, render_template, request, redirect, url_for, abort, session, send_from_directory
+from backupchan_server import BackupType
+from flask import Blueprint, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 
 class WebUI:
     def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: jobs.JobScheduler, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
@@ -196,6 +199,18 @@ class WebUI:
         #
         # Backup endpoints
         #
+
+        @self.blueprint.route("/backup/<id>/download", methods=["GET"])
+        @requires_auth
+        def download_backup(id):
+            backup = self.db.get_backup(id)
+            if backup is None:
+                abort(404)
+            target = self.db.get_target(backup.target_id)
+            if target is None:
+                abort(404) # shouldn't happen but ok
+
+            return send_file(download.get_download_path(backup, target, self.fm.recycle_bin_path, self.config.get("temp_save_path"), self.fm), as_attachment=True)
 
         @self.blueprint.route("/backup/<id>/delete", methods=["GET", "POST"])
         @requires_auth

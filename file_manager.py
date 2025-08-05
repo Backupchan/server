@@ -253,6 +253,25 @@ class FileManager:
                 return file_hash(backup_location)
             return directory_hash(backup_location)
 
+    def create_backup_archive(self, backup_id: str, output_file: str):
+        """
+        Only works with multi-file targets
+        """
+        with self.lock:
+            backup, target = self.get_backup_and_target(backup_id)
+            
+            if target.target_type != models.BackupType.MULTI:
+                raise FileManagerError("Cannot create archive from single-file backup")
+
+            self.logger.info("Create archive of backup {%s} as '%s'", backup.id, output_file)
+
+            fs_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
+            with tarfile.open(output_file, "w:xz") as tar_file:
+                basename = os.path.basename(fs_location)
+                tar_file.add(fs_location, arcname=basename)
+
+            self.logger.info("Finished creating archive")
+
     def recycle_bin_mkdir(self):
         with self.lock:
             os.makedirs(self.recycle_bin_path, exist_ok=True)
