@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 1.2.1
+
+* Fixed API backup downloads not working.
+
 ## 1.2.0
 
 * Added ability to download backups.

@@ -12,7 +12,7 @@ import os
 import uuid
 import datetime
 from version import PROGRAM_VERSION
-from flask import Blueprint, jsonify, request, Response
+from flask import Blueprint, jsonify, request, Response, send_file
 
 TARGET_REQUIRED_PARAMETERS = [
     "name", "backup_type", "recycle_criteria", "recycle_value", "recycle_action", "location", "name_template"
