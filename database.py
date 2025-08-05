@@ -210,7 +210,7 @@ class Database:
             if target is None:
                 raise DatabaseError(f"Target with id or alias '{target_id}' does not exist")
 
-            self.cursor.execute("SELECT * FROM backups WHERE target_id = ? OR alias = ?", (target.id, target_id))
+            self.cursor.execute("SELECT * FROM backups WHERE target_id = ?", (target.id))
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
