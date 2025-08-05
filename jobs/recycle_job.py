@@ -2,9 +2,9 @@ import jobs
 import serverapi
 import database
 import logging
-import models
 import datetime
 import threading
+from backupchan_server import models
 
 class RecycleJob(jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, server_api: serverapi.ServerAPI):

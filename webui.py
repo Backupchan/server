@@ -4,7 +4,6 @@ import serverapi
 import jobs
 import stats
 import configtony
-import utility
 import functools
 import logging
 import sys
@@ -13,6 +12,7 @@ import uuid
 import os
 import datetime
 from version import PROGRAM_VERSION
+from backupchan_server import utility
 from flask import Blueprint, render_template, request, redirect, url_for, abort, session, send_from_directory
 from werkzeug.security import check_password_hash
 

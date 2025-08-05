@@ -3,11 +3,8 @@ Module for accessing the database in an easy way.
 """
 
 import mariadb
-import models
 import uuid
 import logging
-import nameformat
-import utility
 import platform
 import re
 import unicodedata
@@ -15,6 +12,9 @@ import threading
 import os
 from datetime import datetime
 from pathlib import Path
+from backupchan_server import models
+from backupchan_server import nameformat
+from backupchan_server import utility
 
 class DatabaseError(Exception):
     pass

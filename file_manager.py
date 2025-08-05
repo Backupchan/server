@@ -1,7 +1,4 @@
 import database
-import nameformat
-import models
-import os
 import logging
 import shutil
 import zipfile
@@ -9,6 +6,8 @@ import tarfile
 import threading
 import hashlib
 from pathlib import Path
+from backupchan_server import models
+from backupchan_server import nameformat
 
 class FileManagerError(Exception):
     pass
