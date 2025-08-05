@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 1.1.5
+
+* Refactored to use external libraries for models and configuration.
+
 ## 1.1.4
 
 * Fixed listing backups not working with aliases.
