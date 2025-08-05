@@ -1,5 +1,6 @@
 import database
 import logging
+import os
 import shutil
 import zipfile
 import tarfile
