@@ -2,6 +2,14 @@
 
 See what's changed between versions!
 
+## 1.1.4
+
+* Fixed listing backups not working with aliases.
+
+## 1.1.3
+
+* Fixed backups bigger than 2,147,483,647 bytes not working.
+
 ## 1.1.2
 
 * Fixed file manager-related errors.

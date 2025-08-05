@@ -206,7 +206,11 @@ class Database:
 
     def list_backups_target(self, target_id: str) -> list[models.Backup]:
         with self.lock:
-            self.cursor.execute("SELECT * FROM backups WHERE target_id = ?", (target_id,))
+            target = self.get_target(target_id)
+            if target is None:
+                raise DatabaseError(f"Target with id or alias '{target_id}' does not exist")
+
+            self.cursor.execute("SELECT * FROM backups WHERE target_id = ? OR alias = ?", (target.id, target_id))
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
@@ -218,7 +222,11 @@ class Database:
 
     def list_backups_target_is_recycled(self, target_id: str, is_recycled: bool) -> list[models.Backup]:
         with self.lock:
-            self.cursor.execute("SELECT * FROM backups WHERE target_id = ? AND is_recycled = ?", (target_id, is_recycled))
+            target = self.get_target(target_id)
+            if target is None:
+                raise DatabaseError(f"Target with id or alias '{target_id}' does not exist")
+
+            self.cursor.execute("SELECT * FROM backups WHERE (target_id = ?) AND is_recycled = ?", (target.id, is_recycled))
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
