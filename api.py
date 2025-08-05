@@ -1,6 +1,6 @@
 import database
 import serverapi
-import config
+import configtony
 import file_manager
 import stats
 import logging
@@ -44,7 +44,7 @@ class API:
     """
     Refer to API.md for documentaton on the JSON API.
     """
-    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: config.Config, fm: file_manager.FileManager, stats: stats.Stats):
+    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats):
         self.db = db
         self.server_api = server_api
         self.fm = fm

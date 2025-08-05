@@ -3,7 +3,7 @@ import file_manager
 import serverapi
 import jobs
 import stats
-import config
+import configtony
 import utility
 import functools
 import logging
@@ -17,7 +17,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from werkzeug.security import check_password_hash
 
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: jobs.JobScheduler, stats: stats.Stats, config: config.Config, passwd_hash: str | None, root_path: str):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: jobs.JobScheduler, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
         self.db = db
         self.fm = fm
         self.server_api = server_api

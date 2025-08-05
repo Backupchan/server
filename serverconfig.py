@@ -2,10 +2,10 @@
 Creates a configuration interface specific for the server.
 """
 
-import config
+import configtony
 
 def get_server_config(defaults_only=False):
-    server_config = config.Config(None if defaults_only else "./config.jsonc")
+    server_config = configtony.Config(None if defaults_only else "./config.jsonc")
     server_config.add_option("db_path", str, "./backupchan.db") # Unused
     server_config.add_option("webui_enable", bool, True)
     server_config.add_option("web_debug", bool, False)
