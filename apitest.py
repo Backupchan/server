@@ -3,13 +3,13 @@ import api
 import serverapi
 import serverconfig
 import stats
-import models
 import pytest
 import logging
 import io
 import datetime
 import random
 import string
+from backupchan_server import models
 from flask import Flask
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")

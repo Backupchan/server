@@ -5,12 +5,12 @@ The Web UI isn't tested in this way because: browser
 They're all in one files since they're small and don't do anything meaningful.
 """
 
-import models
 import database
 import file_manager
 import uuid
 import logging
 import threading
+from backupchan_server import models
 from datetime import datetime
 
 class MockDatabase(database.Database):
