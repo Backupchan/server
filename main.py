@@ -8,6 +8,7 @@ import stats
 import webui
 import api
 import scheduled_jobs
+import delayed_jobs
 import logging
 import logging.handlers
 import json
@@ -60,6 +61,12 @@ scheduler.add_job(scheduled_jobs.RecycleJob(config.get("recycle_job_interval"), 
 scheduler.add_job(scheduled_jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
 scheduler.add_job(scheduled_jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
 scheduler.start()
+
+#
+# Initializing delayed jobs
+#
+
+manager = delayed_jobs.JobManager()
 
 #
 # Retreive password hash if auth is enabled
