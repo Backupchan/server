@@ -7,7 +7,7 @@ import serverconfig
 import stats
 import webui
 import api
-import jobs
+import scheduled_jobs
 import logging
 import logging.handlers
 import json
@@ -55,10 +55,10 @@ db.validate_schema_version()
 # Initializing scheduled jobs
 #
 
-scheduler = jobs.JobScheduler()
-scheduler.add_job(jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
-scheduler.add_job(jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
-scheduler.add_job(jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
+scheduler = scheduled_jobs.JobScheduler()
+scheduler.add_job(scheduled_jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
+scheduler.add_job(scheduled_jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
+scheduler.add_job(scheduled_jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
 scheduler.start()
 
 #
