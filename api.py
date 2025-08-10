@@ -190,7 +190,7 @@ class API:
             is_manual = data["manual"]
 
             try:
-                self.server_api.upload_backup(target.id, is_manual, self.config.get("temp_save_path"), request.files["backup_file"])
+                backup_id = self.server_api.upload_backup(target.id, is_manual, self.config.get("temp_save_path"), request.files["backup_file"])
             except Exception as exc:
                 self.logger.error("Encountered error while uploading backup", exc_info=exc)
                 return jsonify()
