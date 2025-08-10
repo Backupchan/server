@@ -189,39 +189,12 @@ class API:
 
             is_manual = data["manual"]
 
-            # TODO this is copied from webui.py; consider moving into filemanager or something
-            #      see WebUI.move_uploaded_backup, WebUI.handle_post_upload_backup
-
-            # Move file to a temporary location
-            uploaded_file = request.files["backup_file"]
-            temp_path = f"{self.config.get('temp_save_path')}/{uuid.uuid4().hex}_{uploaded_file.filename}"
             try:
-                os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+                self.server_api.upload_backup(target.id, is_manual, self.config.get("temp_save_path"), request.files["backup_file"])
             except Exception as exc:
-                self.logger.error("Failed to create file temp path", exc_info=exc)
-                return failure_response("Failed to create file temp path"), 500
+                self.logger.error("Encountered error while uploading backup", exc_info=exc)
+                return jsonify()
 
-            uploaded_file.save(temp_path)
-
-            backup_id = None
-
-            # Create backup in the database
-            try:
-                backup_id = self.db.add_backup(id, is_manual)
-            except Exception as exc:
-                self.logger.error("Failed to add backup to database", exc_info=exc)
-                return failure_response("Failed to add backup to database"), 500
-
-            # Move backup from temp location to real location
-            try:
-                self.fm.add_backup(backup_id, temp_path)
-            except Exception as exc:
-                self.db.delete_backup(backup_id)
-                self.logger.error("Failed to add backup file", exc_info=exc) # TODO log exceptions like this everywhere
-                return failure_response("Failed to add backup file"), 500
-
-            self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
-            
             return jsonify(success=True, id=backup_id), 200
 
         @self.blueprint.route("/backup/<id>/download", methods=["GET"])

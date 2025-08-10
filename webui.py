@@ -291,36 +291,13 @@ class WebUI:
         self.post_log("delete target")
         self.server_api.delete_target(target_id, bool(request.form.get("delete_files")))
 
-    def move_uploaded_backup(self) -> str:
-        uploaded_file = request.files["backup_file"]
-        temp_path = f"{self.config.get('temp_save_path')}/{uuid.uuid4().hex}_{uploaded_file.filename}"
-        os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
-        uploaded_file.save(temp_path)
-        return temp_path
-
     def handle_post_upload_backup(self, target_id: str) -> str | None:
-        # TODO not sure if this can be extracted to server api as well
         self.post_log("upload backup")
-        backup_id = ""
         try:
-            backup_id = self.db.add_backup(target_id, True) # Always manual via the browser
-            backup_filename = self.move_uploaded_backup()
-            self.logger.info(f"Uploaded file saved as {backup_filename}")
+            self.server_api.upload_backup(target_id, True, self.config.get("temp_save_path"), request.files["backup_file"])
         except Exception as exc:
-            self.db.delete_backup(backup_id)
             print(traceback.format_exc(), file=sys.stderr)
             return str(exc)
-
-        try:
-            self.fm.add_backup(backup_id, backup_filename)
-        except Exception as exc:
-            # if this fails we delete the freaking backup
-            self.db.delete_backup(backup_id)
-            print(traceback.format_exc(), file=sys.stderr)
-            return str(exc)
-
-        self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
-
         return None
 
     def handle_post_delete_backup(self, backup_id: str):
