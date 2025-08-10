@@ -35,18 +35,11 @@ class ServerAPI:
             for backup in self.db.list_backups_target(target_id):
                 self.delete_backup(backup.id, delete_files)
 
-    def upload_backup(self, target_id: str, manual: bool, temp_save_path: str, file: FileStorage) -> str:
-        try:
-            backup_id = self.db.add_backup(target_id, manual)
-            backup_filename = os.path.join(temp_save_path, f"{uuid.uuid4().hex}_{file.filename}")
-            os.makedirs(temp_save_path, exist_ok=True)
-            file.save(backup_filename)
-        except Exception as exc:
-            self.db.delete_backup(backup_id)
-            raise
+    def upload_backup(self, target_id: str, manual: bool, filename: str) -> str:
+        backup_id = self.db.add_backup(target_id, manual)
 
         try:
-            self.fm.add_backup(backup_id, backup_filename)
+            self.fm.add_backup(backup_id, filename)
         except Exception as exc:
             self.db.delete_backup(backup_id)
             raise

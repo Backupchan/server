@@ -96,14 +96,14 @@ if config.get("webui_enable"):
     # Initialize Web UI
     #
 
-    webui = webui.WebUI(db, file_manager, server_api, scheduler, stats, config, password_hash, app.root_path)
+    webui = webui.WebUI(db, file_manager, server_api, scheduler, manager, stats, config, password_hash, app.root_path)
     app.register_blueprint(webui.blueprint)
 
 #
 # Initialize the API
 #
 
-api = api.API(db, server_api, config, file_manager, stats)
+api = api.API(db, server_api, config, file_manager, stats, manager)
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
 if __name__ == "__main__":

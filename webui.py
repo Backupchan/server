@@ -2,6 +2,7 @@ import database
 import file_manager
 import serverapi
 import scheduled_jobs
+import delayed_jobs
 import stats
 import download
 import configtony
@@ -20,11 +21,12 @@ from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: scheduled_jobs.JobScheduler, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: scheduled_jobs.JobScheduler, job_manager: delayed_jobs.JobManager, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
         self.db = db
         self.fm = fm
         self.server_api = server_api
         self.job_scheduler = job_scheduler
+        self.job_manager = job_manager
         self.stats = stats
         self.config = config
         self.passwd_hash = passwd_hash
@@ -293,8 +295,15 @@ class WebUI:
 
     def handle_post_upload_backup(self, target_id: str) -> str | None:
         self.post_log("upload backup")
+
+        # Saving the file is done separately as it gets closed after the request, but the job runs after it.
+        file = request.files["backup_file"]
+        filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+        os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+        file.save(filename)
+
         try:
-            self.server_api.upload_backup(target_id, True, self.config.get("temp_save_path"), request.files["backup_file"])
+            self.job_manager.run_job(delayed_jobs.UploadJob(target_id, True, filename, self.server_api))
         except Exception as exc:
             print(traceback.format_exc(), file=sys.stderr)
             return str(exc)

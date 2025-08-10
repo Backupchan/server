@@ -4,6 +4,7 @@ import download
 import configtony
 import file_manager
 import stats
+import delayed_jobs
 import logging
 import functools
 import json
@@ -45,12 +46,13 @@ class API:
     """
     Refer to API.md for documentaton on the JSON API.
     """
-    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats):
+    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats, job_manager: delayed_jobs.JobManager):
         self.db = db
         self.server_api = server_api
         self.fm = fm
         self.config = config
         self.stats = stats
+        self.job_manager = job_manager
         self.logger = logging.getLogger(__name__)
 
         self.blueprint = Blueprint("api", __name__)
@@ -189,13 +191,18 @@ class API:
 
             is_manual = data["manual"]
 
+            file = request.files["backup_file"]
+            filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+            os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+            file.save(filename)
+
             try:
-                backup_id = self.server_api.upload_backup(target.id, is_manual, self.config.get("temp_save_path"), request.files["backup_file"])
+                job_id = self.job_manager.run_job(delayed_jobs.UploadJob(target.id, is_manual, filename, self.server_api))
             except Exception as exc:
                 self.logger.error("Encountered error while uploading backup", exc_info=exc)
                 return jsonify()
 
-            return jsonify(success=True, id=backup_id), 200
+            return jsonify(success=True, job_id=job_id), 200
 
         @self.blueprint.route("/backup/<id>/download", methods=["GET"])
         @requires_auth
