@@ -302,3 +302,31 @@ as well.
     "success": true
 }
 ```
+
+### GET `/api/jobs`
+
+List all scheduled and delayed jobs.
+
+#### Example output
+
+```json
+{
+    "success": true,
+    "delayed": [
+        {
+            "id": 1,
+            "name": "upload_job",
+            "status": "FINISHED", // see delayed_jobs/manager.py for a list of statuses
+            "start_time": "Mon, 11 Aug 2025 17:33:29 GMT",
+            "end_time": "Mon, 11 Aug 2025 17:33:31 GMT"
+        }
+    ],
+    "scheduled": [
+        {
+            "name": "recycle_job",
+            "interval": 1800,
+            "next_run": 1754915748.9602332 // unix timestamp
+        }
+    ]
+}
+```

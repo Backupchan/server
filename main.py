@@ -103,7 +103,7 @@ if config.get("webui_enable"):
 # Initialize the API
 #
 
-api = api.API(db, server_api, config, file_manager, stats, manager)
+api = api.API(db, server_api, config, file_manager, stats, manager, scheduler)
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
 if __name__ == "__main__":

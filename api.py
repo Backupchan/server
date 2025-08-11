@@ -5,6 +5,7 @@ import configtony
 import file_manager
 import stats
 import delayed_jobs
+import scheduled_jobs
 import logging
 import functools
 import json
@@ -46,13 +47,14 @@ class API:
     """
     Refer to API.md for documentaton on the JSON API.
     """
-    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats, job_manager: delayed_jobs.JobManager):
+    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats, job_manager: delayed_jobs.JobManager, job_scheduler: scheduled_jobs.JobScheduler):
         self.db = db
         self.server_api = server_api
         self.fm = fm
         self.config = config
         self.stats = stats
         self.job_manager = job_manager
+        self.job_scheduler = job_scheduler
         self.logger = logging.getLogger(__name__)
 
         self.blueprint = Blueprint("api", __name__)
@@ -303,3 +305,27 @@ class API:
                            total_backups=total_backups,
                            total_recycled_backups=total_recycled_backups
             )
+
+        @self.blueprint.route("/jobs", methods=["GET"])
+        @requires_auth
+        def list_jobs():
+            scheduled_json = []
+            delayed_json = []
+
+            for job in self.job_scheduler.jobs:
+                scheduled_json.append({
+                    "name": job.name,
+                    "interval": job.interval,
+                    "next_run": job.next_run
+                })
+
+            for id, job in self.job_manager.jobs.items():
+                delayed_json.append({
+                    "id": id,
+                    "name": job.name,
+                    "status": job.state.name,
+                    "start_time": job.start_time,
+                    "end_time": job.end_time
+                })
+
+            return jsonify(success=True, scheduled=scheduled_json, delayed=delayed_json), 200
