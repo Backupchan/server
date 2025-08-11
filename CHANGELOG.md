@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.0.1
+
+* Fixed API uploads not returning a response when error.
+
 ## 2.0.0
 
 * **Breaking change**: API endpoint for uploads now returns a job ID instead of backup ID.

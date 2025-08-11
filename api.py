@@ -202,7 +202,7 @@ class API:
                 job_id = self.job_manager.run_job(delayed_jobs.UploadJob(target.id, is_manual, filename, self.server_api))
             except Exception as exc:
                 self.logger.error("Encountered error while uploading backup", exc_info=exc)
-                return jsonify()
+                return jsonify(success=False), 500
 
             return jsonify(success=True, job_id=job_id), 200
 
