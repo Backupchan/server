@@ -116,6 +116,11 @@ class WebUI:
                     log_content = "".join(log_file.readlines()[-tail:])
             return render_template("log.html", content=log_content, tail=tail)
 
+        @self.blueprint.route("/jobs")
+        @requires_auth
+        def list_jobs():
+            return render_template("list_jobs.html", scheduled_jobs=self.job_scheduler.jobs, delayed_jobs=self.job_manager.jobs)
+
         #
         # Target endpoints
         #

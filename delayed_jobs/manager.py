@@ -33,6 +33,19 @@ class DelayedJob:
     def run(self):
         raise NotImplementedError()
 
+    def pretty_start_time(self):
+        if self.start_time == 0:
+            return "not started yet"
+        return self.start_time.strftime("%b %d, %Y at %I:%M:%S %p")
+
+    def pretty_end_time(self):
+        if self.start_time == 0:
+            return "not started yet"
+        if self.end_time == 0:
+            return "still running"
+        return self.end_time.strftime("%b %d, %Y at %I:%M:%S %p")
+
+
 class JobManager:
     def __init__(self):
         self.logger = logging.getLogger(__name__)

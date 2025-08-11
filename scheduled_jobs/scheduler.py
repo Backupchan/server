@@ -1,6 +1,7 @@
 import time
 import logging
 import threading
+import datetime
 
 class ScheduledJob:
     def __init__(self, interval: int, name: str):
@@ -18,6 +19,9 @@ class ScheduledJob:
     def force_run(self):
         self.force_flag = True
         self.logger.info("Force re-run")
+
+    def pretty_next_run(self) -> str:
+        return datetime.datetime.fromtimestamp(self.next_run).strftime("%b %d, %Y at %I:%M:%S %p")
 
 class JobScheduler:
     def __init__(self):
