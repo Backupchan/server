@@ -2,6 +2,11 @@
 
 See what's changed between versions!
 
+## 2.0.0
+
+* **Breaking change**: API endpoint for uploads now returns a job ID instead of backup ID.
+* Added delayed job system for one-time tasks to run in the background
+
 ## 1.2.1
 
 * Fixed API backup downloads not working.
