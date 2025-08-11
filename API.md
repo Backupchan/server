@@ -127,7 +127,7 @@ View a target with the specified ID.
 
 Upload a new backup.
 
-This endpoint uses the Content-Type `multipart/form-data`.
+This endpoint uses the Content-Type `multipart/form-data` for the payload.
 
 #### Example payload
 
@@ -141,7 +141,7 @@ manual: true/false, whether the upload was manual or not.
 ```json
 {
     "success": true,
-    "id": "00000000-0000-0000-0000-000000000000"
+    "job_id": 2
 }
 ```
 
