@@ -1,4 +1,4 @@
-{% from "macro.html" import target_print, navbar %}
+{% from "macro.html" import navbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,14 +12,66 @@
     <div id="container">
         <h1>Targets</h1>
         <p>There {% if num_targets == 1 %}is{% else %}are{% endif %} currently {% if num_targets == 0 %}no{% else %}{{ num_targets }}{% endif %} target{% if num_targets != 1 %}s{% endif %}{% if num_targets != 0 %}, storing a total of {{ num_backups }} backups{% endif %}. <a href="{{ url_for('webui.new_target') }}">Create a new target</a></p>
-        <ol>
-        {% for target in targets %}
-            <li>
-                {{ target_print(target) }}
-                <ul><li><a href="{{ url_for('webui.view_target', id=target.id) }}">View target</a></li></ul>
-            </li>
-        {% endfor %}
-        </ol>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>ID</th>
+                    <th>Alias</th>
+                    <th>Recycle criteria</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Name template</th>
+                    <th>Deduplication</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for target in targets %}
+                <tr>
+                    <td><a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a></td>
+                    <td>{{ target.id }}</td>
+                    <td>{{ target.alias }}</td>
+                    <td>
+                    {% if target.recycle_criteria == "none" %}
+                        None
+                    {% else %}
+                        {% if target.recycle_action == "delete" %}
+                            Delete
+                        {% elif target.recycle_action == "recycle" %}
+                            Recycle
+                        {% else %}
+                            (broken value)
+                        {% endif %}
+                        after {{ target.recycle_value }}
+                        {% if target.recycle_criteria == "count" %}
+                            copies
+                        {% elif target.recycle_criteria == "age" %}
+                            days
+                        {% else %}
+                            (broken value)
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                    <td>
+                    {% if target.target_type == "single" %}
+                        Single file
+                    {% elif target.target_type == "multi" %}
+                        Multiple files
+                    {% endif %}
+                    </td>
+                    <td>{{ target.location }}</td>
+                    <td>{{ target.name_template }}</td>
+                    <td>
+                    {% if target.deduplicate %}
+                        on
+                    {% else %}
+                        off
+                    {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
         <a href="{{ url_for('webui.list_targets', page=(page - 1)) }}">&lt; Previous Page</a> {{ page }} <a href="{{ url_for('webui.list_targets', page=(page + 1)) }}">Next Page &gt;</a>
     </div>
