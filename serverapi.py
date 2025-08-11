@@ -2,6 +2,9 @@ import database
 import file_manager
 import datetime
 import threading
+import os
+import uuid
+from werkzeug.datastructures import FileStorage
 
 class ServerAPI:
     """
@@ -31,6 +34,18 @@ class ServerAPI:
         with self.lock:
             for backup in self.db.list_backups_target(target_id):
                 self.delete_backup(backup.id, delete_files)
+
+    def upload_backup(self, target_id: str, manual: bool, filename: str) -> str:
+        backup_id = self.db.add_backup(target_id, manual)
+
+        try:
+            self.fm.add_backup(backup_id, filename)
+        except Exception as exc:
+            self.db.delete_backup(backup_id)
+            raise
+
+        self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
+        return backup_id
 
     def delete_backup(self, backup_id: str, delete_files: bool):
         with self.lock:

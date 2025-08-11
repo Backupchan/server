@@ -1,7 +1,8 @@
 import database
 import file_manager
 import serverapi
-import jobs
+import scheduled_jobs
+import delayed_jobs
 import stats
 import download
 import configtony
@@ -20,11 +21,12 @@ from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: jobs.JobScheduler, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: scheduled_jobs.JobScheduler, job_manager: delayed_jobs.JobManager, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
         self.db = db
         self.fm = fm
         self.server_api = server_api
         self.job_scheduler = job_scheduler
+        self.job_manager = job_manager
         self.stats = stats
         self.config = config
         self.passwd_hash = passwd_hash
@@ -113,6 +115,11 @@ class WebUI:
                 else:
                     log_content = "".join(log_file.readlines()[-tail:])
             return render_template("log.html", content=log_content, tail=tail)
+
+        @self.blueprint.route("/jobs")
+        @requires_auth
+        def list_jobs():
+            return render_template("list_jobs.html", scheduled_jobs=self.job_scheduler.jobs, delayed_jobs=self.job_manager.jobs)
 
         #
         # Target endpoints
@@ -291,36 +298,20 @@ class WebUI:
         self.post_log("delete target")
         self.server_api.delete_target(target_id, bool(request.form.get("delete_files")))
 
-    def move_uploaded_backup(self) -> str:
-        uploaded_file = request.files["backup_file"]
-        temp_path = f"{self.config.get('temp_save_path')}/{uuid.uuid4().hex}_{uploaded_file.filename}"
-        os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
-        uploaded_file.save(temp_path)
-        return temp_path
-
     def handle_post_upload_backup(self, target_id: str) -> str | None:
-        # TODO not sure if this can be extracted to server api as well
         self.post_log("upload backup")
-        backup_id = ""
-        try:
-            backup_id = self.db.add_backup(target_id, True) # Always manual via the browser
-            backup_filename = self.move_uploaded_backup()
-            self.logger.info(f"Uploaded file saved as {backup_filename}")
-        except Exception as exc:
-            self.db.delete_backup(backup_id)
-            print(traceback.format_exc(), file=sys.stderr)
-            return str(exc)
+
+        # Saving the file is done separately as it gets closed after the request, but the job runs after it.
+        file = request.files["backup_file"]
+        filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+        os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+        file.save(filename)
 
         try:
-            self.fm.add_backup(backup_id, backup_filename)
+            self.job_manager.run_job(delayed_jobs.UploadJob(target_id, True, filename, self.server_api))
         except Exception as exc:
-            # if this fails we delete the freaking backup
-            self.db.delete_backup(backup_id)
             print(traceback.format_exc(), file=sys.stderr)
             return str(exc)
-
-        self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
-
         return None
 
     def handle_post_delete_backup(self, backup_id: str):

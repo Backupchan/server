@@ -4,6 +4,8 @@ import download
 import configtony
 import file_manager
 import stats
+import delayed_jobs
+import scheduled_jobs
 import logging
 import functools
 import json
@@ -45,12 +47,14 @@ class API:
     """
     Refer to API.md for documentaton on the JSON API.
     """
-    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats):
+    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats, job_manager: delayed_jobs.JobManager, job_scheduler: scheduled_jobs.JobScheduler):
         self.db = db
         self.server_api = server_api
         self.fm = fm
         self.config = config
         self.stats = stats
+        self.job_manager = job_manager
+        self.job_scheduler = job_scheduler
         self.logger = logging.getLogger(__name__)
 
         self.blueprint = Blueprint("api", __name__)
@@ -189,40 +193,18 @@ class API:
 
             is_manual = data["manual"]
 
-            # TODO this is copied from webui.py; consider moving into filemanager or something
-            #      see WebUI.move_uploaded_backup, WebUI.handle_post_upload_backup
+            file = request.files["backup_file"]
+            filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+            os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+            file.save(filename)
 
-            # Move file to a temporary location
-            uploaded_file = request.files["backup_file"]
-            temp_path = f"{self.config.get('temp_save_path')}/{uuid.uuid4().hex}_{uploaded_file.filename}"
             try:
-                os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+                job_id = self.job_manager.run_job(delayed_jobs.UploadJob(target.id, is_manual, filename, self.server_api))
             except Exception as exc:
-                self.logger.error("Failed to create file temp path", exc_info=exc)
-                return failure_response("Failed to create file temp path"), 500
+                self.logger.error("Encountered error while uploading backup", exc_info=exc)
+                return jsonify(success=False), 500
 
-            uploaded_file.save(temp_path)
-
-            backup_id = None
-
-            # Create backup in the database
-            try:
-                backup_id = self.db.add_backup(id, is_manual)
-            except Exception as exc:
-                self.logger.error("Failed to add backup to database", exc_info=exc)
-                return failure_response("Failed to add backup to database"), 500
-
-            # Move backup from temp location to real location
-            try:
-                self.fm.add_backup(backup_id, temp_path)
-            except Exception as exc:
-                self.db.delete_backup(backup_id)
-                self.logger.error("Failed to add backup file", exc_info=exc) # TODO log exceptions like this everywhere
-                return failure_response("Failed to add backup file"), 500
-
-            self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
-            
-            return jsonify(success=True, id=backup_id), 200
+            return jsonify(success=True, job_id=job_id), 200
 
         @self.blueprint.route("/backup/<id>/download", methods=["GET"])
         @requires_auth
@@ -323,3 +305,27 @@ class API:
                            total_backups=total_backups,
                            total_recycled_backups=total_recycled_backups
             )
+
+        @self.blueprint.route("/jobs", methods=["GET"])
+        @requires_auth
+        def list_jobs():
+            scheduled_json = []
+            delayed_json = []
+
+            for job in self.job_scheduler.jobs:
+                scheduled_json.append({
+                    "name": job.name,
+                    "interval": job.interval,
+                    "next_run": job.next_run
+                })
+
+            for id, job in self.job_manager.jobs.items():
+                delayed_json.append({
+                    "id": id,
+                    "name": job.name,
+                    "status": job.state.name,
+                    "start_time": job.start_time,
+                    "end_time": job.end_time
+                })
+
+            return jsonify(success=True, scheduled=scheduled_json, delayed=delayed_json), 200

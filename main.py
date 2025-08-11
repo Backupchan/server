@@ -7,7 +7,8 @@ import serverconfig
 import stats
 import webui
 import api
-import jobs
+import scheduled_jobs
+import delayed_jobs
 import logging
 import logging.handlers
 import json
@@ -55,11 +56,17 @@ db.validate_schema_version()
 # Initializing scheduled jobs
 #
 
-scheduler = jobs.JobScheduler()
-scheduler.add_job(jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
-scheduler.add_job(jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
-scheduler.add_job(jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
+scheduler = scheduled_jobs.JobScheduler()
+scheduler.add_job(scheduled_jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
+scheduler.add_job(scheduled_jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
+scheduler.add_job(scheduled_jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
 scheduler.start()
+
+#
+# Initializing delayed jobs
+#
+
+manager = delayed_jobs.JobManager()
 
 #
 # Retreive password hash if auth is enabled
@@ -89,14 +96,14 @@ if config.get("webui_enable"):
     # Initialize Web UI
     #
 
-    webui = webui.WebUI(db, file_manager, server_api, scheduler, stats, config, password_hash, app.root_path)
+    webui = webui.WebUI(db, file_manager, server_api, scheduler, manager, stats, config, password_hash, app.root_path)
     app.register_blueprint(webui.blueprint)
 
 #
 # Initialize the API
 #
 
-api = api.API(db, server_api, config, file_manager, stats)
+api = api.API(db, server_api, config, file_manager, stats, manager, scheduler)
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
 if __name__ == "__main__":

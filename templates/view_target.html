@@ -19,13 +19,22 @@
             <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
         </ul>
         <p>This target has <b>{{ num_backups }}</b> backups.</p>
-        <ol>
-        {% for backup in active_backups %}
-            <li>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Size</th>
+                    <th>Manual</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for backup in active_backups %}
                 {{ backup_print(backup) }}
-            </li>
-        {% endfor %}
-        </ol>
+            {% endfor %}
+            </tbody>
+        </table>
 
         {% if has_recycled_backups %}
         <details>

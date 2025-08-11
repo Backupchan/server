@@ -1,9 +1,9 @@
-import jobs
+import scheduled_jobs
 import serverapi
 import database
 import file_manager
 
-class DeduplicateJob(jobs.ScheduledJob):
+class DeduplicateJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI):
         super().__init__(interval, __name__.split(".")[-1])
 

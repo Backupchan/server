@@ -127,7 +127,7 @@ View a target with the specified ID.
 
 Upload a new backup.
 
-This endpoint uses the Content-Type `multipart/form-data`.
+This endpoint uses the Content-Type `multipart/form-data` for the payload.
 
 #### Example payload
 
@@ -141,7 +141,7 @@ manual: true/false, whether the upload was manual or not.
 ```json
 {
     "success": true,
-    "id": "00000000-0000-0000-0000-000000000000"
+    "job_id": 2
 }
 ```
 
@@ -300,5 +300,33 @@ as well.
 ```json
 {
     "success": true
+}
+```
+
+### GET `/api/jobs`
+
+List all scheduled and delayed jobs.
+
+#### Example output
+
+```json
+{
+    "success": true,
+    "delayed": [
+        {
+            "id": 1,
+            "name": "upload_job",
+            "status": "FINISHED", // see delayed_jobs/manager.py for a list of statuses
+            "start_time": "Mon, 11 Aug 2025 17:33:29 GMT",
+            "end_time": "Mon, 11 Aug 2025 17:33:31 GMT"
+        }
+    ],
+    "scheduled": [
+        {
+            "name": "recycle_job",
+            "interval": 1800,
+            "next_run": 1754915748.9602332 // unix timestamp
+        }
+    ]
 }
 ```

@@ -3,13 +3,14 @@ import api
 import serverapi
 import serverconfig
 import stats
-import models
+import delayed_jobs
 import pytest
 import logging
 import io
 import datetime
 import random
 import string
+from backupchan_server import models
 from flask import Flask
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
@@ -21,7 +22,8 @@ db = mock_modules.MockDatabase()
 file_manager = mock_modules.MockFileManager(db)
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
-api = api.API(db, server_api, config, file_manager, stats)
+job_manager = delayed_jobs.JobManager()
+api = api.API(db, server_api, config, file_manager, stats, job_manager)
 api.key = None
 
 app.register_blueprint(api.blueprint, url_prefix="/api")

@@ -1,0 +1,57 @@
+{% from "macro.html" import navbar %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Jobs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Jobs</h1>
+        <h2>Scheduled jobs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Interval</th>
+                    <th>Next run</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in scheduled_jobs %}
+                <tr>
+                    <td>{{ job.name }}</td>
+                    <td>{{ job.interval }} seconds</td>
+                    <td>{{ job.pretty_next_run() }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h2>Delayed jobs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Start time</th>
+                    <th>End time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for id, job in delayed_jobs.items() %}
+                <tr>
+                    <td>{{ id }}</td>
+                    <td>{{ job.name }}</td>
+                    <td>{{ job.state }}</td>
+                    <td>{{ job.pretty_start_time() }}</td>
+                    <td>{{ job.pretty_end_time() }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>

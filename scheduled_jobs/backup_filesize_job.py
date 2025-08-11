@@ -1,9 +1,9 @@
-import jobs
+import scheduled_jobs
 import database
 import file_manager
 from backupchan_server import utility
 
-class BackupFilesizeJob(jobs.ScheduledJob):
+class BackupFilesizeJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, fm: file_manager.FileManager):
         super().__init__(interval, __name__.split(".")[-1])
 
