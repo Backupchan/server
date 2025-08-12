@@ -32,6 +32,9 @@
     // Interval for deleting duplicate backups
     "deduplicate_job_interval": 18000, // 5hrs
 
+    // Interval for purging stale sequential uploads
+    "stale_seq_upload_job_interval": 3600, // 1hr
+
     // Whether or not to enable authentication on webui
     // Set password by running passwd.py
     "webui_auth": true,

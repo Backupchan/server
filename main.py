@@ -9,6 +9,7 @@ import webui
 import api
 import scheduled_jobs
 import delayed_jobs
+import seq_upload
 import logging
 import logging.handlers
 import json
@@ -49,6 +50,7 @@ db = database.Database(config.get("db"), config.get("page_size"))
 file_manager = file_manager.FileManager(db, config.get("recycle_bin_path"))
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
+seq_upload_manager = seq_upload.SequentialUploadManager()
 
 db.validate_schema_version()
 
@@ -60,6 +62,7 @@ scheduler = scheduled_jobs.JobScheduler()
 scheduler.add_job(scheduled_jobs.RecycleJob(config.get("recycle_job_interval"), db, server_api))
 scheduler.add_job(scheduled_jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
 scheduler.add_job(scheduled_jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
+scheduler.add_job(scheduled_jobs.StaleSequentialUploadJob(config.get("stale_seq_upload_job_interval"), seq_upload_manager))
 scheduler.start()
 
 #
@@ -103,7 +106,7 @@ if config.get("webui_enable"):
 # Initialize the API
 #
 
-api = api.API(db, server_api, config, file_manager, stats, manager, scheduler)
+api = api.API(db, server_api, config, file_manager, stats, manager, scheduler, seq_upload_manager)
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
 if __name__ == "__main__":

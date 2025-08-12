@@ -115,7 +115,7 @@ class FileManager:
 
             # If it's multi-file, check the extension
             # TODO is it worth checking the file content to check if it's a real zip/tar/whatever and not an imposter?
-            if target.target_type == models.BackupType.MULTI and not is_archive_filename(filename):
+            if target.target_type == models.BackupType.MULTI and not is_archive_filename(filename) and not os.path.isdir(filename):
                 raise FileManagerError("Backup file is not a supported archive")
 
             #
@@ -133,8 +133,11 @@ class FileManager:
             if target.target_type == models.BackupType.SINGLE:
                 shutil.move(filename, fs_location)
             else:
-                # pull up the extremely convenient archive extractor(tm)
-                extract_archive(fs_location, filename)
+                if os.path.isdir(filename):
+                    shutil.move(filename, fs_location)
+                else:
+                    # pull up the extremely convenient archive extractor(tm)
+                    extract_archive(fs_location, filename)
 
             self.logger.info("Finish upload")
 

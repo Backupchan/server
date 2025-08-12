@@ -6,6 +6,7 @@ import file_manager
 import stats
 import delayed_jobs
 import scheduled_jobs
+import seq_upload
 import logging
 import functools
 import json
@@ -13,6 +14,7 @@ import dataclasses
 import os
 import uuid
 import datetime
+from backupchan_server import models
 from version import PROGRAM_VERSION
 from flask import Blueprint, jsonify, request, Response, send_file
 
@@ -47,7 +49,7 @@ class API:
     """
     Refer to API.md for documentaton on the JSON API.
     """
-    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats, job_manager: delayed_jobs.JobManager, job_scheduler: scheduled_jobs.JobScheduler):
+    def __init__(self, db: database.Database, server_api: serverapi.ServerAPI, config: configtony.Config, fm: file_manager.FileManager, stats: stats.Stats, job_manager: delayed_jobs.JobManager, job_scheduler: scheduled_jobs.JobScheduler, seq_upload_manager: seq_upload.SequentialUploadManager):
         self.db = db
         self.server_api = server_api
         self.fm = fm
@@ -55,6 +57,7 @@ class API:
         self.stats = stats
         self.job_manager = job_manager
         self.job_scheduler = job_scheduler
+        self.seq_upload_manager = seq_upload_manager
         self.logger = logging.getLogger(__name__)
 
         self.blueprint = Blueprint("api", __name__)
@@ -250,6 +253,133 @@ class API:
                 self.server_api.recycle_backup(id)
             else:
                 self.server_api.unrecycle_backup(id)
+            return jsonify(success=True), 200
+
+        #
+        # Sequential upload endpoints
+        #
+
+        @self.blueprint.route("/seq/<target_id>/begin", methods=["POST"])
+        @requires_auth
+        def seq_begin(target_id: str):
+            target = self.db.get_target(target_id)
+            if target is None:
+                return jsonify(success=False), 404
+
+            if target.target_type != models.BackupType.MULTI:
+                return jsonify(success=False, message="Cannot begin sequential upload on single-file target"), 400
+
+            # Verify that the user passed required data
+            data = request.get_json()
+            verify_result = verify_data_present(data, ["file_list", "manual"])
+            if verify_result is not None:
+                return verify_result
+
+            file_list = seq_upload.SequentialFile.list_from_dicts(data["file_list"])
+
+            create_upload_status = self.seq_upload_manager.create_upload(target.id, file_list, data["manual"])
+            if create_upload_status == seq_upload.SequentialUploadCreateStatus.VALIDATION_FAILED:
+                return jsonify(success=False, message="File list validation failed"), 400
+            if create_upload_status == seq_upload.SequentialUploadCreateStatus.TARGET_BUSY:
+                return jsonify(success=False, message="Target busy"), 400
+            
+            return jsonify(success=True), 200
+
+        @self.blueprint.route("/seq/<target_id>", methods=["GET"])
+        @requires_auth
+        def seq_check(target_id: str):
+            target = self.db.get_target(target_id)
+            if target is None:
+                return jsonify(success=False), 404
+            
+            if not self.seq_upload_manager.is_processing(target.id):
+                return jsonify(success=False), 400
+
+            upload = self.seq_upload_manager[target.id]
+            return jsonify(success=True, file_list=[dataclasses.asdict(file) for file in upload.file_list])
+
+        @self.blueprint.route("/seq/<target_id>/upload", methods=["POST"])
+        @requires_auth
+        def seq_upload_file(target_id: str):
+            target = self.db.get_target(target_id)
+            if target is None:
+                return jsonify(success=False), 404
+
+            if not self.seq_upload_manager.is_processing(target.id):
+                return jsonify(success=False), 400 # TODO make a function for checking if a target exists and whether a sequential upload on it is being processed.
+
+            # Verify that user supplied file name and path
+            data = request.form
+            verify_result = verify_data_present(data, ["name", "path"])
+            if verify_result is not None:
+                return verify_result
+
+            sequential_file = seq_upload.SequentialFile(data["path"], data["name"], False)
+
+            # Verify that we don't already have that file
+            if self.seq_upload_manager[target.id].is_uploaded(sequential_file):
+                return jsonify(success=False), 409
+
+            # Verify that it's in the list (and mark as uploaded if it is)
+            if not self.seq_upload_manager[target.id].set_uploaded_state(sequential_file, True):
+                return jsonify(success=False), 400
+
+            # Verify that they gave a file
+            if "file" not in request.files:
+                return jsonify(success=False, message="No file given"), 400
+
+            try:
+                file = request.files["file"]
+                filename = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}", sequential_file.full_path())
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+                file.save(filename)
+            except Exception as exc:
+                self.logger.error("Error during sequential upload on target {%s}", target.id, exc_info=exc)
+                self.seq_upload_manager[target.id].set_uploaded_state(sequential_file, False)
+                return jsonify(success=False, message=str(exc)), 500
+
+            self.logger.info("Uploaded file %s to sequential upload on target {%s}", sequential_file, target.id)
+            return jsonify(success=True), 200
+
+        @self.blueprint.route("/seq/<target_id>/finish", methods=["POST"])
+        @requires_auth
+        def seq_finish(target_id: str):
+            target = self.db.get_target(target_id)
+            if target is None:
+                return jsonify(success=False), 404
+
+            if not self.seq_upload_manager.is_processing(target.id):
+                return jsonify(success=False), 400
+
+            if not self.seq_upload_manager[target.id].all_uploaded():
+                return jsonify(success=False), 409
+
+            source_path = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}")
+            backup_id = self.db.add_backup(target.id, self.seq_upload_manager[target.id].manual)
+            try:
+                self.fm.add_backup(backup_id, source_path)
+            except Exception as exc:
+                self.db.delete_backup(backup_id)
+                self.logger.error("Error when adding sequential backup files on target {%s}", target.id, exc_info=exc)
+                return jsonify(success=False, message=str(exc)), 500
+
+            self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
+            self.seq_upload_manager.finish(target.id)
+
+            return jsonify(success=True), 200
+
+        @self.blueprint.route("/seq/<target_id>/terminate", methods=["POST"])
+        @requires_auth
+        def seq_terminate(target_id: str):
+            target = self.db.get_target(target_id)
+            if target is None:
+                return jsonify(success=False), 404
+            
+            if not self.seq_upload_manager.is_processing(target.id):
+                return jsonify(success=False), 400
+
+            self.seq_upload_manager.delete(target.id)
             return jsonify(success=True), 200
 
         #

@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.1.0
+
+* Added sequential uploads (upload files one-by-one, for large multi-file backups)
+
 ## 2.0.1
 
 * Fixed API uploads not returning a response when error.
