@@ -2,6 +2,12 @@
 
 See what's changed between versions!
 
+## 2.1.1
+
+* Added proper pluralization in target list and target details page.
+* Delayed jobs have a proper string representation in job list.
+* No longeer required to specify recycle value for targets if no criteria set.
+
 ## 2.1.0
 
 * Added sequential uploads (upload files one-by-one, for large multi-file backups)
