@@ -291,6 +291,10 @@ class WebUI:
 
     def handle_post_edit_target(self, target_id: str) -> str | None:
         self.post_log("edit target")
+
+        if not request.form["recycle_value"] and request.form["recycle_criteria"] != "none":
+            return "Specify a recycle value"
+
         try:
             self.server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None)
         except Exception as exc:
