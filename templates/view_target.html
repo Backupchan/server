@@ -18,7 +18,7 @@
             <li><a href="{{ url_for('webui.delete_target', id=target.id) }}">Delete target</a></li>
             <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
         </ul>
-        <p>This target has <b>{{ num_backups }}</b> backups.</p>
+        <p>This target has <b>{{ num_backups }}</b> backup{% if num_backups != 1 %}s{% endif %}.</p>
         <table>
             <thead>
                 <tr>
