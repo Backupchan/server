@@ -45,7 +45,7 @@
                 {% for id, job in delayed_jobs.items() %}
                 <tr>
                     <td>{{ id }}</td>
-                    <td>{{ job.name }}</td>
+                    <td>{{ job }}</td>
                     <td>{{ job.state }}</td>
                     <td>{{ job.pretty_start_time() }}</td>
                     <td>{{ job.pretty_end_time() }}</td>

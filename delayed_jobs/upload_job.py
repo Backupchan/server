@@ -14,3 +14,6 @@ class UploadJob(delayed_jobs.DelayedJob):
         self.logger.info("Upload backup to target {%s}: manual {%s}, backup file: %s", self.target_id, self.manual, self.filename)
         self.server_api.upload_backup(self.target_id, self.manual, self.filename)
         return delayed_jobs.DelayedJobState.FINISHED
+
+    def __str__(self) -> str:
+        return f"UploadJob(target_id={self.target_id}, manual={self.manual}, filename={self.filename})"
