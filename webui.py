@@ -279,8 +279,12 @@ class WebUI:
 
     def handle_post_new_target(self) -> str | None:
         self.post_log("new target")
+
+        if not request.form["recycle_value"] and request.form["recycle_criteria"] != "none":
+            return "Specify a recycle value"
+
         try:
-            self.db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None)
+            self.db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"] or 0, request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None)
         except Exception as exc:
             return str(exc)
         return None

@@ -15,10 +15,10 @@
         <form action="{{ url_for('webui.new_target') }}" method="post">
         {% else %}
         <h1>Edit target</h1>
-        {% if error_message is not none %}
-        <span class="error-message">{{ error_message }}</span>
-        {% endif %}
         <form action="{{ url_for('webui.edit_target', id=target.id) }}" method="post">
+        {% endif %}
+        {% if error_message is not none %}
+        <span class="error-message">{{ error_message }}</span><p></p>
         {% endif %}
             <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required><p></p>
 			<span>Alias:</span> <input type="text" name="alias" {% if target is not none and target.alias is not none %}value="{{ target.alias }}"{% endif %}><p></p>
@@ -33,11 +33,11 @@
             </select>
             <p></p>
             <span>Recycle value:</span>
-			<!-- TODO vvv do not require bc optional for none -->
-            <input type="number" name="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %} required><p></p>
+            <input type="number" name="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %}><p></p>
             <ul>
                 <li>If you chose 'count', then backups will be recycled after this many backups reached.</li>
                 <li>If you chose 'age', then backups will be recycled after this many days.</li>
+                <li>Optional if you chose 'none'.</li>
             </ul>
             <span>Recycle action:</span>&nbsp;
             <select name="recycle_action" required>
