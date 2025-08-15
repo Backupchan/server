@@ -2,11 +2,15 @@
 
 See what's changed between versions!
 
+## 2.1.2
+
+* Fixed recycled backups not showing in a table in Web UI.
+
 ## 2.1.1
 
 * Added proper pluralization in target list and target details page.
 * Delayed jobs have a proper string representation in job list.
-* No longeer required to specify recycle value for targets if no criteria set.
+* No longer required to specify recycle value for targets if no criteria set.
 
 ## 2.1.0
 

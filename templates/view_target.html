@@ -39,14 +39,23 @@
         {% if has_recycled_backups %}
         <details>
             <summary>Recycled backups</summary>
-            <ol>
-            {% for backup in recycled_backups %}
-                <li>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Size</th>
+                        <th>Manual</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for backup in recycled_backups %}
                     {{ backup_print(backup) }}
-                </li>
-            {% endfor %}
-            </ol>
-        </details>
+                {% endfor %}
+                </tbody>
+            </table>
+            </details>
         {% endif %}
     </div>
 </body>
