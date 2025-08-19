@@ -28,7 +28,7 @@
             </thead>
             <tbody>
             {% for backup in backups %}
-                backup_print(backup.backup, backup.target)
+                {{ backup_print(backup.backup, backup.target) }}
             {% endfor %}
             </tbody>
         </table>

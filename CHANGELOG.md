@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.1.3
+
+* Fixed recycle bin page in Web UI not showing properly.
+
 ## 2.1.2
 
 * Fixed recycled backups not showing in a table in Web UI.
