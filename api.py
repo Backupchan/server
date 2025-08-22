@@ -7,6 +7,7 @@ import stats
 import delayed_jobs
 import scheduled_jobs
 import seq_upload
+import log
 import logging
 import functools
 import json
@@ -414,12 +415,11 @@ class API:
             if "tail" in request.args:
                 tail = int(request.args["tail"])
 
-            log_content = ""
-            with open("./log/backupchan.log", "r") as log_file:
-                if tail == 0:
-                    log_content = log_file.read()
-                else:
-                    log_content = "".join(log_file.readlines()[-tail:])
+            try:
+                log_content = log.read(tail)
+            except Exception as exc:
+                self.logger.error("Unable to read log", exc_info=exc)
+                return jsonify(success=False, message=str(exc)), 500
             return jsonify(success=True, log=log_content)
 
         @self.blueprint.route("/stats", methods=["GET"])

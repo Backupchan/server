@@ -10,6 +10,7 @@ import api
 import scheduled_jobs
 import delayed_jobs
 import seq_upload
+import log
 import logging
 import logging.handlers
 import json
@@ -23,23 +24,7 @@ from werkzeug.security import check_password_hash
 # Set up logging for other modules
 #
 
-# TODO make log configurable
-
-if not os.path.isdir("./log"):
-    os.mkdir("./log")
-
-formatter = logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
-
-file_handler = logging.handlers.RotatingFileHandler("log/backupchan.log", maxBytes=2000000, backupCount=5)
-file_handler.setFormatter(formatter)
-
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setFormatter(formatter)
-
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-root_logger.addHandler(file_handler)
-root_logger.addHandler(console_handler)
+log.init()
 
 #
 # Initializing modules

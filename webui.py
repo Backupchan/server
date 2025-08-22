@@ -5,6 +5,7 @@ import scheduled_jobs
 import delayed_jobs
 import stats
 import download
+import log
 import configtony
 import functools
 import logging
@@ -107,13 +108,11 @@ class WebUI:
             tail = 0
             if "tail" in request.args:
                 tail = int(request.args["tail"])
-
-            log_content = ""
-            with open("./log/backupchan.log", "r") as log_file:
-                if tail == 0:
-                    log_content = log_file.read()
-                else:
-                    log_content = "".join(log_file.readlines()[-tail:])
+            try:
+                log_content = log.read(tail)
+            except Exception as exc:
+                self.logger.error("Unable to read log", exc_info=exc)
+                log_content = f"Could not read log file: {str(exc)}"
             return render_template("log.html", content=log_content, tail=tail)
 
         @self.blueprint.route("/jobs")
