@@ -74,6 +74,16 @@ class API:
                 else:
                     self.key = file_json["key"]
 
+    def check_seq_upload(target: None | models.BackupTarget) -> None | tuple[Response, int]:
+        if target is None:
+            return jsonify(success=False), 404
+
+        if not self.seq_upload_manager.is_processing(target.id):
+            return jsonify(success=False), 400
+
+        return None
+
+
     def add_routes(self):
         #
         # Authentication
@@ -302,11 +312,9 @@ class API:
         @requires_auth
         def seq_upload_file(target_id: str):
             target = self.db.get_target(target_id)
-            if target is None:
-                return jsonify(success=False), 404
-
-            if not self.seq_upload_manager.is_processing(target.id):
-                return jsonify(success=False), 400 # TODO make a function for checking if a target exists and whether a sequential upload on it is being processed.
+            verify_result = self.check_seq_upload(target)
+            if verify_result is not None:
+                return verify_result
 
             # Verify that user supplied file name and path
             data = request.form
@@ -346,11 +354,9 @@ class API:
         @requires_auth
         def seq_finish(target_id: str):
             target = self.db.get_target(target_id)
-            if target is None:
-                return jsonify(success=False), 404
-
-            if not self.seq_upload_manager.is_processing(target.id):
-                return jsonify(success=False), 400
+            verify_result = self.check_seq_upload(target)
+            if verify_result is not None:
+                return verify_result
 
             if not self.seq_upload_manager[target.id].all_uploaded():
                 return jsonify(success=False), 409
@@ -373,11 +379,9 @@ class API:
         @requires_auth
         def seq_terminate(target_id: str):
             target = self.db.get_target(target_id)
-            if target is None:
-                return jsonify(success=False), 404
-            
-            if not self.seq_upload_manager.is_processing(target.id):
-                return jsonify(success=False), 400
+            verify_result = self.check_seq_upload(target)
+            if verify_result is not None:
+                return verify_result
 
             self.seq_upload_manager.delete(target.id)
             return jsonify(success=True), 200
