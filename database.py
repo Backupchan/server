@@ -10,6 +10,7 @@ import re
 import unicodedata
 import threading
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from backupchan_server import models
@@ -31,11 +32,15 @@ class Database:
         if connection_config == {}:
             raise DatabaseError("Database connection not configured")
 
-        self.connection = mariadb.connect(user=connection_config["user"], password=connection_config["password"], host=connection_config["host"], port=connection_config["port"], database=connection_config["database"])
+        self.logger = logging.getLogger(__name__)
+        try:
+            self.connection = mariadb.connect(user=connection_config["user"], password=connection_config["password"], host=connection_config["host"], port=connection_config["port"], database=connection_config["database"])
+        except mariadb.OperationalError as exc:
+            self.logger.error("Unable to establish a database connection. Make sure the database server is running and that your config is correct.", exc_info=exc)
+            sys.exit(1)
         self.cursor = self.connection.cursor()
         self.page_size = page_size
         self.lock = threading.RLock()
-        self.logger = logging.getLogger(__name__)
 
     #
     # Schema version methods
