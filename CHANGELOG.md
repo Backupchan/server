@@ -2,6 +2,13 @@
 
 See what's changed between versions!
 
+## 2.1.4
+
+* Refactored sequential upload checks.
+* Refactored log reading and initialization.
+* Handle log read errors.
+* Handle database connection error cleanly.
+
 ## 2.1.3
 
 * Fixed recycle bin page in Web UI not showing properly.
