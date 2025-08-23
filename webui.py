@@ -21,6 +21,14 @@ from flask import Blueprint, render_template, request, redirect, url_for, abort,
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
+def parse_sort_options(kind: type[database.SortOptions]) -> database.SortOptions | None:
+    column = request.args.get("s")
+    if column is None:
+        return None
+
+    asc = request.args.get("a", "1") == "1"
+    return kind(asc, column)
+
 class WebUI:
     def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: scheduled_jobs.JobScheduler, job_manager: delayed_jobs.JobManager, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
         self.db = db
@@ -128,7 +136,8 @@ class WebUI:
         @requires_auth
         def list_targets():
             page = int(request.args.get("page", 1))
-            targets = self.db.list_targets(page)
+            sort_options = parse_sort_options(database.TargetSortOptions)
+            targets = self.db.list_targets(page, sort_options)
             return render_template("list_targets.html", targets=targets, num_targets=self.db.count_targets(), num_backups=self.db.count_backups(), page=page)
 
         @self.blueprint.route("/target/new", methods=["GET", "POST"])
@@ -148,8 +157,9 @@ class WebUI:
             target = self.db.get_target(id)
             if target is None:
                 abort(404)
-            active_backups = self.db.list_backups_target_is_recycled(id, False)
-            recycled_backups = self.db.list_backups_target_is_recycled(id, True)
+            sort_options = parse_sort_options(database.BackupSortOptions)
+            active_backups = self.db.list_backups_target_is_recycled(id, False, sort_options)
+            recycled_backups = self.db.list_backups_target_is_recycled(id, True, sort_options)
             return render_template("view_target.html", target=target, active_backups=active_backups, recycled_backups=recycled_backups, num_backups=len(active_backups) + len(recycled_backups), has_recycled_backups=len(recycled_backups) > 0)
 
         @self.blueprint.route("/target/<id>/upload", methods=["GET", "POST"])
@@ -258,7 +268,8 @@ class WebUI:
         @self.blueprint.route("/recycle_bin")
         @requires_auth
         def recycle_bin():
-            backups = self.db.list_recycled_backups()
+            sort_options = parse_sort_options(database.BackupSortOptions)
+            backups = self.db.list_recycled_backups(sort_options)
             backups_and_targets = []
             for backup in backups:
                 backups_and_targets.append({"backup": backup, "target": self.db.get_target(backup.target_id)})

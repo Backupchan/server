@@ -20,6 +20,42 @@ from backupchan_server import utility
 class DatabaseError(Exception):
     pass
 
+class SortOptions:
+    def __init__(self, valid_columns: list[str], default_column: str, asc: bool, column: str | None):
+        self.valid_columns = valid_columns
+        if column is not None and column in valid_columns:
+            self.column = column
+        else:
+            self.column = default_column
+
+        self.asc = asc
+
+    @classmethod
+    def default(cls) -> "SortOptions":
+        raise NotImplementedError
+
+    def sql(self) -> str:
+        return f"ORDER BY {self.column} {self.asc_str()}"
+
+    def asc_str(self) -> str:
+        return "ASC" if self.asc else "DESC"
+
+class TargetSortOptions(SortOptions):
+    def __init__(self, asc: bool, column: str | None):
+        super().__init__(["id", "name", "type", "recycle_criteria", "recycle_value", "recycle_action", "location", "name_template", "deduplicate", "alias"], "name", asc, column)
+
+    @classmethod
+    def default(cls) -> "TargetSortOptions":
+        return cls(True, "name")
+
+class BackupSortOptions(SortOptions):
+    def __init__(self, asc: bool, column: str | None):
+        super().__init__(["id", "target_id", "created_at", "manual", "is_recycled", "filesize"], "created_at", asc, column)
+
+    @classmethod
+    def default(cls) -> "BackupSortOptions":
+        return cls(False, "created_at")
+
 class Database:
     """
     This class handles the communication with the database.
@@ -111,10 +147,11 @@ class Database:
 
             self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", target_id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
 
-    def list_targets(self, page: int = 1) -> list[models.BackupTarget]:
+    def list_targets(self, page: int = 1, sort_options: TargetSortOptions | None = None) -> list[models.BackupTarget]:
+        sort_options = sort_options or TargetSortOptions.default()
         offset = (page - 1) * self.page_size
         with self.lock:
-            self.cursor.execute("SELECT * FROM targets LIMIT ? OFFSET ?", (self.page_size, offset))
+            self.cursor.execute(f"SELECT * FROM targets {sort_options.sql()} LIMIT ? OFFSET ?", (self.page_size, offset))
             rows = self.cursor.fetchall()
             return [models.BackupTarget(*row) for row in rows]
 
@@ -203,35 +240,39 @@ class Database:
             self.connection.commit()
             self.logger.info("Recycle backup {%s} to %s", id, recycled)
 
-    def list_backups(self) -> list[models.Backup]:
+    def list_backups(self, sort_options: None | BackupSortOptions = None) -> list[models.Backup]:
+        sort_options = sort_options or BackupSortOptions.default()
         with self.lock:
-            self.cursor.execute("SELECT * FROM backups")
+            self.cursor.execute(f"SELECT * FROM backups {sort_options.sql()}")
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
-    def list_backups_target(self, target_id: str) -> list[models.Backup]:
+    def list_backups_target(self, target_id: str, sort_options: None | BackupSortOptions = None) -> list[models.Backup]:
+        sort_options = sort_options or BackupSortOptions.default()
         with self.lock:
             target = self.get_target(target_id)
             if target is None:
                 raise DatabaseError(f"Target with id or alias '{target_id}' does not exist")
 
-            self.cursor.execute("SELECT * FROM backups WHERE target_id = ?", (target.id,))
+            self.cursor.execute(f"SELECT * FROM backups WHERE target_id = ? {sort_options.sql()}", (target.id,))
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
-    def list_recycled_backups(self) -> list[models.Backup]:
+    def list_recycled_backups(self, sort_options: None | BackupSortOptions = None) -> list[models.Backup]:
+        sort_options = sort_options or BackupSortOptions.default()
         with self.lock:
-            self.cursor.execute("SELECT * FROM backups WHERE is_recycled = TRUE")
+            self.cursor.execute(f"SELECT * FROM backups WHERE is_recycled = TRUE {sort_options.sql()}")
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
-    def list_backups_target_is_recycled(self, target_id: str, is_recycled: bool) -> list[models.Backup]:
+    def list_backups_target_is_recycled(self, target_id: str, is_recycled: bool, sort_options: None | BackupSortOptions = None) -> list[models.Backup]:
+        sort_options = sort_options or BackupSortOptions.default()
         with self.lock:
             target = self.get_target(target_id)
             if target is None:
                 raise DatabaseError(f"Target with id or alias '{target_id}' does not exist")
 
-            self.cursor.execute("SELECT * FROM backups WHERE (target_id = ?) AND is_recycled = ?", (target.id, is_recycled))
+            self.cursor.execute(f"SELECT * FROM backups WHERE (target_id = ?) AND is_recycled = ? {sort_options.sql()}", (target.id, is_recycled))
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
