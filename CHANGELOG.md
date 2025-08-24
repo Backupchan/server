@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.1.5
+
+* Fixed age-based recycling not working.
+
 ## 2.1.4
 
 * Refactored sequential upload checks.
