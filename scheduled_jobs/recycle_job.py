@@ -62,7 +62,7 @@ class RecycleJob(scheduled_jobs.ScheduledJob):
                 age = (now - backup.created_at).days
                 if age > max_age:
                     self.logger.info("Backup {%s} is %d days old", backup.id, age)
-                    self.execute_recycle_action(target.recycle_action, backup, target.id)
+                    self.execute_recycle_action(target.recycle_action, backup.id, target.id)
         else:
             self.logger.error("Target {%s} has a broken recycle criteria value", target.id)
 
