@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.1.5
+
+* Fixed crashing when doing a sequential upload.
+
 ## 2.1.4
 
 * Refactored sequential upload checks.

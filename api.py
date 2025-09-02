@@ -75,7 +75,7 @@ class API:
                 else:
                     self.key = file_json["key"]
 
-    def check_seq_upload(target: None | models.BackupTarget) -> None | tuple[Response, int]:
+    def check_seq_upload(self, target: None | models.BackupTarget) -> None | tuple[Response, int]:
         if target is None:
             return jsonify(success=False), 404
 
