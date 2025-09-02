@@ -2,9 +2,13 @@
 
 See what's changed between versions!
 
-## 2.1.5
+## 2.1.6
 
 * Fixed crashing when doing a sequential upload.
+
+## 2.1.5
+
+* Fixed age-based recycling not working.
 
 ## 2.1.4
 
