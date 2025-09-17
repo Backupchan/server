@@ -57,7 +57,7 @@ def find_single_backup_file(base_path: str) -> str | None:
     for file in parent.iterdir():
         if file.is_file() and file.stem == stem:
             return file
-    return None
+    raise FileManagerError(f"Could not find backup file for backup {backup_id}")
 
 def get_directory_size(path: Path)-> int:
     total = 0
@@ -185,8 +185,6 @@ class FileManager:
 
                 if target.target_type == models.BackupType.SINGLE:
                     old_fs_location = find_single_backup_file(old_fs_location)
-                    if old_fs_location is None:
-                        raise FileManagerError(f"Could not find backup file for backup {backup.id}")
                     new_fs_location += "".join(Path(old_fs_location).suffixes)
 
                 self.logger.info("Move %s -> %s", old_fs_location, new_fs_location)
@@ -212,8 +210,6 @@ class FileManager:
 
             if target.target_type == models.BackupType.SINGLE:
                 backup_location = find_single_backup_file(backup_location)
-                if backup_location is None:
-                    raise FileManagerError(f"Could not find backup file for backup {backup_id}")
                 recycle_location += "".join(Path(backup_location).suffixes)
 
             self.logger.info("Move %s -> %s", backup_location, recycle_location)
@@ -233,8 +229,6 @@ class FileManager:
 
             if target.target_type == models.BackupType.SINGLE:
                 backup_location = find_single_backup_file(backup_location)
-                if backup_location is None:
-                    raise FileManagerError(f"Could not find backup file for backup {backup_id}")
                 original_location += "".join(Path(backup_location).suffixes)
 
             self.logger.info("Move %s -> %s", backup_location, original_location)
@@ -249,10 +243,7 @@ class FileManager:
 
             backup_location = get_backup_fs_location(backup, target, self.recycle_bin_path)
             if target.target_type == models.BackupType.SINGLE:
-                # TODO wrap this in function too
                 backup_location = find_single_backup_file(backup_location)
-                if backup_location is None:
-                    raise FileManagerError(f"Could not find backup file for backup {backup_id}")
                 return file_hash(backup_location)
             return directory_hash(backup_location)
 
@@ -293,8 +284,6 @@ class FileManager:
 
         if target.target_type == models.BackupType.SINGLE:
             fs_location = find_single_backup_file(fs_location)
-            if fs_location is None:
-                raise FileManagerError(f"Could not find backup file for backup {backup_id}")
             return Path(fs_location).stat().st_size
 
         if not os.path.exists(fs_location):
