@@ -26,21 +26,21 @@
 				<li>Optional. Must be unique to this target. It can be used as the ID when accessing the target.</li>
 			</ul>
             <span>Recycle criteria:</span>&nbsp;
-            <select name="recycle_criteria" required>
+            <select name="recycle_criteria" id="recycle_criteria" required>
                 <option value="none" {% if target is none or target.recycle_criteria == "none" %}selected="selected"{% endif %}>None</option>
                 <option value="count" {% if target is not none and target.recycle_criteria == "count" %}selected="selected"{% endif %}>Count: When multiple backups are present</option>
                 <option value="age" {% if target is not none and target.recycle_criteria == "age" %}selected="selected"{% endif %}>Age: When backups are old enough</option>
             </select>
             <p></p>
             <span>Recycle value:</span>
-            <input type="number" name="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %}><p></p>
+            <input type="number" name="recycle_value" id="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %}><p></p>
             <ul>
                 <li>If you chose 'count', then backups will be recycled after this many backups reached.</li>
                 <li>If you chose 'age', then backups will be recycled after this many days.</li>
                 <li>Optional if you chose 'none'.</li>
             </ul>
             <span>Recycle action:</span>&nbsp;
-            <select name="recycle_action" required>
+            <select name="recycle_action" id="recycle_action" required>
                 <option value="delete" {% if target is not none and target.recycle_criteria == "delete" %}selected="selected"{% endif %}>Delete (permanently delete once criteria met)</option>
                 <option value="recycle" {% if target is none or target.recycle_criteria == "recycle" %}selected="selected" {% endif %}>Recycle (move to recycle bin once criteria met)</option>
             </select><p></p>
@@ -78,5 +78,7 @@
             <input type="submit" value="{% if target is none %}Create target{% else %}Submit changes{% endif %}">
         </form>
     </div>
+	
+	<script src="{{ url_for('static', filename='edit_target.js') }}"></script>
 </body>
 </html>
