@@ -39,6 +39,7 @@
         {% if has_recycled_backups %}
         <details>
             <summary>Recycled backups</summary>
+			<a href="{{ url_for('webui.delete_target_recycled', id=target.id) }}">Delete recycled backups</a>
             <table>
                 <thead>
                     <tr>

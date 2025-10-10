@@ -212,6 +212,17 @@ class WebUI:
                 return redirect(url_for("webui.view_target", id=id))
             return render_template("delete_target_backups.html", target=target)
 
+        @self.blueprint.route("/target/<id>/delete_recycled", methods=["GET", "POST"])
+        @requires_auth
+        def delete_target_recycled(id):
+            target = self.db.get_target(id)
+            if target is None:
+                abort(404)
+            if request.method == "POST":
+                self.handle_post_delete_target_recycled(id)
+                return redirect(url_for("webui.view_target", id=id))
+            return render_template("delete_target_recycled.html", target=target)
+
         #
         # Backup endpoints
         #
@@ -339,6 +350,10 @@ class WebUI:
     def handle_post_delete_target_backups(self, target_id: str):
         self.post_log("delete target backups")
         self.server_api.delete_target_backups(target_id, bool(request.form.get("delete_files")))
+
+    def handle_post_delete_target_recycled(self, target_id: str):
+        self.post_log("delete target recycled")
+        self.server_api.delete_target_recycled_backups(target_id, bool(request.form.get("delete_files")))
 
     def handle_post_recycle_backup(self, backup_id: str):
         self.post_log("recycle backup")
