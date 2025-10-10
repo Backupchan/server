@@ -2,6 +2,12 @@
 
 See what's changed between versions!
 
+## 2.2
+
+* Added ability to delete only recycled backups of specific target.
+* Fixed checkbox labels in Web UI deletion confirmation pages not working.
+* Disable recycle options in Web UI target edit page if recycle criteria set to none.
+
 ## 2.1.6
 
 * Fixed crashing when doing a sequential upload.
