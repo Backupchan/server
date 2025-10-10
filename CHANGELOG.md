@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.2.1
+
+* Automatically focus on password field on login page.
+
 ## 2.2
 
 * Added ability to delete only recycled backups of specific target.
