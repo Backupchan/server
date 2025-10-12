@@ -187,6 +187,21 @@ class API:
             self.server_api.delete_target_backups(id, data["delete_files"])
             return jsonify(success=True), 200
 
+        @self.blueprint.route("/target/<id>/recycled", methods=["DELETE"])
+        @requires_auth
+        def delete_target_recycled(id):
+            target = self.db.get_target(id)
+            if target is None:
+                return jsonify(success=False), 404
+
+            data = request.get_json()
+            verify_result = verify_data_present(data, ["delete_files"])
+            if verify_result is not None:
+                return verify_result
+
+            self.server_api.delete_target_recycled_backups(id, data["delete_files"])
+            return jsonify(success=True), 200
+
         #
         # Backup endpoints
         #

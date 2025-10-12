@@ -13,7 +13,7 @@
     <p class="error-message">Access denied</p>
     {% endif %}
     <form action="{{ url_for('webui.login') }}" method="post">
-        <input type="password" name="password" placeholder="Enter it here">
+        <input type="password" name="password" placeholder="Enter it here" autofocus>
         <input type="submit" value="Login">
     </form>
 </body>

@@ -23,7 +23,7 @@ file_manager = mock_modules.MockFileManager(db)
 server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
 job_manager = delayed_jobs.JobManager()
-api = api.API(db, server_api, config, file_manager, stats, job_manager)
+api = api.API(db, server_api, config, file_manager, stats, job_manager, None, None)
 api.key = None
 
 app.register_blueprint(api.blueprint, url_prefix="/api")
@@ -115,6 +115,22 @@ def test_delete_target_backups(client):
     
     backup = db.get_backup(backup_id)
     assert backup is None
+
+def test_delete_target_recycled_backups(client):
+    db.reset()
+    
+    target_id = create_test_target()
+    backup_id = create_test_backup(target_id)
+    db.recycle_backup(backup_id, True)
+    backup_id2 = create_test_backup(target_id)
+    
+    response = client.delete(f"/api/target/{target_id}/recycled", json={"delete_files": True})
+    assert response.status_code == 200
+    
+    backup = db.get_backup(backup_id)
+    backup2 = db.get_backup(backup_id2)
+    assert backup is None
+    assert backup2 is not None
 
 def test_delete_backup(client):
     db.reset()

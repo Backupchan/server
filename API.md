@@ -214,6 +214,27 @@ to indicate whether or not to permanently delete backup files as well.
 }
 ```
 
+### DELETE `/api/target/<id>/recycled`
+
+Delete every recycled backup from an existing target. `delete_files` must be supplied
+to indicate whether or not to permanently delete backup files as well.
+
+#### Example payload
+
+```json
+{
+    "delete_files": true
+}
+```
+
+#### Example output
+
+```json
+{
+    "success": true
+}
+```
+
 ## Backup endpoints
 
 ### DELETE `/api/backup/<id>`
