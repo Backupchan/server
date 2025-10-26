@@ -8,6 +8,7 @@
 
     // Temporary location for uploaded files
     // Must be writable and readable
+	// This location is periodically cleared by a job, make sure it's only for backup-chan.
     "temp_save_path": "/tmp/backupchan",
 
     // Database connection info
@@ -34,6 +35,9 @@
 
     // Interval for purging stale sequential uploads
     "stale_seq_upload_job_interval": 3600, // 1hr
+	
+	// Interval for purging temporary directory
+	"tmp_purge_job_interval": 43200, // 12hrs
 
     // Whether or not to enable authentication on webui
     // Set password by running passwd.py

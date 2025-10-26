@@ -48,6 +48,7 @@ scheduler.add_job(scheduled_jobs.RecycleJob(config.get("recycle_job_interval"), 
 scheduler.add_job(scheduled_jobs.BackupFilesizeJob(config.get("backup_filesize_job_interval"), db, file_manager))
 scheduler.add_job(scheduled_jobs.DeduplicateJob(config.get("deduplicate_job_interval"), db, file_manager, server_api))
 scheduler.add_job(scheduled_jobs.StaleSequentialUploadJob(config.get("stale_seq_upload_job_interval"), seq_upload_manager))
+scheduler.add_job(scheduled_jobs.TemporaryPurgeJob(config.get("tmp_purge_job_interval"), config.get("temp_save_path")))
 scheduler.start()
 
 #
