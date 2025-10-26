@@ -2,6 +2,13 @@
 
 See what's changed between versions!
 
+## 2.3
+
+* Added a better page for force running scheduled jobs.
+* Added an option to force run a job from the job list.
+* Added a scheduled job to remove temp files older than a day.
+* Revert schema version number back to 9 as I forgot to commit the migration code and currently don't have it on me.
+
 ## 2.2.1
 
 * Automatically focus on password field on login page.
