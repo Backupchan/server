@@ -85,9 +85,9 @@ class WebUI:
 
         @self.blueprint.route("/force-run-job/<name>")
         @requires_auth
-        def daemon_recheck(name: str):
+        def force_run_job(name: str):
             self.job_scheduler.force_run_job(name)
-            return f"Job {name} forced to run. Check log for details."
+            return render_template("force_run_job.html", name=name)
 
         @self.blueprint.route("/stats")
         @requires_auth

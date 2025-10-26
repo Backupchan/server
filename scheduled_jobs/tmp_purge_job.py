@@ -13,7 +13,6 @@ class TemporaryPurgeJob(scheduled_jobs.ScheduledJob):
         for i, file in enumerate(temp_files):
             temp_files[i] = os.path.join(self.temp_dir, file)
         files = [file for file in temp_files if os.path.isfile(file)]
-        self.logger.info(files)
         now = datetime.datetime.now()
         for file in files:
             mod_timestamp = os.path.getmtime(file)
