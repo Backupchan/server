@@ -29,8 +29,8 @@
                 {% for target in targets %}
                 <tr>
                     <td><a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a></td>
-                    <td>{{ target.id }}</td>
-                    <td>{{ target.alias }}</td>
+                    <td><span class="monospace">{{ target.id }}</span></td>
+                    <td>{% if target.alias is none %}<i>None</i>{% else %}{{ target.alias }}{% endif %}</td>
                     <td>
                     {% if target.recycle_criteria == "none" %}
                         None
@@ -59,8 +59,8 @@
                         Multiple files
                     {% endif %}
                     </td>
-                    <td>{{ target.location }}</td>
-                    <td>{{ target.name_template }}</td>
+                    <td><span class="monospace">{{ target.location }}</span></td>
+                    <td><span class="monospace">{{ target.name_template }}</span></td>
                     <td>
                     {% if target.deduplicate %}
                         on
