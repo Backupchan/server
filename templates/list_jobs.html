@@ -18,6 +18,7 @@
                     <th>Name</th>
                     <th>Interval</th>
                     <th>Next run</th>
+					<th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -26,6 +27,7 @@
                     <td>{{ job.name }}</td>
                     <td>{{ job.interval }} seconds</td>
                     <td>{{ job.pretty_next_run() }}</td>
+					<td><a href="{{ url_for('webui.force_run_job', name=job.name) }}">Force re-run</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
