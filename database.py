@@ -62,7 +62,7 @@ class Database:
     It does not perform any actual file operations on backups.
     """
 
-    CURRENT_SCHEMA_VERSION = 10
+    CURRENT_SCHEMA_VERSION = 9
 
     def __init__(self, connection_config: dict, page_size: int = 10):
         if connection_config == {}:
