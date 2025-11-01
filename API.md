@@ -351,3 +351,15 @@ List all scheduled and delayed jobs.
     ]
 }
 ```
+
+### GET `/api/jobs/force_run/<job name>`
+
+Force a specific job to run.
+
+#### Example output
+
+```json
+{
+    "success": true
+}
+```

@@ -478,3 +478,9 @@ class API:
                 })
 
             return jsonify(success=True, scheduled=scheduled_json, delayed=delayed_json), 200
+
+        @self.blueprint.route("/jobs/force_run/<name>")
+        @requires_auth
+        def force_run_job(name: str):
+            self.job_scheduler.force_run_job(name)
+            return jsonify(success=True)

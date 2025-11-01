@@ -2,6 +2,14 @@
 
 See what's changed between versions!
 
+## 2.4
+
+* Added API endpoint to force run job.
+
+## 2.3.1
+
+* Updated schema version back to 10 as I added the corrseponding migration file.
+
 ## 2.3
 
 * Added a better page for force running scheduled jobs.
