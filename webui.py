@@ -160,7 +160,7 @@ class WebUI:
             sort_options = parse_sort_options(database.BackupSortOptions)
             active_backups = self.db.list_backups_target_is_recycled(id, False, sort_options)
             recycled_backups = self.db.list_backups_target_is_recycled(id, True, sort_options)
-            return render_template("view_target.html", target=target, active_backups=active_backups, recycled_backups=recycled_backups, num_backups=len(active_backups) + len(recycled_backups), has_recycled_backups=len(recycled_backups) > 0)
+            return render_template("view_target.html", target=target, active_backups=active_backups, recycled_backups=recycled_backups, num_backups=len(active_backups) + len(recycled_backups), has_recycled_backups=len(recycled_backups) > 0, num_recycled_backups=len(recycled_backups))
 
         @self.blueprint.route("/target/<id>/upload", methods=["GET", "POST"])
         @requires_auth
@@ -285,7 +285,7 @@ class WebUI:
             for backup in backups:
                 backups_and_targets.append({"backup": backup, "target": self.db.get_target(backup.target_id)})
             return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups))
-        
+
         @self.blueprint.route("/recycle_bin/clear", methods=["GET", "POST"])
         @requires_auth
         def recycle_bin_clear():
@@ -293,6 +293,65 @@ class WebUI:
                 self.handle_post_recycle_bin_clear()
                 return redirect(url_for("webui.recycle_bin"))
             return render_template("recycle_bin_clear.html")
+
+        @self.blueprint.route("/backup/bulk_edit", methods=["POST"])
+        @requires_auth
+        def bulk_edit():
+            # TODO Create a separate POST handler for this.
+            # I didn't bother with one for now as this is quite complex unlike all the other ones
+            self.post_log("bulk edit")
+            all_target_id = request.form.get("select_all_backups")
+            execute = request.form.get("bulk_edit_execute")
+            backups = []
+            recycled_type = request.form.get("recycled_type")
+
+            action = None
+            if execute:
+                action = request.form.get("action")
+            else:
+                if request.form.get("bulk_recycle") == "Recycle":
+                    action = "recycle"
+                elif request.form.get("bulk_unrecycle") == "Restore":
+                    action = "unrecycle"
+                elif request.form.get("bulk_delete") == "Delete":
+                    action = "delete"
+                else:
+                    return render_template("bulk_edit_confirm.html", error="Invalid action specified")
+
+            if execute:
+                backups = request.form.get("backup_ids").split(";")
+            else:
+                if all_target_id is not None:
+                    if recycled_type == "only_recycled":
+                        backups = self.db.list_backups_target_is_recycled(all_target_id, True)
+                    elif recycled_type == "only_active":
+                        backups = self.db.list_backups_target_is_recycled(all_target_id, False)
+                    else:
+                        backups = self.db.list_backups_target(all_target_id)
+                else:
+                    for key, value in request.form.items():
+                        if key.startswith("backup"):
+                            backup_id = key[6:]
+                            backups.append(self.db.get_backup(backup_id))
+
+                if len(backups) == 0:
+                    return render_template("bulk_edit_confirm.html", error="No backups selected")
+                if all_target_id is not None and self.db.get_target(all_target_id) is None:
+                    return render_template("bulk_edit_confirm.html", error="Invalid target specified")
+
+            if execute:
+                if action == "recycle":
+                    for backup_id in backups:
+                        self.server_api.recycle_backup(backup_id)
+                elif action == "unrecycle":
+                    for backup_id in backups:
+                        self.server_api.unrecycle_backup(backup_id)
+                elif action == "delete":
+                    for backup_id in backups:
+                        self.server_api.delete_backup(backup_id)
+                return redirect(url_for("webui.list_targets"))
+
+            return render_template("bulk_edit_confirm.html", backups=backups, error=None, action=action, backup_ids=";".join([backup.id for backup in backups]))
 
     #
     # POST request handlers

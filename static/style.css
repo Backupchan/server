@@ -105,3 +105,15 @@ th, td {
     border: 1px solid black;
     padding: 4px;
 }
+
+.bulk_edit_checkbox {
+    text-align: center;
+}
+
+.bulk_edit_actions {
+    display: none;
+    border: 1px solid black;
+    padding: 0.3em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+}

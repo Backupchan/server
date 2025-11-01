@@ -5,6 +5,7 @@ See what's changed between versions!
 ## 2.4
 
 * Added API endpoint to force run job.
+* Added bulk edit mode for backups.
 
 ## 2.3.1
 

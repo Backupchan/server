@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Backup-chan >> Target: {{ target.name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="{{ url_for('static', filename='bulk_edit.js') }}"></script>
+    <noscript>
+        <style>
+            .bulk_edit_actions {
+                display: inline-block;
+            }
+        </style>
+    </noscript>
 </head>
 <body>
     {{ navbar() }}
@@ -19,13 +27,13 @@
             <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
         </ul>
         <p>This target has <b>{{ num_backups }}</b> backup{% if num_backups != 1 %}s{% endif %}.</p>
-        {{ backup_table_print(active_backups) }}
+        {{ backup_table_print(active_backups, true, false, "del_rec", "active_backups_form", target.id) }}
 
         {% if has_recycled_backups %}
         <details>
-            <summary>Recycled backups</summary>
-			<a href="{{ url_for('webui.delete_target_recycled', id=target.id) }}">Delete recycled backups</a>
-            {{ backup_table_print(recycled_backups) }}
+            <summary>Recycled backups ({{ num_recycled_backups }})</summary>
+	    <a href="{{ url_for('webui.delete_target_recycled', id=target.id) }}">Delete recycled backups</a>
+            {{ backup_table_print(recycled_backups, true, true, "del_unrec", "recycled_backups_form", target.id) }}
             </details>
         {% endif %}
     </div>

@@ -1,0 +1,29 @@
+{% from "macro.html" import backup_table_print, navbar %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Confirm bulk edit</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        {% if error is none %}
+        <h1>Confirm bulk edit</h1>
+        <p>The following backups will be <b>{{ action}}d</b>:</p>
+        {{ backup_table_print(backups) }}
+        <p></p>
+        <form method="post" action="{{ url_for('webui.bulk_edit') }}">
+            <input type="hidden" name="bulk_edit_execute" value="1">
+            <input type="hidden" name="backup_ids" value="{{ backup_ids }}">
+            <input type="hidden" name="action" value="{{ action }}">
+            <input type="submit" name="submit" value="Submit">
+        </form>
+        {% else %}
+        <p>Unable to execute bulk edit: {{ error }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>

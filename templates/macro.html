@@ -50,8 +50,11 @@
     </b>
 {% endmacro %}
 
-{% macro backup_print(backup, target=none) %}
+{% macro backup_print(backup, bulk_edit_controls, target=none) %}
 <tr>
+    {% if bulk_edit_controls %}
+    <td class="bulk_edit_checkbox"><input name="backup{{ backup.id }}" type="checkbox" value="1">
+    {% endif %}
     <td>{{ backup.id }}</td>
     {% if target is not none %}
     <td><a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a></td>
@@ -71,23 +74,47 @@
 </tr>
 {% endmacro %}
 
-{% macro backup_table_print(backups) %}
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Date</th>
-                <th>Size</th>
-                <th>Manual</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for backup in backups %}
-                {{ backup_print(backup) }}
-            {% endfor %}
-        </tbody>
-    </table>
+{% macro backup_table_print(backups, bulk_edit, bulk_recycled_only, bulk_actions, form_id, target_id) %}
+    <form method="post" id="{{ form_id }}" action="{{ url_for('webui.bulk_edit') }}">
+        <input type="hidden" name="recycled_type" value="{% if bulk_recycled_only %}only_recycled{% else %}only_active{% endif %}">
+        <table>
+            <thead>
+                <tr>
+                    {% if bulk_edit %}
+                    <th><input name="select_all_backups" class="select_all_backups" type="checkbox" value="{{ target_id }}"></th>
+                    {% endif %}
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Size</th>
+                    <th>Manual</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for backup in backups %}
+                    {{ backup_print(backup, bulk_edit) }}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if bulk_edit %}
+        <div class="bulk_edit_actions">
+            Bulk edit:
+            {% if bulk_actions == "del_rec" %}
+            <input name="bulk_delete" type="submit" value="Delete">
+            <input name="bulk_recycle" type="submit" value="Recycle">
+            {% elif bulk_actions == "del_unrec" %}
+            <input name="bulk_delete" type="submit" value="Delete">
+            <input name="bulk_unrecycle" type="submit" value="Restore">
+            {% endif %}
+            <span class="selected_count"></span>
+        </div>
+        {% endif %}
+    </form>
+    {% if bulk_edit %}
+    <script>
+        bulkEditInitialize("{{ form_id }}");
+    </script>
+    {% endif %}
 {% endmacro %}
 
 {% macro navbar() %}
