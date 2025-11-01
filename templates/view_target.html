@@ -1,4 +1,4 @@
-{% from "macro.html" import target_print, backup_print, navbar %}
+{% from "macro.html" import target_print, backup_table_print, navbar %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,43 +19,13 @@
             <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
         </ul>
         <p>This target has <b>{{ num_backups }}</b> backup{% if num_backups != 1 %}s{% endif %}.</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Date</th>
-                    <th>Size</th>
-                    <th>Manual</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for backup in active_backups %}
-                {{ backup_print(backup) }}
-            {% endfor %}
-            </tbody>
-        </table>
+        {{ backup_table_print(active_backups) }}
 
         {% if has_recycled_backups %}
         <details>
             <summary>Recycled backups</summary>
 			<a href="{{ url_for('webui.delete_target_recycled', id=target.id) }}">Delete recycled backups</a>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Date</th>
-                        <th>Size</th>
-                        <th>Manual</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for backup in recycled_backups %}
-                    {{ backup_print(backup) }}
-                {% endfor %}
-                </tbody>
-            </table>
+            {{ backup_table_print(recycled_backups) }}
             </details>
         {% endif %}
     </div>

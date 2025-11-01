@@ -51,24 +51,43 @@
 {% endmacro %}
 
 {% macro backup_print(backup, target=none) %}
-    <tr>
-        <td>{{ backup.id }}</td>
-        {% if target is not none %}
-        <td><a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a></td>
+<tr>
+    <td>{{ backup.id }}</td>
+    {% if target is not none %}
+    <td><a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a></td>
+    {% endif %}
+    <td>{{ backup.pretty_created_at() }}</td>
+    <td>{{ backup.pretty_filesize() }}</td>
+    <td>{% if backup.manual %}yes{% else %}no{% endif %}</td>
+    <td>
+        <a href="{{ url_for('webui.download_backup', id=backup.id) }}">Download</a> |
+        <a href="{{ url_for('webui.delete_backup', id=backup.id) }}">Delete</a> |
+        {% if backup.is_recycled %}
+        <a href="{{ url_for('webui.unrecycle_backup', id=backup.id) }}">Restore</a>
+        {% else %}
+        <a href="{{ url_for('webui.recycle_backup', id=backup.id) }}">Recycle</a>
         {% endif %}
-        <td>{{ backup.pretty_created_at() }}</td>
-        <td>{{ backup.pretty_filesize() }}</td>
-        <td>{% if backup.manual %}yes{% else %}no{% endif %}</td>
-        <td>
-            <a href="{{ url_for('webui.download_backup', id=backup.id) }}">Download</a> |
-            <a href="{{ url_for('webui.delete_backup', id=backup.id) }}">Delete</a> |
-            {% if backup.is_recycled %}
-            <a href="{{ url_for('webui.unrecycle_backup', id=backup.id) }}">Restore</a>
-            {% else %}
-            <a href="{{ url_for('webui.recycle_backup', id=backup.id) }}">Recycle</a>
-            {% endif %}
-        </td>
-    </tr>
+    </td>
+</tr>
+{% endmacro %}
+
+{% macro backup_table_print(backups) %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Size</th>
+                <th>Manual</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for backup in backups %}
+                {{ backup_print(backup) }}
+            {% endfor %}
+        </tbody>
+    </table>
 {% endmacro %}
 
 {% macro navbar() %}
