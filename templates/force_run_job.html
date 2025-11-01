@@ -1,0 +1,17 @@
+{% from "macro.html" import navbar %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Force run job</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <p>Scheduled job <span class="monospace">{{ name }}</span> has been started. Check the <a href="{{ url_for('webui.view_log') }}">log</a> for more details.</p>
+		<a href="{{ url_for('webui.list_jobs') }}">Back to job list</a>
+    </div>
+</body>
+</html>
