@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.4.2
+
+* Fixed recycle job not working.
+
 ## 2.4.1
 
 * Fixed force run job web UI crashing.

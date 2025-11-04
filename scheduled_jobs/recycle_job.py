@@ -18,7 +18,7 @@ class RecycleJob(scheduled_jobs.ScheduledJob):
         with self.lock:
             targets = self.db.list_targets()
             for target in targets:
-                self.logger.info("Check target {%s}", target.id)
+                self.logger.info("Check target {%s} (%s)", target.id, target.name)
 
                 if target.recycle_criteria == models.BackupRecycleCriteria.NONE:
                     self.logger.info("Target has no recycle criteria.")
@@ -69,7 +69,7 @@ class RecycleJob(scheduled_jobs.ScheduledJob):
     def execute_recycle_action(self, recycle_action: models.BackupRecycleAction, backup_id: str, target_id: str):
         self.logger.info("Execute recycle action (%s) on backup {%s}", recycle_action, backup_id)
         if recycle_action == models.BackupRecycleAction.DELETE:
-            self.server_api.delete_backup(backup_id)
+            self.server_api.delete_backup(backup_id, True)
         elif recycle_action == models.BackupRecycleAction.RECYCLE:
             self.server_api.recycle_backup(backup_id)
         else:
