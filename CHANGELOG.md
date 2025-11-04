@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.5.1
+
+* Added API support for minimum backups field.
+
 ## 2.5.0
 
 * Added a minimum backups field for targets with age-based recycle criteria.
