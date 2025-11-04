@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.5.0
+
+* Added a minimum backups field for targets with age-based recycle criteria.
+
 ## 2.4.2
 
 * Fixed recycle job not working.
