@@ -110,16 +110,17 @@ class Database:
         location: str,
         name_template: str,
         deduplicate: bool,
-        alias: str | None
+        alias: str | None,
+        min_backups: int | None
     ) -> str:
         with self.lock:
             self.validate_target(name, name_template, location, None, alias)
 
             target_id = str(uuid.uuid4())
-            self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias))
+            self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups))
             self.connection.commit()
 
-            self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
+            self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s min backups: %d", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups)
             return target_id
 
     def edit_target(
@@ -132,7 +133,8 @@ class Database:
         location: str,
         name_template: str,
         deduplicate: bool,
-        alias: str | None
+        alias: str | None,
+        min_backups: int | None
     ):
         with self.lock:
             target = self.get_target(id)
@@ -142,10 +144,10 @@ class Database:
             target_id = target.id
             self.validate_target(name, name_template, location, target_id, alias)
 
-            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ?, alias = ? WHERE id = ? OR alias = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, id, id))
+            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ?, alias = ?, min_backups = ? WHERE id = ? OR alias = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups, id, alias))
             self.connection.commit()
 
-            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s", target_id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias)
+            self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s min backups %d", target_id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups)
 
     def list_targets(self, page: int = 1, sort_options: TargetSortOptions | None = None) -> list[models.BackupTarget]:
         sort_options = sort_options or TargetSortOptions.default()

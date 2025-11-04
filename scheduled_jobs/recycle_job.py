@@ -59,6 +59,10 @@ class RecycleJob(scheduled_jobs.ScheduledJob):
             self.logger.info("Criteria = age; Recycling backups older than %d days", max_age)
 
             for backup in backups:
+                num_backups = len(self.db.list_backups_target_is_recycled(target.id, False))
+                if num_backups <= target.min_backups:
+                    self.logger.info("Minimal number of backups (%d) reached. Stopping.", target.min_backups)
+                    break
                 age = (now - backup.created_at).days
                 if age > max_age:
                     self.logger.info("Backup {%s} is %d days old", backup.id, age)

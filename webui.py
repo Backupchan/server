@@ -364,7 +364,7 @@ class WebUI:
             return "Specify a recycle value"
 
         try:
-            self.db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"] or 0, request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None)
+            self.db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"] or 0, request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None, request.form["min_backups"] or None)
         except Exception as exc:
             return str(exc)
         return None
@@ -376,7 +376,7 @@ class WebUI:
             return "Specify a recycle value"
 
         try:
-            self.server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None)
+            self.server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None, request.form["min_backups"] or None)
         except Exception as exc:
             print(traceback.format_exc(), file=sys.stderr)
             return str(exc)

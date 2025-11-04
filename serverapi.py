@@ -15,12 +15,12 @@ class ServerAPI:
         self.fm = fm
         self.lock = threading.RLock()
 
-    def edit_target(self, target_id: str, new_name: str, new_recycle_criteria: str, new_recycle_value: int, new_recycle_action: str, new_location: str, new_name_template: str, deduplicate: bool, alias: str | None):
+    def edit_target(self, target_id: str, new_name: str, new_recycle_criteria: str, new_recycle_value: int, new_recycle_action: str, new_location: str, new_name_template: str, deduplicate: bool, alias: str | None, min_backups: int | None):
         with self.lock:
             target = self.db.get_target(target_id)
             old_location = target.location
             old_name_template = target.name_template
-            self.db.edit_target(target_id, new_name, new_recycle_criteria, new_recycle_value, new_recycle_action, new_location, new_name_template, deduplicate, alias)
+            self.db.edit_target(target_id, new_name, new_recycle_criteria, new_recycle_value, new_recycle_action, new_location, new_name_template, deduplicate, alias, min_backups)
             if old_name_template != new_name_template or old_location != new_location:
                 self.fm.update_backup_locations(target, new_name_template, new_location, old_name_template, old_location)
 

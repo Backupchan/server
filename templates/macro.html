@@ -12,6 +12,9 @@
         After {{ target.recycle_value }} copies
     {% elif target.recycle_criteria == "age" %}
         After {{ target.recycle_value }} days
+        {% if target.min_backups %}
+        (keep at least {{ target.min_backups }} backups)
+        {% endif %}
     {% else %}
         (broken value)
     {% endif %}
