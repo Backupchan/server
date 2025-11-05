@@ -360,11 +360,11 @@ class WebUI:
     def handle_post_new_target(self) -> str | None:
         self.post_log("new target")
 
-        if not request.form["recycle_value"] and request.form["recycle_criteria"] != "none":
+        if not "recycle_value" in request.form and request.form["recycle_criteria"] != "none":
             return "Specify a recycle value"
 
         try:
-            self.db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form["recycle_value"] or 0, request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None, request.form["min_backups"] or None)
+            self.db.add_target(request.form["name"], request.form["backup_type"], request.form["recycle_criteria"], request.form.get("recycle_value", 0), request.form.get("recycle_action", "none"), request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form.get("alias", None) or None, request.form.get("min_backups", 0))
         except Exception as exc:
             return str(exc)
         return None
@@ -372,13 +372,12 @@ class WebUI:
     def handle_post_edit_target(self, target_id: str) -> str | None:
         self.post_log("edit target")
 
-        if not request.form["recycle_value"] and request.form["recycle_criteria"] != "none":
+        if not "recycle_value" in request.form and request.form["recycle_criteria"] != "none":
             return "Specify a recycle value"
 
         try:
-            self.server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form["recycle_value"], request.form["recycle_action"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form["alias"] or None, request.form["min_backups"] or None)
+            self.server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form.get("recycle_value", 0), request.form.get("recycle_action", "none"), request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form.get("alias", None) or None, request.form.get("min_backups", 0))
         except Exception as exc:
-            print(traceback.format_exc(), file=sys.stderr)
             return str(exc)
         return None
 
