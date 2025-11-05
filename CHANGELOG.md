@@ -2,6 +2,11 @@
 
 See what's changed between versions!
 
+## 2.6.0
+
+* Fixed 400 status code when editing or creating target.
+* Changed target list to show total filesize and number of backups. Removed recycle criteria and name template columns.
+
 ## 2.5.1
 
 * Added API support for minimum backups field.
