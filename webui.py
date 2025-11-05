@@ -138,7 +138,16 @@ class WebUI:
             page = int(request.args.get("page", 1))
             sort_options = parse_sort_options(database.TargetSortOptions)
             targets = self.db.list_targets(page, sort_options)
-            return render_template("list_targets.html", targets=targets, num_targets=self.db.count_targets(), num_backups=self.db.count_backups(), page=page)
+            target_infos = []
+            for target in targets:
+                backups = self.db.list_backups_target(target.id)
+                target_infos.append(
+                        (target,
+                         len(backups),
+                         utility.humanread_file_size(sum([backup.filesize for backup in backups]))
+                    )
+                )
+            return render_template("list_targets.html", targets=target_infos, num_targets=self.db.count_targets(), num_backups=self.db.count_backups(), page=page)
 
         @self.blueprint.route("/target/new", methods=["GET", "POST"])
         @requires_auth
