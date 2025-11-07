@@ -357,7 +357,7 @@ class WebUI:
                         self.server_api.unrecycle_backup(backup_id)
                 elif action == "delete":
                     for backup_id in backups:
-                        self.server_api.delete_backup(backup_id)
+                        self.server_api.delete_backup(backup_id, True)
                 return redirect(url_for("webui.list_targets"))
 
             return render_template("bulk_edit_confirm.html", backups=backups, error=None, action=action, backup_ids=";".join([backup.id for backup in backups]))
@@ -398,13 +398,20 @@ class WebUI:
         self.post_log("upload backup")
 
         # Saving the file is done separately as it gets closed after the request, but the job runs after it.
-        file = request.files["backup_file"]
-        filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
-        os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
-        file.save(filename)
+        files = request.files.getlist("backup_file")
+        if len(files) == 0:
+            return "No files specified"
+        if len(files) != 1 and self.db.get_target(target_id).target_type == "single":
+            return "Cannot upload multiple files to a single-file target" # Technically shouldn't happen but who knows
+        filenames = []
+        for file in files:
+            filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+            os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+            file.save(filename)
+            filenames.append(filename)
 
         try:
-            self.job_manager.run_job(delayed_jobs.UploadJob(target_id, True, filename, self.server_api))
+            self.job_manager.run_job(delayed_jobs.UploadJob(target_id, True, filenames, self.server_api))
         except Exception as exc:
             print(traceback.format_exc(), file=sys.stderr)
             return str(exc)

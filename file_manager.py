@@ -92,9 +92,9 @@ class FileManager:
         self.lock = threading.RLock()
         self.logger = logging.getLogger(__name__)
 
-    def add_backup(self, backup_id: str, filename: str):
+    def add_backup(self, backup_id: str, filenames: list[str]):
         with self.lock:
-            self.logger.info("Start add backup operation. Backup id: {%s} filename: %s", backup_id, filename)
+            self.logger.info("Start add backup operation. Backup id: {%s} filenames: %s", backup_id, filenames)
 
             #
             # Checks
@@ -106,17 +106,32 @@ class FileManager:
 
             # If it's single-file, append the extension as well.
             if target.target_type == models.BackupType.SINGLE:
-                fs_location += Path(filename).suffix
+                fs_location += Path(filenames[0]).suffix
 
             if os.path.exists(fs_location):
                 return FileManagerError(f"Path {fs_location} already exists")
 
             self.logger.info("Will be put in %s", fs_location)
 
-            # If it's multi-file, check the extension
-            # TODO is it worth checking the file content to check if it's a real zip/tar/whatever and not an imposter?
-            if target.target_type == models.BackupType.MULTI and not is_archive_filename(filename) and not os.path.isdir(filename):
-                raise FileManagerError("Backup file is not a supported archive")
+            # If it's multi-file...
+            is_multiple_files = True
+            if target.target_type == models.BackupType.MULTI:
+                # If there's only one file...
+                if len(filenames) == 1:
+                    # ...and it's either an archive or directory, then it's not a multi-file upload.
+                    # TODO is it worth checking the file content to check if it's a real zip/tar/whatever and not an imposter?
+                    if is_archive_filename(filenames[0]) or os.path.isdir(filenames[0]):
+                        is_multiple_files = False
+                    # Otherwise it's a multi-file upload (or just 1 that will be put in a dir anyway)
+                # Having zero files physically wouldn't work.
+                elif len(filenames) == 0:
+                    raise FileManagerError("No files specified for backup")
+                # Two or more files.
+                else:
+                    # If any of them's a directory, then no.
+                    for filename in filenames:
+                        if os.path.isdir(filename):
+                            raise FileManagerError("Directories are not permitted when multiple filenames specified.")
 
             #
             # Actual operation
@@ -131,13 +146,18 @@ class FileManager:
                 os.makedirs(target.location, exist_ok=True)
 
             if target.target_type == models.BackupType.SINGLE:
-                shutil.move(filename, fs_location)
+                shutil.move(filenames[0], fs_location)
             else:
-                if os.path.isdir(filename):
-                    shutil.move(filename, fs_location)
+                if is_multiple_files:
+                    # This keeps hex UUIDs that webUI prefixes, to avoid duplicate names.
+                    for filename in filenames:
+                        shutil.move(filename, fs_location)
                 else:
-                    # pull up the extremely convenient archive extractor(tm)
-                    extract_archive(fs_location, filename)
+                    if os.path.isdir(filenames[0]):
+                        shutil.move(filenames[0], fs_location)
+                    else:
+                        # pull up the extremely convenient archive extractor(tm)
+                        extract_archive(fs_location, filenames[0])
 
             self.logger.info("Finish upload")
 

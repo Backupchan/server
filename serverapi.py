@@ -40,11 +40,11 @@ class ServerAPI:
             for backup in self.db.list_backups_target_is_recycled(target_id, True):
                 self.delete_backup(backup.id, delete_files)
 
-    def upload_backup(self, target_id: str, manual: bool, filename: str) -> str:
+    def upload_backup(self, target_id: str, manual: bool, filenames: list[str]) -> str:
         backup_id = self.db.add_backup(target_id, manual)
 
         try:
-            self.fm.add_backup(backup_id, filename)
+            self.fm.add_backup(backup_id, filenames)
         except Exception as exc:
             self.db.delete_backup(backup_id)
             raise

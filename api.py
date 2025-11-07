@@ -222,13 +222,20 @@ class API:
 
             is_manual = data["manual"]
 
-            file = request.files["backup_file"]
-            filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
-            os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
-            file.save(filename)
+            files = request.files.getlist("backup_file")
+            if len(files) == 0:
+                return "No files specified"
+            if len(files) != 1 and target.target_type == "single":
+                return "Cannot upload multiple files to a single-file target" # More likely to happen in the API if you're not careful
+            filenames = []
+            for file in files:
+                filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+                os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
+                file.save(filename)
+                filenames.append(filename)
 
             try:
-                job_id = self.job_manager.run_job(delayed_jobs.UploadJob(target.id, is_manual, filename, self.server_api))
+                job_id = self.job_manager.run_job(delayed_jobs.UploadJob(target.id, is_manual, filenames, self.server_api))
             except Exception as exc:
                 self.logger.error("Encountered error while uploading backup", exc_info=exc)
                 return jsonify(success=False), 500
@@ -380,7 +387,7 @@ class API:
             source_path = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}")
             backup_id = self.db.add_backup(target.id, self.seq_upload_manager[target.id].manual)
             try:
-                self.fm.add_backup(backup_id, source_path)
+                self.fm.add_backup(backup_id, [source_path])
             except Exception as exc:
                 self.db.delete_backup(backup_id)
                 self.logger.error("Error when adding sequential backup files on target {%s}", target.id, exc_info=exc)

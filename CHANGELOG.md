@@ -2,6 +2,11 @@
 
 See what's changed between versions!
 
+## 2.7.0
+
+* Added multi-file uploads in web UI for multi-file targets.
+* Fixed delete bulk edit not working.
+
 ## 2.6.0
 
 * Fixed 400 status code when editing or creating target.
