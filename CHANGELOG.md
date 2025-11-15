@@ -2,6 +2,11 @@
 
 See what's changed between versions!
 
+## 2.7.1
+
+* Added autofocus on name field in target create and edit page.
+* Fixed whitespace-only target names and aliases being allowed.
+
 ## 2.7.0
 
 * Added multi-file uploads in web UI for multi-file targets.
