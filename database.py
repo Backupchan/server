@@ -295,8 +295,8 @@ class Database:
     def validate_target(self, name: str, name_template: str, location: str, target_id: str | None, alias: str | None):
         with self.lock:
             # The name must not be empty.
-            if len(name) == 0:
-                raise DatabaseError("Name of new target must not be empty")
+            if len(name.strip()) == 0:
+                raise DatabaseError("Target name must not be empty")
 
             # Name template must contain either ID of backup or its creation date.
             if not nameformat.verify_name(name_template):
@@ -315,8 +315,13 @@ class Database:
             if not utility.is_valid_path(location, True):
                 raise DatabaseError("Target location must not contain invalid characters")
             
-            # Alias must be unique to this target (if present).
+            # Alias validation
             if alias is not None:
+                # Alias must not be empty.
+                if len(alias.strip()) == 0:
+                    raise DatabaseError("Alias must not be empty")
+                
+                # Alias must be unique to this target.
                 for target in self.list_targets():
                     if target.alias == alias and target.id != target_id:
                         raise DatabaseError("Alias is not unique to this target")
