@@ -56,19 +56,20 @@ class WebUI:
             def decorated(*args, **kwargs):
                 if not self.passwd_hash or not self.config.get("webui_auth") or session.get("authed"):
                     return f(*args, **kwargs)
-                return redirect("/login")
+                return redirect(url_for("webui.login", return_url=request.path))
             return decorated
 
         @self.blueprint.route("/login", methods=["GET", "POST"])
         def login():
+            return_url = request.args.get("return_url")
             if request.method == "POST":
                 password = request.form["password"]
                 if check_password_hash(self.passwd_hash, password):
                     session["authed"] = True
-                    return redirect(url_for("webui.list_targets"))
+                    return redirect(return_url or url_for("webui.list_targets"))
                 else:
-                    return render_template("login.html", incorrect=True)
-            return render_template("login.html")
+                    return render_template("login.html", incorrect=True, return_url=return_url)
+            return render_template("login.html", return_url=return_url)
 
         #
         # Miscellaneous endpoints
