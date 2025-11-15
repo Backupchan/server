@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.7.2
+
+* When logging in, the user is now returned to their previous page upon logging in.
+
 ## 2.7.1
 
 * Added autofocus on name field in target create and edit page.
