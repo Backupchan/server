@@ -20,7 +20,7 @@
         {% if error_message is not none %}
         <span class="error-message">{{ error_message }}</span><p></p>
         {% endif %}
-            <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required><p></p>
+            <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required autofocus><p></p>
 
             <span>Alias:</span> <input type="text" name="alias" {% if target is not none and target.alias is not none %}value="{{ target.alias }}"{% endif %}><p></p>
             <ul>
