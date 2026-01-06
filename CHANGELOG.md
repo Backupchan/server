@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.7.3
+
+* The current and required database schema version is shown in the event of a version mismatch.
+
 ## 2.7.2
 
 * When logging in, the user is now returned to their previous page upon logging in.
