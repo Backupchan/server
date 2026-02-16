@@ -360,8 +360,13 @@ class API:
                 return jsonify(success=False, message="No file given"), 400
 
             try:
+                rel_path = sequential_file.full_path()
+                if os.path.isabs(rel_path):
+                    rel_path = rel_path.lstrip("/")
+
                 file = request.files["file"]
-                filename = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}", sequential_file.full_path())
+                filename = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}", rel_path)
+                self.logger.info(f"{sequential_file.full_path()} -> {filename}")
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
 
                 file.save(filename)
