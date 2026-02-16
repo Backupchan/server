@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.7.4
+
+* Fixed sequential uploads putting files in subdirectories into the root directory of the filesystem.
+
 ## 2.7.3
 
 * The current and required database schema version is shown in the event of a version mismatch.
