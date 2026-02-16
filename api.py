@@ -366,7 +366,6 @@ class API:
 
                 file = request.files["file"]
                 filename = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}", rel_path)
-                self.logger.info(f"{sequential_file.full_path()} -> {filename}")
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
 
                 file.save(filename)
