@@ -15,7 +15,7 @@ import dataclasses
 import os
 import uuid
 import datetime
-from backupchan_server import models
+from backupchan_server import models, utility
 from version import PROGRAM_VERSION
 from flask import Blueprint, jsonify, request, Response, send_file
 
@@ -229,7 +229,7 @@ class API:
                 return "Cannot upload multiple files to a single-file target" # More likely to happen in the API if you're not careful
             filenames = []
             for file in files:
-                filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+                filename = utility.join_path(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
                 os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
                 file.save(filename)
                 filenames.append(filename)
@@ -365,7 +365,7 @@ class API:
                     rel_path = rel_path.lstrip("/")
 
                 file = request.files["file"]
-                filename = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}", rel_path)
+                filename = utility.join_path(self.config.get("temp_save_path"), f"seq_{target.id}", rel_path)
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
 
                 file.save(filename)
@@ -388,7 +388,7 @@ class API:
             if not self.seq_upload_manager[target.id].all_uploaded():
                 return jsonify(success=False), 409
 
-            source_path = os.path.join(self.config.get("temp_save_path"), f"seq_{target.id}")
+            source_path = utility.join_path(self.config.get("temp_save_path"), f"seq_{target.id}")
             backup_id = self.db.add_backup(target.id, self.seq_upload_manager[target.id].manual)
             try:
                 self.fm.add_backup(backup_id, [source_path])

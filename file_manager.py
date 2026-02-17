@@ -7,8 +7,7 @@ import tarfile
 import threading
 import hashlib
 from pathlib import Path
-from backupchan_server import models
-from backupchan_server import nameformat
+from backupchan_server import models, nameformat, utility
 
 class FileManagerError(Exception):
     pass
@@ -42,7 +41,7 @@ def extract_archive(fs_location: str, filename: str):
     raise FileManagerError("Unsupported archive format")
 
 def get_fs_location(location: str, name_template: str, backup_id: str, backup_creation_str: str, manual: bool) -> str:
-    return os.path.join(location, nameformat.parse(name_template, backup_id, backup_creation_str, manual))
+    return utility.join_path(location, nameformat.parse(name_template, backup_id, backup_creation_str, manual))
 
 def get_backup_fs_location(backup: models.Backup, target: models.BackupTarget, recycle_bin_path: str) -> str:
     if backup.is_recycled:
@@ -79,7 +78,7 @@ def directory_hash(path: str) -> str:
     h = hashlib.sha256()
     for root, _, files in sorted(os.walk(path)):
         for filename in sorted(files):
-            filepath = os.path.join(root, filename)
+            filepath = utility.join_path(root, filename)
             relpath = os.path.relpath(filepath, path)
             h.update(relpath.encode())
             h.update(file_hash(filepath).encode())

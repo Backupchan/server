@@ -2,12 +2,13 @@ import logging
 import os
 import sys
 import re
+from backupchan_server import utility
 from dataclasses import dataclass
 
 # TODO make configurable
 
-LOG_DIRECTORY = os.path.join(".", "log")
-LOG_FILE = os.path.join(LOG_DIRECTORY, "backupchan.log")
+LOG_DIRECTORY = utility.join_path(".", "log")
+LOG_FILE = utility.join_path(LOG_DIRECTORY, "backupchan.log")
 
 @dataclass
 class LogLine:

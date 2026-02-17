@@ -115,7 +115,7 @@ class WebUI:
 
         @self.blueprint.route("/favicon.ico")
         def favicon():
-            return send_from_directory(os.path.join(self.root_path, "static"), "favicon.ico", mimetype="vnd.microsoft.icon")
+            return send_from_directory(utility.join_path(self.root_path, "static"), "favicon.ico", mimetype="vnd.microsoft.icon")
 
         @self.blueprint.route("/force-run-job/<name>")
         @requires_auth
@@ -442,7 +442,7 @@ class WebUI:
             return "Cannot upload multiple files to a single-file target" # Technically shouldn't happen but who knows
         filenames = []
         for file in files:
-            filename = os.path.join(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
+            filename = utility.join_path(self.config.get("temp_save_path"), f"{uuid.uuid4().hex}_{file.filename}")
             os.makedirs(self.config.get("temp_save_path"), exist_ok=True)
             file.save(filename)
             filenames.append(filename)

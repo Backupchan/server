@@ -5,6 +5,7 @@ import serverconfig
 import logging
 import argparse
 import os
+from backupchan_server import utility
 
 def main():
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s")
@@ -21,7 +22,7 @@ def main():
     if migration == "":
         db.initialize_database()
     else:
-        with open(os.path.join("migrations", migration), "r", encoding="utf-8") as f:
+        with open(utility.join_path("migrations", migration), "r", encoding="utf-8") as f:
             sql = f.read()
             db.run_migration(migration, sql)
     print("The Backup-chan database has been migrated. Backup-chan is ready to run.")

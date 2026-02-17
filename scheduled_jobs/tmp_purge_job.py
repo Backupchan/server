@@ -1,6 +1,7 @@
 import scheduled_jobs
 import os
 import datetime
+from backupchan_server import utility
 
 class TemporaryPurgeJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, temp_dir: str):
@@ -11,7 +12,7 @@ class TemporaryPurgeJob(scheduled_jobs.ScheduledJob):
     def run(self):
         temp_files = os.listdir(self.temp_dir)
         for i, file in enumerate(temp_files):
-            temp_files[i] = os.path.join(self.temp_dir, file)
+            temp_files[i] = utility.join_path(self.temp_dir, file)
         files = [file for file in temp_files if os.path.isfile(file)]
         now = datetime.datetime.now()
         for file in files:

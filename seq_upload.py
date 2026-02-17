@@ -17,7 +17,7 @@ class SequentialFile:
         return self.path == other.path and self.name == other.name
 
     def full_path(self) -> str:
-        return os.path.join(self.path.rstrip("/"), self.name)
+        return utility.join_path(self.path.rstrip("/"), self.name)
 
     @staticmethod
     def from_dict(d: dict) -> "SequentialFile":
