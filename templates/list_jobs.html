@@ -27,7 +27,7 @@
                     <td class="monospace">{{ job.name }}</td>
                     <td>{{ job.interval }} seconds</td>
                     <td>{{ job.pretty_next_run() }} ({{ job.next_run | time_until }})</td>
-					<td><a href="{{ url_for('webui.force_run_job', name=job.name) }}">Force re-run</a></td>
+		    <td><a href="{{ url_for('webui.force_run_job', name=job.name) }}">Force re-run</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
