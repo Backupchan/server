@@ -16,7 +16,7 @@ class RecycleJob(scheduled_jobs.ScheduledJob):
 
     def run(self):
         with self.lock:
-            targets = self.db.list_targets()
+            targets = self.db.list_targets_all()
             for target in targets:
                 self.logger.info("Check target {%s} (%s)", target.id, target.name)
 

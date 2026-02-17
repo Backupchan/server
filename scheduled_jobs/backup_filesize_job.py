@@ -11,7 +11,7 @@ class BackupFilesizeJob(scheduled_jobs.ScheduledJob):
         self.fm = fm
 
     def run(self):
-        targets = self.db.list_targets()
+        targets = self.db.list_targets_all()
         for target in targets:
             self.logger.info("Check target {%s} (%s)", target.id, target.name)
             for backup in self.db.list_backups_target(target.id):
