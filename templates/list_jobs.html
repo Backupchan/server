@@ -33,6 +33,9 @@
             </tbody>
         </table>
         <h2>Delayed jobs</h2>
+        {% if delayed_job_count == 0 %}
+        No delayed jobs have been run yet.
+        {% else %}
         <table>
             <thead>
                 <tr>
@@ -55,5 +58,6 @@
                 {% endfor %}
             </tbody>
         </table>
+        {% endif %}
     </div>
 </body>
