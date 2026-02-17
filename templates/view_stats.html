@@ -11,11 +11,28 @@
     {{ navbar() }}
     <div id="container">
         <h1>Stats</h1>
-        <p>Backup-chan version: <b>{{ program_version }}</b></p>
-        <p>Total number of targets: <b>{{ total_targets }}</b></p>
-        <p>Total number of backups: <b>{{ total_backups }}</b> (<b>{{ total_recycled_backups }}</b> recycled)</p>
-        <p>Total size of all targets: <b title="{{ total_target_size_bytes }} bytes">{{ total_target_size }}</b></p>
-        <p>Total size of recycle bin: <b title="{{ total_recycle_bin_size_bytes}} bytes">{{ total_recycle_bin_size }}</b></p>
+        <table>
+            <tr>
+                <td>Backup-chan version</td>
+                <td><b>{{ program_version }}</b></td>
+            </tr>
+            <tr>
+                <td>Total targets</td>
+                <td><b>{{ total_targets }}</b></td>
+            </tr>
+            <tr>
+                <td>Total backups</td>
+                <td><b>{{ total_backups }}</b> (<b>{{ total_recycled_backups }}</b> recycled)</td>
+            </tr>
+            <tr>
+                <td>Total target size</td>
+                <td><b>{{ total_target_size }}</b></td>
+            </tr>
+            <tr>
+                <td>Total recycle bin size</td>
+                <td><b>{{ total_recycle_bin_size }}</b></td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>
