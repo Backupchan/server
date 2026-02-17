@@ -30,9 +30,9 @@
                 </tr>
             </thead>
             <tbody>
-            {% for backup in backups %}
-                {{ backup_print(backup.backup, false, backup.target) }}
-            {% endfor %}
+                {% for backup in backups %}
+                    {{ backup_print(backup.backup, false, true, backup.target) }}
+                {% endfor %}
             </tbody>
         </table>
         {% endif %}

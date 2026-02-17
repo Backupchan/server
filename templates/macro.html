@@ -53,7 +53,7 @@
     </b>
 {% endmacro %}
 
-{% macro backup_print(backup, bulk_edit_controls, target=none) %}
+{% macro backup_print(backup, bulk_edit_controls, show_actions, target=none) %}
 <tr>
     {% if bulk_edit_controls %}
     <td class="bulk_edit_checkbox"><input name="backup{{ backup.id }}" type="checkbox" value="1">
@@ -65,6 +65,7 @@
     <td>{{ backup.pretty_created_at() }}</td>
     <td>{{ backup.pretty_filesize() }}</td>
     <td>{% if backup.manual %}yes{% else %}no{% endif %}</td>
+    {% if show_actions %}
     <td>
         <a href="{{ url_for('webui.download_backup', id=backup.id) }}">Download</a> |
         <a href="{{ url_for('webui.delete_backup', id=backup.id) }}">Delete</a> |
@@ -74,28 +75,31 @@
         <a href="{{ url_for('webui.recycle_backup', id=backup.id) }}">Recycle</a>
         {% endif %}
     </td>
+    {% endif %}
 </tr>
 {% endmacro %}
 
-{% macro backup_table_print(backups, bulk_edit, bulk_recycled_only, bulk_actions, form_id, target_id) %}
+{% macro backup_table_print(backups, bulk_edit, bulk_recycled_only, bulk_actions, form_id, target_id, show_actions) %}
+    {% if form_id %}
     <form method="post" id="{{ form_id }}" action="{{ url_for('webui.bulk_edit') }}">
         <input type="hidden" name="recycled_type" value="{% if bulk_recycled_only %}only_recycled{% else %}only_active{% endif %}">
+    {% endif %}
         <table>
             <thead>
                 <tr>
-                    {% if bulk_edit %}
+                    {% if bulk_edit and form_id %}
                     <th><input name="select_all_backups" class="select_all_backups" type="checkbox" value="{{ target_id }}"></th>
                     {% endif %}
                     <th>ID</th>
                     <th>Date</th>
                     <th>Size</th>
                     <th>Manual</th>
-                    <th>Actions</th>
+                    {% if show_actions %}<th>Actions</th>{% endif %}
                 </tr>
             </thead>
             <tbody>
                 {% for backup in backups %}
-                    {{ backup_print(backup, bulk_edit) }}
+                    {{ backup_print(backup, bulk_edit, show_actions) }}
                 {% endfor %}
             </tbody>
         </table>
@@ -112,8 +116,10 @@
             <span class="selected_count"></span>
         </div>
         {% endif %}
+    {% if form_id %}
     </form>
-    {% if bulk_edit %}
+    {% endif %}
+    {% if bulk_edit and form_id %}
     <script>
         bulkEditInitialize("{{ form_id }}");
     </script>

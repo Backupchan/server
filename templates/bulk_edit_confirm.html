@@ -12,7 +12,7 @@
     <div id="container">
         {% if error is none %}
         <h1>Confirm bulk edit</h1>
-        <p>The following backups will be <b>{{ action}}d</b>:</p>
+        <p>The following backups will be <b>{{ action }}d</b>:</p>
         {{ backup_table_print(backups) }}
         <p></p>
         <form method="post" action="{{ url_for('webui.bulk_edit') }}">
