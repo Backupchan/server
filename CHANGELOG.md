@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.8.3
+
+* Force the usage of forward-slashed istead of backslashes. This fixes some bugs related to sequential uploads.
+
 ## 2.8.2
 
 * Don't show backups table in target view page if there's no active backups.
