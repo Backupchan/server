@@ -303,7 +303,7 @@ class Database:
                 raise DatabaseError("Filename template must contain either creation date or ID of backup")
 
             # Name template must be unique to this target if it shares location with another target.
-            for target in self.list_targets():
+            for target in self.list_targets_all():
                 if target.name_template == name_template and target.id != target_id:
                     raise DatabaseError("Name template is not unique to this target")
 
@@ -322,7 +322,7 @@ class Database:
                     raise DatabaseError("Alias must not be empty")
                 
                 # Alias must be unique to this target.
-                for target in self.list_targets():
+                for target in self.list_targets_all():
                     if target.alias == alias and target.id != target_id:
                         raise DatabaseError("Alias is not unique to this target")
 
