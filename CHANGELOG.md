@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.8.2
+
+* Don't show backups table in target view page if there's no active backups.
+
 ## 2.8.1.1
 
 * *Actually* fix crashing when viewing target.

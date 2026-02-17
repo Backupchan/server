@@ -27,7 +27,9 @@
             <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
         </ul>
         <p>This target has <b>{{ num_backups }}</b> backup{% if num_backups != 1 %}s{% endif %}.</p>
+        {% if num_backups != num_recycled_backups %}
         {{ backup_table_print(active_backups, true, false, "del_rec", "active_backups_form", target.id, true) }}
+        {% endif %}
 
         {% if has_recycled_backups %}
         <details>
