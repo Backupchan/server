@@ -155,7 +155,7 @@ class WebUI:
             except Exception as exc:
                 self.logger.error("Unable to read log", exc_info=exc)
                 log_content = f"Could not read log file: {str(exc)}"
-            return render_template("log.html", content=log_content, tail=tail)
+            return render_template("log.html", content=log.parse(log_content), tail=tail)
 
         @self.blueprint.route("/jobs")
         @requires_auth

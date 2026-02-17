@@ -15,9 +15,25 @@
         {% if tail != 0 %}
         <p>Showing last {{ tail }} lines.</p>
         {% endif %}
-        <pre class="big-monospace">
-            {{ content }}
-        </p>
+
+        <table>
+            <thead>
+                <th>Time</th>
+                <th>Module</th>
+                <th>Level</th>
+                <th>Message</th>
+            </thead>
+            <tbody>
+                {% for line in content %}
+                <tr>
+                    <td>{{ line.time }}</td>
+                    <td>{{ line.module }}</td>
+                    <td class="log-{{ line.level | lower }}">{{ line.level }}</td>
+                    <td><pre>{{ line.message }}</pre></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

@@ -132,3 +132,27 @@ th {
     border: 1px solid black;
     border-top: none;
 }
+
+.log-debug {
+    color: green;
+}
+
+.log-info {
+    color: blue;
+}
+
+.log-warning {
+    color: orange;
+}
+
+.log-error {
+    color: red;
+}
+
+.log-critical {
+    color: maroon;
+}
+
+#log-table {
+    overflow: auto;
+}
