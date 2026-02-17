@@ -19,20 +19,17 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>ID</th>
                     <th>Alias</th>
                     <th>Type</th>
-                    <th>Backup count</th>
+                    <th>Backups</th>
                     <th>Total filesize</th>
                     <th>Location</th>
-                    <th>Deduplication</th>
                 </tr>
             </thead>
             <tbody>
                 {% for target_info in targets %}
                 <tr>
                     <td><a href="{{ url_for('webui.view_target', id=target_info[0].id) }}">{{ target_info[0].name }}</a></td>
-                    <td><span class="monospace">{{ target_info[0].id }}</span></td>
                     <td>{% if target_info[0].alias is none %}<i>None</i>{% else %}{{ target_info[0].alias }}{% endif %}</td>
                     <td>
                     {% if target_info[0].target_type == "single" %}
@@ -44,13 +41,6 @@
                     <td>{{ target_info[1] }}</td>
                     <td>{{ target_info[2] }}</td>
                     <td><span class="monospace">{{ target_info[0].location }}</span></td>
-                    <td>
-                    {% if target_info[0].deduplicate %}
-                        on
-                    {% else %}
-                        off
-                    {% endif %}
-                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
