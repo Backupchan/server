@@ -147,7 +147,7 @@ class WebUI:
         @requires_auth
         def view_log():
             # TODO function for this
-            tail = 0
+            tail = 100
             if "tail" in request.args:
                 tail = int(request.args["tail"])
             try:
