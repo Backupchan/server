@@ -9,3 +9,4 @@ auth.json
 apikey.json
 *~
 log/
+waitress_config.jsonc

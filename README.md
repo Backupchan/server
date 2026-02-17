@@ -19,11 +19,17 @@ This is the server portion of Backup-chan, an automatic backup system.
 
 ## Running the server
 
+### Development
+
 If you're running for development purposes, simply running `main.py` should be enough.
+
+### Production
 
 If you plan to use this installation in a production environment (with your real backups), you should use a WSGI server. See
 [here](https://flask.palletsprojects.com/en/stable/deploying/) on how to set one up. **Remember to start only one worker,
 otherwise every job will start multiple times.**
+
+Backup-chan provides `waitress_serve.py` for launching a production server using `waitress`. Configure it using `waitress_config.jsonc` (see `waitress_config.jsonc.example` for an example configuration).
 
 Once it's run, you can access the web UI through the browser or use a dedicated client.
 
