@@ -2,6 +2,18 @@
 
 See what's changed between versions!
 
+## 2.8
+
+* Web UI improvements:
+  * Better pagination in target list
+  * Redesigned stats page to use a table layout
+  * Delayed jobs table is not shown if none have been run yet.
+  * Removed ID and Deduplication columns from target list.
+  * Actions are now hidden from backup lists when not needed.
+  * Revamped the log view page.
+* Fixed target validation and some scheduled jobs not accounting for pagination.
+* Added waitress serve configuration.
+
 ## 2.7.4
 
 * Fixed sequential uploads putting files in subdirectories into the root directory of the filesystem.
@@ -102,7 +114,7 @@ See what's changed between versions!
 
 ## 2.1.0
 
-* Added sequential uploads (upload files one-by-one, for large multi-file backups)
+* Added sequential uploads (upload files one-by-one, for large multi-file backups).
 
 ## 2.0.1
 
@@ -111,7 +123,7 @@ See what's changed between versions!
 ## 2.0.0
 
 * **Breaking change**: API endpoint for uploads now returns a job ID instead of backup ID.
-* Added delayed job system for one-time tasks to run in the background
+* Added delayed job system for one-time tasks to run in the background.
 
 ## 1.2.1
 
