@@ -1,5 +1,5 @@
 {
     "host": "0.0.0.0",
     "port": 5000,
-    "max_request_body_size": 1024 ** 2 * 10 // 2 GiB
+    "max_request_body_size": 10485760 // 10 GiB
 }
