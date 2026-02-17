@@ -33,7 +33,6 @@
         <details>
             <summary>Recycled backups ({{ num_recycled_backups }})</summary>
             <a href="{{ url_for('webui.delete_target_recycled', id=target.id) }}">Delete all</a></li>
-            <a href="{{ url_for('webui.restore_target_recycled', id=target.id) }}">Restore all</a></li>
             {{ backup_table_print(recycled_backups, true, true, "del_unrec", "recycled_backups_form", target.id, true) }}
             </details>
         {% endif %}

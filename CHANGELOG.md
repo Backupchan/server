@@ -2,6 +2,10 @@
 
 See what's changed between versions!
 
+## 2.8.1.1
+
+* *Actually* fix crashing when viewing target.
+
 ## 2.8.1
 
 * Fix crashing when viewing target.
