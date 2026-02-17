@@ -12,9 +12,11 @@
     <div id="container">
         <h1>Log</h1>
         <p>The following are the latest lines from the log. Oldest lines come first.</p>
-        {% if tail != 0 %}
-        <p>Showing last {{ tail }} lines.</p>
-        {% endif %}
+        <form method="get" target="{{ url_for('webui.view_log') }}">
+            <p>
+                Show the last <input name="tail" type="number" value="{{ tail or 100 }}"> lines <input type="submit" value="Show">
+            </p>
+        </form>
 
         <table id="log-table">
             <thead>
