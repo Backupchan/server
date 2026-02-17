@@ -25,7 +25,6 @@
             <li><a href="{{ url_for('webui.edit_target', id=target.id) }}">Edit target</a></li>
             <li><a href="{{ url_for('webui.delete_target', id=target.id) }}">Delete target</a></li>
             <li><a href="{{ url_for('webui.delete_target_backups', id=target.id) }}">Delete all backups</a></li>
-            <li><a href="{{ url_for('webui.recycle_target_backups', id=target.id }}">Recycle all backups</a></li>
         </ul>
         <p>This target has <b>{{ num_backups }}</b> backup{% if num_backups != 1 %}s{% endif %}.</p>
         {{ backup_table_print(active_backups, true, false, "del_rec", "active_backups_form", target.id, true) }}
@@ -33,10 +32,8 @@
         {% if has_recycled_backups %}
         <details>
             <summary>Recycled backups ({{ num_recycled_backups }})</summary>
-            <ul>
-                <li><a href="{{ url_for('webui.delete_target_recycled', id=target.id) }}">Delete all</a></li>
-                <li><a href="{{ url_for('webui.restore_target_recycled', id=target.id) }}">Restore all</a></li>
-            </ul>
+            <a href="{{ url_for('webui.delete_target_recycled', id=target.id) }}">Delete all</a></li>
+            <a href="{{ url_for('webui.restore_target_recycled', id=target.id) }}">Restore all</a></li>
             {{ backup_table_print(recycled_backups, true, true, "del_unrec", "recycled_backups_form", target.id, true) }}
             </details>
         {% endif %}
