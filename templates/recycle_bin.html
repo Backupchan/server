@@ -11,7 +11,10 @@
     {{ navbar() }}
     <div id="container">
         <h1>Recycle bin</h1>
-        <p>There are {{ num_backups }} items in the recycle bin. You may delete or restore them.</p>
+        {% if num_backups == 0 %}
+        <p>The recycle bin is empty.</p>
+        {% else %}
+        <p>There are {{ num_backups }} items in the recycle bin, taking up {{ storage }} of space. You may delete or restore them.</p>
         <ul><li><a href="{{ url_for('webui.recycle_bin_clear') }}">Delete all</a></li></ul>
 
         {% if num_backups != 0 %}
@@ -32,6 +35,7 @@
             {% endfor %}
             </tbody>
         </table>
+        {% endif %}
         {% endif %}
     </div>
 </body>

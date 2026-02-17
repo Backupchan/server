@@ -155,7 +155,12 @@ class Database:
         with self.lock:
             self.cursor.execute(f"SELECT * FROM targets {sort_options.sql()} LIMIT ? OFFSET ?", (self.page_size, offset))
             rows = self.cursor.fetchall()
-            return [models.BackupTarget(*row) for row in rows]
+            self.cursor.execute(f"SELECT * FROM targets {sort_options.sql()} LIMIT ? OFFSET ?", (self.page_size, offset + self.page_size))
+            has_more = bool(self.cursor.fetchall())
+            return {
+                "targets": [models.BackupTarget(*row) for row in rows],
+                "has_more": has_more
+            }
 
     def list_targets_all(self) -> list[models.BackupTarget]:
         self.cursor.execute("SELECT * FROM targets")

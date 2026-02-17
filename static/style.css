@@ -106,6 +106,14 @@ th, td {
     padding: 4px;
 }
 
+tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+th {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
 .bulk_edit_checkbox {
     text-align: center;
 }
@@ -116,4 +124,11 @@ th, td {
     padding: 0.3em;
     margin-top: 0.4em;
     margin-bottom: 0.4em;
+}
+
+#pagination {
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    border: 1px solid black;
+    border-top: none;
 }

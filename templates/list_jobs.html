@@ -24,9 +24,9 @@
             <tbody>
                 {% for job in scheduled_jobs %}
                 <tr>
-                    <td>{{ job.name }}</td>
+                    <td class="monospace">{{ job.name }}</td>
                     <td>{{ job.interval }} seconds</td>
-                    <td>{{ job.pretty_next_run() }}</td>
+                    <td>{{ job.pretty_next_run() }} ({{ job.next_run | time_until }})</td>
 					<td><a href="{{ url_for('webui.force_run_job', name=job.name) }}">Force re-run</a></td>
                 </tr>
                 {% endfor %}
@@ -47,7 +47,7 @@
                 {% for id, job in delayed_jobs.items() %}
                 <tr>
                     <td>{{ id }}</td>
-                    <td>{{ job }}</td>
+                    <td class="monospace">{{ job }}</td>
                     <td>{{ job.state }}</td>
                     <td>{{ job.pretty_start_time() }}</td>
                     <td>{{ job.pretty_end_time() }}</td>

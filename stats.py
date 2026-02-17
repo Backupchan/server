@@ -7,7 +7,7 @@ class Stats:
         self.fm = fm
 
     def total_target_size(self) -> int:
-        targets = self.db.list_targets()
+        targets = self.db.list_targets_all()
         total = 0
         for target in targets:
             total += self.db.get_target_size(target.id)

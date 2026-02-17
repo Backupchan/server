@@ -29,6 +29,7 @@ def parse_sort_options(kind: type[database.SortOptions]) -> database.SortOptions
     asc = request.args.get("a", "1") == "1"
     return kind(asc, column)
 
+
 class WebUI:
     def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: scheduled_jobs.JobScheduler, job_manager: delayed_jobs.JobManager, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
         self.db = db
@@ -70,6 +71,38 @@ class WebUI:
                 else:
                     return render_template("login.html", incorrect=True, return_url=return_url)
             return render_template("login.html", return_url=return_url)
+
+        #
+        # Template filters
+        #
+
+        @self.blueprint.app_template_filter("time_until")
+        def time_until(n_target: float) -> str:
+            target = datetime.datetime.fromtimestamp(n_target)
+            now = datetime.datetime.now(target.tzinfo) if target.tzinfo else datetime.datetime.now()
+            delta = target - now
+
+            total_seconds = int(delta.total_seconds())
+
+            if total_seconds <= 0:
+                return "now"
+
+            days, remainder = divmod(total_seconds, 86400)
+            hours, remainder = divmod(remainder, 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            parts = []
+
+            if days:
+                parts.append(f"{days} day{'s' if days != 1 else ''}")
+            if hours:
+                parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+            if minutes:
+                parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+            if seconds:
+                parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+
+            return "in " + ", ".join(parts)
 
         #
         # Miscellaneous endpoints
@@ -129,6 +162,7 @@ class WebUI:
         def list_jobs():
             return render_template("list_jobs.html", scheduled_jobs=self.job_scheduler.jobs, delayed_jobs=self.job_manager.jobs)
 
+
         #
         # Target endpoints
         #
@@ -138,7 +172,9 @@ class WebUI:
         def list_targets():
             page = int(request.args.get("page", 1))
             sort_options = parse_sort_options(database.TargetSortOptions)
-            targets = self.db.list_targets(page, sort_options)
+            target_list = self.db.list_targets(page, sort_options)
+            targets = target_list["targets"]
+            has_more = target_list["has_more"]
             target_infos = []
             for target in targets:
                 backups = self.db.list_backups_target(target.id)
@@ -148,7 +184,7 @@ class WebUI:
                          utility.humanread_file_size(sum([backup.filesize for backup in backups]))
                     )
                 )
-            return render_template("list_targets.html", targets=target_infos, num_targets=self.db.count_targets(), num_backups=self.db.count_backups(), page=page)
+            return render_template("list_targets.html", targets=target_infos, num_targets=self.db.count_targets(), num_backups=self.db.count_backups(), page=page, has_more=has_more)
 
         @self.blueprint.route("/target/new", methods=["GET", "POST"])
         @requires_auth
@@ -294,7 +330,7 @@ class WebUI:
             backups_and_targets = []
             for backup in backups:
                 backups_and_targets.append({"backup": backup, "target": self.db.get_target(backup.target_id)})
-            return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups))
+            return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups), storage=utility.humanread_file_size(self.stats.total_recycle_bin_size()))
 
         @self.blueprint.route("/recycle_bin/clear", methods=["GET", "POST"])
         @requires_auth
