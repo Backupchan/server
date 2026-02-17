@@ -154,5 +154,11 @@ th {
 }
 
 #log-table {
-    overflow: auto;
+    width: 100%;
+}
+
+#log-table td:last-child pre {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-wrap;
 }
