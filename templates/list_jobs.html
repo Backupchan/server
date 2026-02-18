@@ -78,7 +78,7 @@
                     <td><a href="/targets/{{ target_id }}">{{ target_id }}</a></td>
                     <td>{{ seq_upload.file_list | length }}</td>
                     <td>{% if seq_upload.manual %}yes{% else %}no{% endif %}</td>
-                    <td>{{ seq_upload.last_activity }}</td>
+                    <td>{{ seq_upload.last_activity | pretty_time }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

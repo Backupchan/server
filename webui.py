@@ -105,6 +105,10 @@ class WebUI:
 
             return "in " + ", ".join(parts)
 
+        @self.blueprint.app_template_filter("pretty_time")
+        def pretty_time(float_time: datetime.datetime) -> str:
+            return datetime.datetime.fromtimestamp(float_time).strftime("%B %d, %Y %H:%M")
+
         #
         # Miscellaneous endpoints
         #
