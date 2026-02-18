@@ -263,6 +263,7 @@ class Database:
 
             self.cursor.execute(f"SELECT * FROM backups WHERE target_id = ? {sort_options.sql()}", (target.id,))
             rows = self.cursor.fetchall()
+            print(rows)
             return [models.Backup(*row) for row in rows]
 
     def list_recycled_backups(self, sort_options: None | BackupSortOptions = None) -> list[models.Backup]:

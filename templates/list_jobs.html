@@ -59,5 +59,30 @@
             </tbody>
         </table>
         {% endif %}
+        <h2>Sequential uploads</h2>
+        {% if seq_uploads | length == 0 %}
+        No sequential uploads are currently being processed.
+        {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Target ID</th>
+                    <th>File count</th>
+                    <th>Manual</th>
+                    <th>Last activity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for target_id, seq_upload in seq_uploads.items() %}
+                <tr>
+                    <td><a href="/targets/{{ target_id }}">{{ target_id }}</a></td>
+                    <td>{{ seq_upload.file_list | length }}</td>
+                    <td>{% if seq_upload.manual %}yes{% else %}no{% endif %}</td>
+                    <td>{{ seq_upload.last_activity }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
     </div>
 </body>

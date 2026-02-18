@@ -6,6 +6,7 @@ import delayed_jobs
 import stats
 import download
 import log
+import seq_upload
 import configtony
 import functools
 import logging
@@ -29,15 +30,15 @@ def parse_sort_options(kind: type[database.SortOptions]) -> database.SortOptions
     asc = request.args.get("a", "1") == "1"
     return kind(asc, column)
 
-
 class WebUI:
-    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: scheduled_jobs.JobScheduler, job_manager: delayed_jobs.JobManager, stats: stats.Stats, config: configtony.Config, passwd_hash: str | None, root_path: str):
+    def __init__(self, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI, job_scheduler: scheduled_jobs.JobScheduler, job_manager: delayed_jobs.JobManager, stats: stats.Stats, seq_upload_manager: seq_upload.SequentialUploadManager, config: configtony.Config, passwd_hash: str | None, root_path: str):
         self.db = db
         self.fm = fm
         self.server_api = server_api
         self.job_scheduler = job_scheduler
         self.job_manager = job_manager
         self.stats = stats
+        self.seq_upload_manager = seq_upload_manager
         self.config = config
         self.passwd_hash = passwd_hash
         self.root_path = root_path
@@ -160,7 +161,7 @@ class WebUI:
         @self.blueprint.route("/jobs")
         @requires_auth
         def list_jobs():
-            return render_template("list_jobs.html", scheduled_jobs=self.job_scheduler.jobs, delayed_jobs=self.job_manager.jobs, delayed_job_count=len(self.job_manager.jobs))
+            return render_template("list_jobs.html", scheduled_jobs=self.job_scheduler.jobs, delayed_jobs=self.job_manager.jobs, delayed_job_count=len(self.job_manager.jobs), seq_uploads=self.seq_upload_manager.uploads)
 
 
         #
