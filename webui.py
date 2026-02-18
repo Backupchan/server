@@ -136,6 +136,19 @@ class WebUI:
             self.job_scheduler.force_run_job(name)
             return render_template("force_run_job.html", name=name)
 
+        @self.blueprint.route("/seq-cancel/<id>", methods=["GET", "POST"])
+        @requires_auth
+        def seq_cancel(id: str):
+            if request.method == "POST":
+                self.seq_upload_manager.delete(id)
+                return redirect(url_for("webui.list_jobs"))
+            target = self.db.get_target(id)
+            if not target:
+                return render_template("cancel_seq_upload.html", target=target, not_found_target=True);
+            if id not in self.seq_upload_manager.uploads:
+                return render_template("cancel_seq_upload.html", target=target, not_found_seq=True)
+            return render_template("cancel_seq_upload.html", target=target);
+
         @self.blueprint.route("/stats")
         @requires_auth
         def view_stats():

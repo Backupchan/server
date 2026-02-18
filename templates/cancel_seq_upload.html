@@ -1,0 +1,26 @@
+{% from "macro.html" import navbar %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Cancel sequential upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Cancel sequential upload</h1>
+        {% if not_found_seq %}
+        <p>No sequential upload is being processed on target <a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a>.</p>
+        {% elif not_found_target %}
+        <p>Target {{ target.id }} not found.</p>
+        {% else %}
+        <form method="post" action="{{ url_for('webui.seq_cancel', id=target.id) }}">
+            <p>Are you sure you want to cancel the sequential upload on target with ID <a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a>?</p>
+            <input type="submit" value="Confirm">
+        </form>
+        {% endif %}
+    </div>
+</body>
+</html>
