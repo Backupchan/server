@@ -26,11 +26,11 @@
             </tr>
             <tr>
                 <td>Total target size</td>
-                <td><b>{{ total_target_size }}</b></td>
+                <td><b title="{{ total_target_size }} bytes">{{ total_target_size | pretty_filesize }}</b></td>
             </tr>
             <tr>
                 <td>Total recycle bin size</td>
-                <td><b>{{ total_recycle_bin_size }}</b></td>
+                <td><b title="{{ total_recycle_bin_size }} bytes">{{ total_recycle_bin_size | pretty_filesize }}</b></td>
             </tr>
         </table>
     </div>

@@ -153,17 +153,13 @@ class WebUI:
         @requires_auth
         def view_stats():
             total_target_size = self.stats.total_target_size()
-            total_target_size_str = utility.humanread_file_size(total_target_size)
             total_recycle_bin_size = self.stats.total_recycle_bin_size()
-            total_recycle_bin_size_str = utility.humanread_file_size(total_recycle_bin_size)
             total_targets = self.db.count_targets()
             total_backups = self.db.count_backups()
             total_recycled_backups = self.db.count_recycled_backups()
             return render_template("view_stats.html",
-                                   total_target_size=total_target_size_str,
-                                   total_target_size_bytes=total_target_size,
-                                   total_recycle_bin_size=total_recycle_bin_size_str,
-                                   total_recycle_bin_size_bytes=total_recycle_bin_size,
+                                   total_target_size=total_target_size,
+                                   total_recycle_bin_size=total_recycle_bin_size,
                                    total_targets=total_targets,
                                    total_backups=total_backups,
                                    total_recycled_backups=total_recycled_backups,
@@ -356,7 +352,7 @@ class WebUI:
             backups_and_targets = []
             for backup in backups:
                 backups_and_targets.append({"backup": backup, "target": self.db.get_target(backup.target_id)})
-            return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups), storage=utility.humanread_file_size(self.stats.total_recycle_bin_size()))
+            return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups), storage=self.stats.total_recycle_bin_size)
 
         @self.blueprint.route("/recycle_bin/clear", methods=["GET", "POST"])
         @requires_auth
