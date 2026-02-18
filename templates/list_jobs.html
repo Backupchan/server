@@ -26,7 +26,7 @@
                 <tr>
                     <td class="monospace">{{ job.name }}</td>
                     <td>{{ job.interval }} seconds</td>
-                    <td>{{ job.pretty_next_run() }} ({{ job.next_run | time_until }})</td>
+                    <td>{{ job.next_run | pretty_ftime }} ({{ job.next_run | time_until }})</td>
 		    <td><a href="{{ url_for('webui.force_run_job', name=job.name) }}">Force re-run</a></td>
                 </tr>
                 {% endfor %}
@@ -52,8 +52,8 @@
                     <td>{{ id }}</td>
                     <td class="monospace">{{ job }}</td>
                     <td>{{ job.state }}</td>
-                    <td>{{ job.pretty_start_time() }}</td>
-                    <td>{{ job.pretty_end_time() }}</td>
+                    <td>{% if job.start_time == 0 %}not started yet{% else %}{{ job.start_time | pretty_datetime }}{% endif %}</td>
+                    <td>{% if job.start_time == 0 %}not started yet{% elif job.end_time == 0 %}still running{% else %}{{ job.end_time | pretty_datetime }}{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -75,10 +75,10 @@
             <tbody>
                 {% for target_id, seq_upload in seq_uploads.items() %}
                 <tr>
-                    <td><a href="/targets/{{ target_id }}">{{ target_id }}</a></td>
+                    <td><a href="{{ url_for('webui.view_target', id=target_id) }}">{{ target_id }}</a></td>
                     <td>{{ seq_upload.file_list | length }}</td>
                     <td>{% if seq_upload.manual %}yes{% else %}no{% endif %}</td>
-                    <td>{{ seq_upload.last_activity | pretty_time }}</td>
+                    <td>{{ seq_upload.last_activity | pretty_ftime }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

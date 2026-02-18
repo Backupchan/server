@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Restore backup</h1>
-    <p>Backup with ID <b class="monospace">{{ backup.id }}</b> created at <b>{{ backup.pretty_created_at() }}</b>, belonging to target <b>{{ target_name }}</b> will be restored. Are you okay with that?</p>
+    <p>Backup with ID <b class="monospace">{{ backup.id }}</b> created at <b>{{ backup.created_at | pretty_datetime }}</b>, belonging to target <b>{{ target_name }}</b> will be restored. Are you okay with that?</p>
     <form action="{{ url_for('webui.unrecycle_backup', id=backup.id) }}" method="post">
         <input type="submit" value="Restore">
     </form>

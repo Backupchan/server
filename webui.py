@@ -105,11 +105,15 @@ class WebUI:
 
             return "in " + ", ".join(parts)
 
-        @self.blueprint.app_template_filter("pretty_time")
-        def pretty_time(float_time: datetime.datetime) -> str:
-            return datetime.datetime.fromtimestamp(float_time).strftime("%B %d, %Y %H:%M")
-        
-        @self.blueprint.app_template_filter("pretty_filesize")
+        @self.blueprint.app_template_filter()
+        def pretty_datetime(time: datetime.datetime) -> str:
+            return time.strftime("%B %d, %Y %H:%M")
+
+        @self.blueprint.app_template_filter()
+        def pretty_ftime(time: float) -> str:
+            return pretty_datetime(datetime.datetime.fromtimestamp(time))
+
+        @self.blueprint.app_template_filter()
         def pretty_filesize(size: int) -> str:
             return utility.humanread_file_size(size)
 

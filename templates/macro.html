@@ -62,8 +62,8 @@
     {% if target is not none %}
     <td><a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a></td>
     {% endif %}
-    <td>{{ backup.pretty_created_at() }}</td>
-    <td>{{ backup.pretty_filesize() }}</td>
+    <td>{{ backup.created_at | pretty_datetime }}</td>
+    <td>{{ backup.filesize | pretty_filesize }}</td>
     <td>{% if backup.manual %}yes{% else %}no{% endif %}</td>
     {% if show_actions %}
     <td>
