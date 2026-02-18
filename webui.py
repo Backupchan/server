@@ -108,6 +108,10 @@ class WebUI:
         @self.blueprint.app_template_filter("pretty_time")
         def pretty_time(float_time: datetime.datetime) -> str:
             return datetime.datetime.fromtimestamp(float_time).strftime("%B %d, %Y %H:%M")
+        
+        @self.blueprint.app_template_filter("pretty_filesize")
+        def pretty_filesize(size: int) -> str:
+            return utility.humanread_file_size(size)
 
         #
         # Miscellaneous endpoints
