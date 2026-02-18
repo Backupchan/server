@@ -9,6 +9,8 @@ class StaleSequentialUploadJob(scheduled_jobs.ScheduledJob):
 
     def run(self):
         for target_id in self.manager:
+            if not self.manager.is_processing(target_id):
+                continue
             if self.manager[target_id].expired():
                 self.logger.info("Sequential upload on target {%s} expired, deleting", target_id)
                 self.manager.delete(target_id)

@@ -122,4 +122,4 @@ class SequentialUploadManager:
         return self.uploads[target_id]
 
     def __iter__(self):
-        return iter(self.uploads.keys())
+        return iter(self.uploads.copy().keys())
