@@ -66,6 +66,12 @@ class MockDatabase(database.Database):
         return None
     
     def list_targets(self, _ = None) -> list[models.BackupTarget]:
+        return {
+            "targets": self.targets,
+            "has_more": False
+        }
+
+    def list_targets_all(self) -> list[models.BackupTarget]:
         return self.targets
     
     def delete_target(self, id: str):
