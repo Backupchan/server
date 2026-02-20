@@ -52,7 +52,9 @@ Accepts a `page` argument for pagination: `/api/target?page=2`
             "location": "/var/backups/MyBackup",
             "name_template": "backup-$I-$D",
             "deduplicate": true,
-            "alias": "mybackup"
+            "alias": "mybackup",
+            "min_backups": 2,
+            "tags": ["cool", "beans"]
         }
     ]
 }
@@ -64,7 +66,7 @@ Create a new target.
 
 #### Example payload
 
-```json
+```jsonc
 {
     "name": "Name of new target",
     "backup_type": "multi", // multi or single
@@ -74,7 +76,9 @@ Create a new target.
     "location": "/path/to/backups",
     "name_template": "name-template-$I-$D",
     "deduplicate": true,
-    "alias": "target-alias" // or null if you don't want one
+    "alias": "target-alias", // or null if you don't want one,
+    "min_backups": 3,
+    "tags": ["cool", "beans"] // optional
 }
 ```
 
@@ -106,7 +110,9 @@ View a target with the specified ID.
         "location": "/var/backups/MyBackup",
         "name_template": "backup-$I-$D",
         "deduplicate": true,
-        "alias": "mybackup"
+        "alias": "mybackup",
+        "min_backups": 4,
+        "tags": ["cool", "beans"]
     },
     "backups": [
         {
@@ -151,7 +157,7 @@ Edit an existing target. A target's type cannot be modified after creaton.
 
 #### Example payload
 
-```json
+```jsonc
 {
     "name": "New name of target",
     "recycle_criteria": "count", // count / age / none
@@ -160,7 +166,9 @@ Edit an existing target. A target's type cannot be modified after creaton.
     "location": "/path/to/backups",
     "name_template": "name-template-$I-$D",
     "deduplicate": false,
-    "alias": "new-alias" // or null to clear it
+    "alias": "new-alias", // or null to clear it,
+    "num_backups": 2,
+    "tags": ["uncool", "beans"]
 }
 ```
 
@@ -330,7 +338,7 @@ List all scheduled and delayed jobs.
 
 #### Example output
 
-```json
+```jsonc
 {
     "success": true,
     "delayed": [
