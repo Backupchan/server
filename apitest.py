@@ -41,7 +41,7 @@ def create_test_target() -> models.BackupTarget:
     recycle_action = random.choice(list(models.BackupRecycleAction))
     location = "".join(random.choices(string.ascii_uppercase + string.digits, k=5)) + "/" + "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
     name_template = "$I-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=5))
-    return db.add_target(name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, True, None, 3)
+    return db.add_target(name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, True, None, 3, [])
 
 def create_test_backup(target_id: str) -> models.Backup:
     return db.add_backup(target_id, False)
@@ -54,7 +54,7 @@ def test_list_targets(client):
     assert "targets" in data
 
 def test_new_target(client):
-    response = client.post("/api/target", json={"name": "test", "backup_type": "single", "recycle_criteria": "none", "recycle_value": 0, "recycle_action": "recycle", "location": "/", "name_template": "test$I", "deduplicate": True, "alias": "test", "min_backups": 3})
+    response = client.post("/api/target", json={"name": "test", "backup_type": "single", "recycle_criteria": "none", "recycle_value": 0, "recycle_action": "recycle", "location": "/", "name_template": "test$I", "deduplicate": True, "alias": "test", "min_backups": 3, "tags": ["lobster"]})
     assert response.status_code == 201
     
     data = response.get_json()
@@ -70,7 +70,7 @@ def test_edit_target(client):
 
     target_id = create_test_target()
 
-    response = client.patch(f"/api/target/{target_id}", json={"name": "test23", "recycle_criteria": "count", "recycle_value": 10, "recycle_action": "delete", "location": "/var/backups/test", "name_template": "test$I-$D", "deduplicate": False, "alias": "test", "min_backups": 4})
+    response = client.patch(f"/api/target/{target_id}", json={"name": "test23", "recycle_criteria": "count", "recycle_value": 10, "recycle_action": "delete", "location": "/var/backups/test", "name_template": "test$I-$D", "deduplicate": False, "alias": "test", "min_backups": 4, "tags": ["cool", "beans"]})
     assert response.status_code == 200
     
     target = db.get_target(target_id)
@@ -82,6 +82,7 @@ def test_edit_target(client):
     assert target.name_template == "test$I-$D"
     assert target.alias == "test"
     assert target.min_backups == 4
+    assert target.tags == ["cool", "beans"]
 
 def test_delete_target(client):
     db.reset()

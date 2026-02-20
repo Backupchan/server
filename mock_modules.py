@@ -44,7 +44,8 @@ class MockDatabase(database.Database):
         name_template: str,
         deduplicate: bool,
         alias: str | None,
-        min_backups: int | None
+        min_backups: int | None,
+        tags: list[str] | None
     ):
         self.validate_target(name, name_template, location, id, alias)
         target = self.get_target(id)
@@ -57,6 +58,7 @@ class MockDatabase(database.Database):
         target.deduplicate = deduplicate
         target.alias = alias
         target.min_backups = min_backups
+        target.tags = tags
         self.logger.info("Edit target {%s} to %s", id, target)
     
     def get_target(self, id: str) -> models.BackupTarget:
