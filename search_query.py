@@ -52,7 +52,7 @@ class SearchQuery:
         tags = [] if not self.tags else list(set(tag.strip() for tag in self.tags if tag.strip()))
         if tags:
             placeholders = ",".join(["%s"] * len(tags))
-            filter_string = "AND " + " AND ".join(["tar." + condition for condition in conditions])
+            filter_string = ("AND " + " AND ".join(["tar." + condition for condition in conditions])) if conditions else ""
             return f"SELECT tar.* FROM targets tar JOIN target_tags tt ON tar.id = tt.target_id JOIN tags t ON t.id = tt.tag_id WHERE t.name IN ({placeholders}) {filter_string} GROUP BY tar.id HAVING COUNT(DISTINCT t.name) >= %s", tags + values + [len(tags)]
 
         filter_string = " AND ".join(conditions)

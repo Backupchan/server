@@ -1,0 +1,60 @@
+{% from "macro.html" import navbar %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Search targets</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Search targets</h1>
+        <form method="get" action="{{ url_for('webui.search_targets') }}">
+            <label for="name">Name:</label> <input type="text" name="name"><p></p>
+
+            <label for="type">Type:</label>
+
+            <select name="type">
+                <option value="" selected="selected">Any</option>
+                <option value="single">Single file</option>
+                <option value="multi">Multiple files</option>
+            </select><p></p>
+
+            <label for="recycle_criteria">Recycle criteria:</label>
+            <select name="recycle_criteria">
+                <option value="" selected="selected">Any</option>
+                <option value="none">None</option>
+                <option value="count">Count</option>
+                <option value="age">Age</option>
+            </select><p></p>
+
+            <label for="recycle_action">Recycle action:</label>
+            <select name="recycle_action">
+                <option value="" selected="selected">Any</option>
+                <option value="recycle">Recycle</option>
+                <option value="delete">Delete</option>
+            </select><p></p>
+
+            <label for="location">Location:</label> <input type="text" name="location"><p></p>
+
+            <label for="name_template">Name template:</label> <input type="text" name="name_template"><p></p>
+
+            <label for="deduplicate">Deduplication:</label>
+            <select name="deduplicate">
+                <option value="" selected="selected">Any</option>
+                <option value="on">On</option>
+                <option value="off">Off</option>
+            </select><p></p>
+
+            <label for="alias">Alias:</label> <input type="text" name="alias"><p></p>
+
+            <label for="tags">Tags (separate with spaces):</label> <input type="text" name="tags"><p></p>
+
+            <input type="submit" value="Search">
+        </form>
+    </div>
+</body>
+</html>
+

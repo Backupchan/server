@@ -16,6 +16,7 @@ import uuid
 import os
 import datetime
 from version import PROGRAM_VERSION
+from search_query import SearchQuery
 from backupchan_server import utility
 from backupchan_server import BackupType
 from flask import Blueprint, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file
@@ -291,6 +292,26 @@ class WebUI:
                 return redirect(url_for("webui.view_target", id=id))
             return render_template("delete_target_recycled.html", target=target)
 
+        @self.blueprint.route("/target/search")
+        @requires_auth
+        def search_targets():
+            name = request.args.get("name", None)
+            target_type = request.args.get("type", None)
+            recycle_criteria = request.args.get("recycle_criteria", None)
+            recycle_action = request.args.get("recycle_action", None)
+            location = request.args.get("location", None)
+            name_template = request.args.get("name_template", None)
+            deduplication = True if request.args.get("deduplication", None) == "on" else False if request.args.get("deduplication", None) is not None else None
+            alias = request.args.get("alias", None)
+            tags = request.args.get("tags", "").split()
+            if name or target_type or recycle_criteria or recycle_action or location or name_template or deduplication or alias or tags:
+                results = self.db.search_targets(SearchQuery(name, target_type, recycle_criteria, recycle_action, location, name_template, deduplication, alias, tags))
+                target_infos = self.get_target_infos(results)
+                return render_template("list_targets.html", targets=target_infos, search=True, page=1, has_more=False)
+
+            return render_template("search_targets.html")
+
+
         #
         # Backup endpoints
         #
@@ -421,6 +442,17 @@ class WebUI:
 
             return render_template("bulk_edit_confirm.html", backups=backups, error=None, action=action, backup_ids=";".join([backup.id for backup in backups]))
 
+    def get_target_infos(self, targets):
+        target_infos = []
+        for target in targets:
+            backups = self.db.list_backups_target(target.id)
+            target_infos.append(
+                    (target,
+                     len(backups),
+                     utility.humanread_file_size(sum([backup.filesize for backup in backups]))
+                )
+            )
+        return target_infos
     #
     # POST request handlers
     #
