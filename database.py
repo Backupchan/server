@@ -210,7 +210,6 @@ class Database:
     def search_targets(self, query: SearchQuery) -> list[models.BackupTarget]:
         with self.lock:
             sql, values = query.sql()
-            print(f"sql={sql} values={values}")
             self.cursor.execute(sql, values)
             rows = self.cursor.fetchall()
             return [models.BackupTarget(*row, self.get_target_tags(row[0])) for row in rows]
