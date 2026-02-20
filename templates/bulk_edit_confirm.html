@@ -13,8 +13,9 @@
         {% if error is none %}
         <h1>Confirm bulk edit</h1>
         <p>The following backups will be <b>{{ action }}d</b>:</p>
-        {{ backup_table_print(backups) }}
-        <p></p>
+        <div class="row">
+            {{ backup_table_print(backups) }}
+        </div>
         <form method="post" action="{{ url_for('webui.bulk_edit') }}">
             <input type="hidden" name="bulk_edit_execute" value="1">
             <input type="hidden" name="backup_ids" value="{{ backup_ids }}">

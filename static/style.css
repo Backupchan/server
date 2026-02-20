@@ -162,3 +162,7 @@ th {
     word-break: break-word;
     white-space: pre-wrap;
 }
+
+.row {
+    margin-bottom: 10px;
+}

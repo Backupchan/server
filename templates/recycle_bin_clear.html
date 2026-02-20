@@ -13,7 +13,9 @@
         <h1>Empty recycle bin</h1>
         <p>Every item in the recycle bin will be permanently deleted. Are you okay with that?</p>
         <form action="{{ url_for('webui.recycle_bin_clear') }}" method="post">
-            <input type="checkbox" name="delete_files" value="delete_files" id="delete_files"> <label for="delete_files">Also delete backup files</label><p></p>
+            <div class="row">
+                <input type="checkbox" name="delete_files" value="delete_files" id="delete_files"> <label for="delete_files">Also delete backup files</label>
+            </div>
             <input type="submit" value="Delete">
         </form>
     </div>

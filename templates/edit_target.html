@@ -18,57 +18,72 @@
         <form action="{{ url_for('webui.edit_target', id=target.id) }}" method="post">
         {% endif %}
         {% if error_message is not none %}
-        <span class="error-message">{{ error_message }}</span><p></p>
+        <div class="row">
+            <span class="error-message">{{ error_message }}</span>
+        </div>
         {% endif %}
-            <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required autofocus><p></p>
+            <div class="row">
+                <span>Name:</span> <input type="text" name="name" {% if target is not none %}value="{{ target.name }}"{% endif %} required autofocus>
+            </div>
 
-            <span>Alias:</span> <input type="text" name="alias" {% if target is not none and target.alias is not none %}value="{{ target.alias }}"{% endif %}><p></p>
+            <div class="row">
+                <span>Alias:</span> <input type="text" name="alias" {% if target is not none and target.alias is not none %}value="{{ target.alias }}"{% endif %}>
+            </div>
             <ul>
                 <li>Optional. Must be unique to this target. It can be used as the ID when accessing the target.</li>
             </ul>
 
-            <span>Recycle criteria:</span>&nbsp;
-            <select name="recycle_criteria" id="recycle_criteria" required>
-                <option value="none" {% if target is none or target.recycle_criteria == "none" %}selected="selected"{% endif %}>None</option>
-                <option value="count" {% if target is not none and target.recycle_criteria == "count" %}selected="selected"{% endif %}>Count: When multiple backups are present</option>
-                <option value="age" {% if target is not none and target.recycle_criteria == "age" %}selected="selected"{% endif %}>Age: When backups are old enough</option>
-            </select>
-            <p></p>
+            <div class="row">
+                <span>Recycle criteria:</span>&nbsp;
+                <select name="recycle_criteria" id="recycle_criteria" required>
+                    <option value="none" {% if target is none or target.recycle_criteria == "none" %}selected="selected"{% endif %}>None</option>
+                    <option value="count" {% if target is not none and target.recycle_criteria == "count" %}selected="selected"{% endif %}>Count: When multiple backups are present</option>
+                    <option value="age" {% if target is not none and target.recycle_criteria == "age" %}selected="selected"{% endif %}>Age: When backups are old enough</option>
+                </select>
+            </div>
 
-            <span>Recycle value:</span>
-            <input type="number" name="recycle_value" id="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %}><p></p>
+            <div class="row">
+                <span>Recycle value:</span>
+                <input type="number" name="recycle_value" id="recycle_value" {% if target is not none %}value="{{ target.recycle_value }}"{% endif %}>
+            </div>
             <ul>
                 <li>If you chose 'count', then backups will be recycled after this many backups reached.</li>
                 <li>If you chose 'age', then backups will be recycled after this many days.</li>
                 <li>Optional if you chose 'none'.</li>
             </ul>
 
-            <span>Recycle action:</span>&nbsp;
-            <select name="recycle_action" id="recycle_action" required>
-                <option value="delete" {% if target is not none and target.recycle_criteria == "delete" %}selected="selected"{% endif %}>Delete (permanently delete once criteria met)</option>
-                <option value="recycle" {% if target is none or target.recycle_criteria == "recycle" %}selected="selected" {% endif %}>Recycle (move to recycle bin once criteria met)</option>
-            </select><p></p>
+            <div class="row">
+                <span>Recycle action:</span>&nbsp;
+                <select name="recycle_action" id="recycle_action" required>
+                    <option value="delete" {% if target is not none and target.recycle_criteria == "delete" %}selected="selected"{% endif %}>Delete (permanently delete once criteria met)</option>
+                    <option value="recycle" {% if target is none or target.recycle_criteria == "recycle" %}selected="selected" {% endif %}>Recycle (move to recycle bin once criteria met)</option>
+                </select>
+            </div>
 
-            <span>Minimum backups to keep:</span>&nbsp;
-            <input type="number" name="min_backups" id="min_backups" {% if target is not none %}value="{{ target.min_backups }}"{% endif %}><p></p>
+            <div class="row">
+                <span>Minimum backups to keep:</span>&nbsp;
+                <input type="number" name="min_backups" id="min_backups" {% if target is not none %}value="{{ target.min_backups }}"{% endif %}>
+            </div>
             <ul>
                 <li>This option only applicable for targets with age-based recycle criteria.</li>
             </ul>
 
-            <span>Backup type:</span>&nbsp;
-            <select name="backup_type" {% if target is not none %}disabled{% else %}required{% endif %}>
-                <option value="single" {% if target is none or target.target_type == "single" %}selected="selected"{% endif %}>Single file</option>
-                <option value="multi" {% if target is not none and target.target_type == "multi" %}selected="selected"{% endif %}>Multiple files</option>
-            </select><p></p>
+            <div class="row">
+                <span>Backup type:</span>&nbsp;
+                <select name="backup_type" {% if target is not none %}disabled{% else %}required{% endif %}>
+                    <option value="single" {% if target is none or target.target_type == "single" %}selected="selected"{% endif %}>Single file</option>
+                    <option value="multi" {% if target is not none and target.target_type == "multi" %}selected="selected"{% endif %}>Multiple files</option>
+                </select>
+            </div>
 
-            <span>Backup location:</span> <input type="text" name="location" {% if target is not none %}value="{{ target.location }}"{% endif %} required><p></p>
+            <span>Backup location:</span> <input type="text" name="location" {% if target is not none %}value="{{ target.location }}"{% endif %} required>
             <ul>
                 <li>Path to store backups (e.g. <span class="monospace">/var/backups</span>)</li>
                 <li>The user account running Backup-chan must have read and write access to access this location.</li>
                 <li>If the path does not exist, Backup-chan will try to create it.</li>
             </ul>
 
-            <span>Name template:</span> <input type="text" name="name_template" {% if target is not none %}value="{{ target.name_template }}"{% endif %} required><br>
+            <span>Name template:</span> <input type="text" name="name_template" {% if target is not none %}value="{{ target.name_template }}"{% endif %} required>
             <ul>
                 <li>The name template is the template for individual backup names.</li>
                 <li>
@@ -85,10 +100,17 @@
                     </ul>
                 </li>
                 <li>Example: <span class="monospace">backup-$I-$D</span>, <span class="monospace">$M_backup_$D</span></li>
-            </ul><p></p>
-            <input type="checkbox" name="deduplicate" id="deduplicate" {% if target is not none and target.deduplicate %}checked{% endif %}>
-            <label for="deduplicate">Enable backup deduplication</label><p></p>
-            <label for="tags">Tags (separate with spaces): </label><input type="text" name="tags" {% if target is not none %}value="{{ target.tags | join(' ') }}"{% endif %}><p></p>
+            </ul>
+
+            <div class="row">
+                <input type="checkbox" name="deduplicate" id="deduplicate" {% if target is not none and target.deduplicate %}checked{% endif %}>
+                <label for="deduplicate">Enable backup deduplication</label>
+            </div>
+
+            <div class="row">
+                <label for="tags">Tags (separate with spaces): </label><input type="text" name="tags" {% if target is not none %}value="{{ target.tags | join(' ') }}"{% endif %}>
+            </div>
+
             <input type="submit" value="{% if target is none %}Create target{% else %}Submit changes{% endif %}">
         </form>
     </div>

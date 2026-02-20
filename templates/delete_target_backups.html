@@ -13,7 +13,9 @@
         <h1>Delete target backups</h1>
         <p>All backups for target <b>{{ target.name }}</b> are about to be deleted. Are you okay with that?</p>
         <form method="post" action="{{ url_for('webui.delete_target_backups', id=target.id) }}">
-            <input type="checkbox" name="delete_files" value="delete_files" id="delete_files"> <label for="delete_files">Also delete backup files</label><p></p>
+            <div class="row">
+                <input type="checkbox" name="delete_files" value="delete_files" id="delete_files"> <label for="delete_files">Also delete backup files</label>
+            </div>
             <input type="submit" value="Delete">
         </form>
     </div>

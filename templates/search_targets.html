@@ -12,44 +12,62 @@
     <div id="container">
         <h1>Search targets</h1>
         <form method="get" action="{{ url_for('webui.search_targets') }}">
-            <label for="name">Name:</label> <input type="text" name="name" id="name"><p></p>
+            <div class="row">
+                <label for="name">Name:</label> <input type="text" name="name" id="name">
+            </div>
 
-            <label for="type">Type:</label>
-            <select name="type" id="type">
-                <option value="" selected="selected">Any</option>
-                <option value="single">Single file</option>
-                <option value="multi">Multiple files</option>
-            </select><p></p>
+            <div class="row">
+                <label for="type">Type:</label>
+                <select name="type" id="type">
+                    <option value="" selected="selected">Any</option>
+                    <option value="single">Single file</option>
+                    <option value="multi">Multiple files</option>
+                </select>
+            </div>
 
-            <label for="recycle_criteria">Recycle criteria:</label>
-            <select name="recycle_criteria" id="recycle_criteria">
-                <option value="" selected="selected">Any</option>
-                <option value="none">None</option>
-                <option value="count">Count</option>
-                <option value="age">Age</option>
-            </select><p></p>
+            <div class="row">
+                <label for="recycle_criteria">Recycle criteria:</label>
+                <select name="recycle_criteria" id="recycle_criteria">
+                    <option value="" selected="selected">Any</option>
+                    <option value="none">None</option>
+                    <option value="count">Count</option>
+                    <option value="age">Age</option>
+                </select>
+            </div>
 
-            <label for="recycle_action">Recycle action:</label>
-            <select name="recycle_action" id="recycle_action">
-                <option value="" selected="selected">Any</option>
-                <option value="recycle">Recycle</option>
-                <option value="delete">Delete</option>
-            </select><p></p>
+            <div class="row">
+                <label for="recycle_action">Recycle action:</label>
+                <select name="recycle_action" id="recycle_action">
+                    <option value="" selected="selected">Any</option>
+                    <option value="recycle">Recycle</option>
+                    <option value="delete">Delete</option>
+                </select>
+            </div>
 
-            <label for="location">Location:</label> <input type="text" name="location" id="location" placeholder="/var/backups"><p></p>
+            <div class="row">
+                <label for="location">Location:</label> <input type="text" name="location" id="location" placeholder="/var/backups">
+            </div>
 
-            <label for="name_template">Name template:</label> <input type="text" name="name_template" id="name_template"><p></p>
+            <div class="row">
+                <label for="name_template">Name template:</label> <input type="text" name="name_template" id="name_template">
+            </div>
 
-            <label for="deduplicate">Deduplication:</label>
-            <select name="deduplicate" id="deduplicate">
-                <option value="" selected="selected">Any</option>
-                <option value="on">On</option>
-                <option value="off">Off</option>
-            </select><p></p>
+            <div class="row">
+                <label for="deduplicate">Deduplication:</label>
+                <select name="deduplicate" id="deduplicate">
+                    <option value="" selected="selected">Any</option>
+                    <option value="on">On</option>
+                    <option value="off">Off</option>
+                </select>
+            </div>
 
-            <label for="alias">Alias:</label> <input type="text" name="alias" id="alias"><p></p>
+            <div class="row">
+                <label for="alias">Alias:</label> <input type="text" name="alias" id="alias">
+            </div>
 
-            <label for="tags">Tags (separate with spaces):</label> <input type="text" name="tags" id="tags" placeholder="games important"><p></p>
+            <div class="row">
+                <label for="tags">Tags (separate with spaces):</label> <input type="text" name="tags" id="tags" placeholder="games important">
+            </div>
 
             <input type="submit" value="Search">
         </form>
