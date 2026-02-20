@@ -218,19 +218,21 @@ class Database:
             # Normalize tag names
             tags = [tag.strip() for tag in tags]
 
-            # Insert missing tags
-            self.cursor.executemany("INSERT IGNORE INTO tags (name) VALUES (%s)", [(tag,) for tag in tags])
+            if tags:
+                # Insert missing tags
+                self.cursor.executemany("INSERT IGNORE INTO tags (name) VALUES (%s)", [(tag,) for tag in tags])
 
-            # Map names to tag IDs
-            self.cursor.execute(f"SELECT id, name FROM tags WHERE name IN ({', '.join(['?'] * len(tags))})", tags)
-            rows = self.cursor.fetchall()
-            tag_map = {row[1]: row[0] for row in rows}
+                # Map names to tag IDs
+                self.cursor.execute(f"SELECT id, name FROM tags WHERE name IN ({', '.join(['?'] * len(tags))})", tags)
+                rows = self.cursor.fetchall()
+                tag_map = {row[1]: row[0] for row in rows}
 
             # Remove existing links
             self.cursor.execute("DELETE FROM target_tags WHERE target_id = ?", (id,))
 
-            # Insert new links
-            self.cursor.executemany("INSERT INTO target_tags (target_id, tag_id) VALUES (?, ?)", [(id, tag_map[tag]) for tag in tags])
+            if tags:
+                # Insert new links
+                self.cursor.executemany("INSERT INTO target_tags (target_id, tag_id) VALUES (?, ?)", [(id, tag_map[tag]) for tag in tags])
 
             self.connection.commit()
 

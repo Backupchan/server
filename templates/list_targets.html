@@ -24,6 +24,7 @@
                     <th>Type</th>
                     <th>Backups</th>
                     <th>Total filesize</th>
+                    <th>Tags</th>
                     <th>Location</th>
                 </tr>
             </thead>
@@ -41,6 +42,7 @@
                     </td>
                     <td>{{ target_info[1] }}</td>
                     <td>{{ target_info[2] }}</td>
+                    <td>{% if target_info[0].tags | length == 0 %}<i>None</i>{% else %}{{ target_info[0].tags | join(', ') }}{% endif %}</td>
                     <td><span class="monospace">{{ target_info[0].location }}</span></td>
                 </tr>
                 {% endfor %}

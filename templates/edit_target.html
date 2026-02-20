@@ -88,6 +88,7 @@
             </ul><p></p>
             <input type="checkbox" name="deduplicate" id="deduplicate" {% if target is not none and target.deduplicate %}checked{% endif %}>
             <label for="deduplicate">Enable backup deduplication</label><p></p>
+            <label for="tags">Tags (separate with spaces): </label><input type="text" name="tags" {% if target is not none %}value="{{ target.tags | join(' ') }}"{% endif %}><p></p>
             <input type="submit" value="{% if target is none %}Create target{% else %}Submit changes{% endif %}">
         </form>
     </div>
