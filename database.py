@@ -11,6 +11,7 @@ import unicodedata
 import threading
 import os
 import sys
+from search_query import SearchQuery
 from datetime import datetime
 from pathlib import Path
 from backupchan_server import models
@@ -205,6 +206,14 @@ class Database:
             self.cursor.execute("DELETE FROM backups WHERE target_id = ?", (id,))
             self.connection.commit()
             self.logger.info("Delete target backups {%s}")
+
+    def search_targets(self, query: SearchQuery) -> list[models.BackupTarget]:
+        with self.lock:
+            sql, values = query.sql()
+            print(f"sql={sql} values={values}")
+            self.cursor.execute(sql, values)
+            rows = self.cursor.fetchall()
+            return [models.BackupTarget(*row, self.get_target_tags(row[0])) for row in rows]
 
     # Methods dealing with tags do not support alias as ID.
 
