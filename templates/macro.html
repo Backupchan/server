@@ -7,7 +7,7 @@
     Recycle criteria:
     <b>
     {% if target.recycle_criteria == "none" %}
-        None
+        <i>None</i>
     {% elif target.recycle_criteria == "count" %}
         After {{ target.recycle_value }} copies
     {% elif target.recycle_criteria == "age" %}
@@ -50,7 +50,8 @@
     {% else %}
         off
     {% endif %}
-    </b>
+    </b><br>
+    Tags: <b>{% if target.tags | length == 0 %}<i>None</i>{% else %}{{ target.tags | join(', ') }}{% endif %}</b>
 {% endmacro %}
 
 {% macro backup_print(backup, bulk_edit_controls, show_actions, target=none) %}
