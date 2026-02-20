@@ -12,18 +12,17 @@
     <div id="container">
         <h1>Search targets</h1>
         <form method="get" action="{{ url_for('webui.search_targets') }}">
-            <label for="name">Name:</label> <input type="text" name="name"><p></p>
+            <label for="name">Name:</label> <input type="text" name="name" id="name"><p></p>
 
             <label for="type">Type:</label>
-
-            <select name="type">
+            <select name="type" id="type">
                 <option value="" selected="selected">Any</option>
                 <option value="single">Single file</option>
                 <option value="multi">Multiple files</option>
             </select><p></p>
 
             <label for="recycle_criteria">Recycle criteria:</label>
-            <select name="recycle_criteria">
+            <select name="recycle_criteria" id="recycle_criteria">
                 <option value="" selected="selected">Any</option>
                 <option value="none">None</option>
                 <option value="count">Count</option>
@@ -31,26 +30,26 @@
             </select><p></p>
 
             <label for="recycle_action">Recycle action:</label>
-            <select name="recycle_action">
+            <select name="recycle_action" id="recycle_action">
                 <option value="" selected="selected">Any</option>
                 <option value="recycle">Recycle</option>
                 <option value="delete">Delete</option>
             </select><p></p>
 
-            <label for="location">Location:</label> <input type="text" name="location"><p></p>
+            <label for="location">Location:</label> <input type="text" name="location" id="location" placeholder="/var/backups"><p></p>
 
-            <label for="name_template">Name template:</label> <input type="text" name="name_template"><p></p>
+            <label for="name_template">Name template:</label> <input type="text" name="name_template" id="name_template"><p></p>
 
             <label for="deduplicate">Deduplication:</label>
-            <select name="deduplicate">
+            <select name="deduplicate" id="deduplicate">
                 <option value="" selected="selected">Any</option>
                 <option value="on">On</option>
                 <option value="off">Off</option>
             </select><p></p>
 
-            <label for="alias">Alias:</label> <input type="text" name="alias"><p></p>
+            <label for="alias">Alias:</label> <input type="text" name="alias" id="alias"><p></p>
 
-            <label for="tags">Tags (separate with spaces):</label> <input type="text" name="tags"><p></p>
+            <label for="tags">Tags (separate with spaces):</label> <input type="text" name="tags" id="tags" placeholder="games important"><p></p>
 
             <input type="submit" value="Search">
         </form>

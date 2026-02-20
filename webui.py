@@ -301,7 +301,7 @@ class WebUI:
             recycle_action = request.args.get("recycle_action", None)
             location = request.args.get("location", None)
             name_template = request.args.get("name_template", None)
-            deduplication = True if request.args.get("deduplication", None) == "on" else False if request.args.get("deduplication", None) is not None else None
+            deduplication = True if request.args.get("deduplicate", None) == "on" else False if request.args.get("deduplicate", None) is not None else None
             alias = request.args.get("alias", None)
             tags = request.args.get("tags", "").split()
             if name or target_type or recycle_criteria or recycle_action or location or name_template or deduplication or alias or tags:
