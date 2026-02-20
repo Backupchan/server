@@ -25,10 +25,10 @@ class MockDatabase(database.Database):
         self.backups = []
         self.logger.info("Reset")
 
-    def add_target(self, name: str, target_type: models.BackupType, recycle_criteria: models.BackupRecycleCriteria, recycle_value: int | None, recycle_action: models.BackupRecycleAction | None, location: str, name_template: str, deduplicate: bool, alias: str | None, min_backups: int | None) -> str:
+    def add_target(self, name: str, target_type: models.BackupType, recycle_criteria: models.BackupRecycleCriteria, recycle_value: int | None, recycle_action: models.BackupRecycleAction | None, location: str, name_template: str, deduplicate: bool, alias: str | None, min_backups: int | None, tags: list[str] | None) -> str:
         self.validate_target(name, name_template, location, None, alias)
         target_id = str(uuid.uuid4())
-        target = models.BackupTarget(target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups)
+        target = models.BackupTarget(target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups, tags or [])
         self.targets.append(target)
         self.logger.info("Add target: %s", target)
         return target_id

@@ -111,7 +111,8 @@ class Database:
         name_template: str,
         deduplicate: bool,
         alias: str | None,
-        min_backups: int | None
+        min_backups: int | None,
+        tags: str | None
     ) -> str:
         with self.lock:
             self.validate_target(name, name_template, location, None, alias)
@@ -119,6 +120,9 @@ class Database:
             target_id = str(uuid.uuid4())
             self.cursor.execute("INSERT INTO targets VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups))
             self.connection.commit()
+
+            if tags:
+                self.set_target_tags(target_id, tags)
 
             self.logger.info("Add target {%s} name: %s type: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s min backups: %d", target_id, name, target_type, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups)
             return target_id
@@ -134,7 +138,8 @@ class Database:
         name_template: str,
         deduplicate: bool,
         alias: str | None,
-        min_backups: int | None
+        min_backups: int | None,
+        tags: str | None
     ):
         with self.lock:
             target = self.get_target(id)
@@ -147,6 +152,8 @@ class Database:
             self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ?, alias = ?, min_backups = ? WHERE id = ? OR alias = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups, id, alias))
             self.connection.commit()
 
+            self.set_target_tags(target_id, tags)
+
             self.logger.info("Update target {%s} name: %s criteria: %s value: %s action: %s location: %s template: %s dedup: %s alias: %s min backups %d", target_id, name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups)
 
     def list_targets(self, page: int = 1, sort_options: TargetSortOptions | None = None) -> list[models.BackupTarget]:
@@ -158,14 +165,15 @@ class Database:
             self.cursor.execute(f"SELECT * FROM targets {sort_options.sql()} LIMIT ? OFFSET ?", (self.page_size, offset + self.page_size))
             has_more = bool(self.cursor.fetchall())
             return {
-                "targets": [models.BackupTarget(*row) for row in rows],
+                # Column #0 is ID
+                "targets": [models.BackupTarget(*row, self.get_target_tags(row[0])) for row in rows],
                 "has_more": has_more
             }
 
     def list_targets_all(self) -> list[models.BackupTarget]:
         self.cursor.execute("SELECT * FROM targets")
         rows = self.cursor.fetchall()
-        return [models.BackupTarget(*row) for row in rows]
+        return [models.BackupTarget(*row, self.get_target_tags(row[0])) for row in rows]
     
     def get_target(self, id: str) -> None | models.BackupTarget:
         """
@@ -174,7 +182,7 @@ class Database:
         with self.lock:
             self.cursor.execute("SELECT * FROM targets WHERE id = ? OR alias = ?", (id, id))
             row = self.cursor.fetchone()
-            return None if row is None else models.BackupTarget(*row)
+            return None if row is None else models.BackupTarget(*row, self.get_target_tags(row[0]))
 
     def get_target_size(self, id: str) -> int:
         with self.lock:
@@ -197,6 +205,68 @@ class Database:
             self.cursor.execute("DELETE FROM backups WHERE target_id = ?", (id,))
             self.connection.commit()
             self.logger.info("Delete target backups {%s}")
+
+    # Methods dealing with tags do not support alias as ID.
+
+    def get_target_tags(self, id: str) -> list[str]:
+        with self.lock:
+            self.cursor.execute("SELECT tag.name FROM tags tag JOIN target_tags tt ON tt.tag_id = tag.id WHERE tt.target_id = ?", (id,))
+            return [row[0] for row in self.cursor.fetchall()]
+
+    def set_target_tags(self, id: str, tags: list[str]):
+        with self.lock:
+            # Normalize tag names
+            tags = [tag.strip() for tag in tags]
+
+            # Insert missing tags
+            self.cursor.executemany("INSERT IGNORE INTO tags (name) VALUES (%s)", [(tag,) for tag in tags])
+
+            # Map names to tag IDs
+            self.cursor.execute(f"SELECT id, name FROM tags WHERE name IN ({', '.join(['?'] * len(tags))})", tags)
+            rows = self.cursor.fetchall()
+            tag_map = {row[1]: row[0] for row in rows}
+
+            # Remove existing links
+            self.cursor.execute("DELETE FROM target_tags WHERE target_id = ?", (id,))
+
+            # Insert new links
+            self.cursor.executemany("INSERT INTO target_tags (target_id, tag_id) VALUES (?, ?)", [(id, tag_map[tag]) for tag in tags])
+
+            self.connection.commit()
+
+    def validate_target(self, name: str, name_template: str, location: str, target_id: str | None, alias: str | None):
+        with self.lock:
+            # The name must not be empty.
+            if len(name.strip()) == 0:
+                raise DatabaseError("Target name must not be empty")
+
+            # Name template must contain either ID of backup or its creation date.
+            if not nameformat.verify_name(name_template):
+                raise DatabaseError("Filename template must contain either creation date or ID of backup")
+
+            # Name template must be unique to this target.
+            for target in self.list_targets_all():
+                if target.name_template == name_template and target.id != target_id:
+                    raise DatabaseError("Name template is not unique to this target")
+
+            # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
+            if not utility.is_valid_path(name_template, False):
+                raise DatabaseError("Filename template must not contain invalid characters")
+
+            # Location must not contain illegal characters. '/' is okay.
+            if not utility.is_valid_path(location, True):
+                raise DatabaseError("Target location must not contain invalid characters")
+            
+            # Alias validation
+            if alias is not None:
+                # Alias must not be empty.
+                if len(alias.strip()) == 0:
+                    raise DatabaseError("Alias must not be empty")
+                
+                # Alias must be unique to this target.
+                for target in self.list_targets_all():
+                    if target.alias == alias and target.id != target_id:
+                        raise DatabaseError("Alias is not unique to this target")
 
     #
     # Backup methods
@@ -297,40 +367,6 @@ class Database:
     # Miscellaneous
     #
 
-    def validate_target(self, name: str, name_template: str, location: str, target_id: str | None, alias: str | None):
-        with self.lock:
-            # The name must not be empty.
-            if len(name.strip()) == 0:
-                raise DatabaseError("Target name must not be empty")
-
-            # Name template must contain either ID of backup or its creation date.
-            if not nameformat.verify_name(name_template):
-                raise DatabaseError("Filename template must contain either creation date or ID of backup")
-
-            # Name template must be unique to this target if it shares location with another target.
-            for target in self.list_targets_all():
-                if target.name_template == name_template and target.id != target_id:
-                    raise DatabaseError("Name template is not unique to this target")
-
-            # Name template must not contain illegal characters (like '?' on Windows, or '/' on everything else).
-            if not utility.is_valid_path(name_template, False):
-                raise DatabaseError("Filename template must not contain invalid characters")
-
-            # Location must not contain illegal characters. '/' is okay.
-            if not utility.is_valid_path(location, True):
-                raise DatabaseError("Target location must not contain invalid characters")
-            
-            # Alias validation
-            if alias is not None:
-                # Alias must not be empty.
-                if len(alias.strip()) == 0:
-                    raise DatabaseError("Alias must not be empty")
-                
-                # Alias must be unique to this target.
-                for target in self.list_targets_all():
-                    if target.alias == alias and target.id != target_id:
-                        raise DatabaseError("Alias is not unique to this target")
-
     def initialize_database(self):
         migrations_dir = Path("migrations")
         sql_files = sorted(migrations_dir.glob("*.sql"))
@@ -347,7 +383,6 @@ class Database:
                 self.logger.info("Run statement: %s", command)
                 self.cursor.execute(command)
         self.connection.commit()
-
 
     def __del__(self):
         self.cursor.close()
