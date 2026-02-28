@@ -12,7 +12,7 @@
     <div id="container">
         {% if search %}
         <h1>Search</h1>
-        <p>{{ targets | length }} target{% if targets | length != 1 %}s{% endif %} matched your search.</p>
+        <p>{% if num_targets == 0 %}No{% else %}{{ num_targets }}{% endif %} target{% if num_targets != 1 %}s{% endif %} matched your search.</p>
         {% else %}
         <h1>Targets</h1>
         {% if num_targets == 0 %}

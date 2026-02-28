@@ -57,7 +57,7 @@ class WebUI:
         def requires_auth(f):
             @functools.wraps(f)
             def decorated(*args, **kwargs):
-                if not self.passwd_hash or not self.config.get("webui_auth") or session.get("authed"):
+                if not self.passwd_hash or not self.config.get("webui_auth") or session.get("authed") or (self.config.get("webui_localhost_disable_auth") and request.remote_addr in ("127.0.0.1", "::1")):
                     return f(*args, **kwargs)
                 return redirect(url_for("webui.login", return_url=request.path))
             return decorated
@@ -307,7 +307,7 @@ class WebUI:
             if name or target_type or recycle_criteria or recycle_action or location or name_template or deduplicate is not None or alias or tags:
                 results = self.db.search_targets(SearchQuery(name, target_type, recycle_criteria, recycle_action, location, name_template, deduplicate, alias, tags))
                 target_infos = self.get_target_infos(results)
-                return render_template("list_targets.html", targets=target_infos, search=True, page=1, has_more=False)
+                return render_template("list_targets.html", targets=target_infos, search=True, page=1, has_more=False, num_targets=len(target_infos))
 
             return render_template("search_targets.html")
 

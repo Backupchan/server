@@ -44,5 +44,8 @@
     "webui_auth": true,
 
     // How many targets to show per page in the list
-    "page_size": 10
+    "page_size": 10,
+
+    // Disable WebUI authentication on localhost
+    "webui_localhost_disable_auth": false
 }
