@@ -1,4 +1,4 @@
 flask
 mariadb
 configtony
-backupchan-server-lib==1.0.0
+backupchan-server-lib==1.0.1
