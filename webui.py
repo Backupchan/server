@@ -301,11 +301,11 @@ class WebUI:
             recycle_action = request.args.get("recycle_action", None)
             location = request.args.get("location", None)
             name_template = request.args.get("name_template", None)
-            deduplication = True if request.args.get("deduplicate", None) == "on" else False if request.args.get("deduplicate", None) is not None else None
+            deduplicate = True if request.args.get("deduplicate", None) == "on" else False if request.args.get("deduplicate", None) else None
             alias = request.args.get("alias", None)
             tags = request.args.get("tags", "").split()
-            if name or target_type or recycle_criteria or recycle_action or location or name_template or deduplication or alias or tags:
-                results = self.db.search_targets(SearchQuery(name, target_type, recycle_criteria, recycle_action, location, name_template, deduplication, alias, tags))
+            if name or target_type or recycle_criteria or recycle_action or location or name_template or deduplicate is not None or alias or tags:
+                results = self.db.search_targets(SearchQuery(name, target_type, recycle_criteria, recycle_action, location, name_template, deduplicate, alias, tags))
                 target_infos = self.get_target_infos(results)
                 return render_template("list_targets.html", targets=target_infos, search=True, page=1, has_more=False)
 
