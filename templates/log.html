@@ -31,7 +31,7 @@
                     <td>{{ line.time }}</td>
                     <td>{{ line.module }}</td>
                     <td class="log-{{ line.level | lower }}">{{ line.level }}</td>
-                    <td><pre>{{ line.message }}</pre></td>
+                    <td><pre class="monospace">{{ line.message }}</pre></td>
                 </tr>
                 {% endfor %}
             </tbody>
