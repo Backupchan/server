@@ -373,7 +373,7 @@ class WebUI:
             backups_and_targets = []
             for backup in backups:
                 backups_and_targets.append({"backup": backup, "target": self.db.get_target(backup.target_id)})
-            return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups), storage=self.stats.total_recycle_bin_size)
+            return render_template("recycle_bin.html", backups=backups_and_targets, num_backups=len(backups), storage=self.stats.total_recycle_bin_size())
 
         @self.blueprint.route("/recycle_bin/clear", methods=["GET", "POST"])
         @requires_auth
