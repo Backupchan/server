@@ -15,6 +15,7 @@ class WebAuth:
         def decorated(*args, **kwargs):
             if not self.passwd_hash or not self.config.get("webui_auth") or session.get("authed") or self.can_bypass_auth():
                 return f(*args, **kwargs)
+            return redirect(url_for("webui.login", return_url=request.path))
         return decorated
 
     def add_routes(self, blueprint: Blueprint):
