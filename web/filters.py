@@ -42,7 +42,7 @@ def add_filters(blueprint: Blueprint):
 
     @blueprint.app_template_filter()
     def pretty_datetime(time: datetime.datetime) -> str:
-        return time.strftime("%B %d, %Y %H:%M")
+        return time.strftime("%B %d, %Y %H:%M:%S")
 
     @blueprint.app_template_filter()
     def pretty_ftime(time: float) -> str:

@@ -63,7 +63,7 @@
     {% if target is not none %}
     <td><a href="{{ url_for('webui.view_target', id=target.id) }}">{{ target.name }}</a></td>
     {% endif %}
-    <td>{{ backup.created_at | pretty_datetime }}</td>
+    <td><abbr title="{{ backup.created_at | pretty_datetime }}">{{ backup.created_at | pretty_timedelta }}</abbr></td>
     <td>{{ backup.filesize | pretty_filesize }}</td>
     <td>{% if backup.manual %}yes{% else %}no{% endif %}</td>
     {% if show_actions %}
@@ -92,7 +92,7 @@
                     <th><input name="select_all_backups" class="select_all_backups" type="checkbox" value="{{ target_id }}"></th>
                     {% endif %}
                     <th>ID</th>
-                    <th>Date</th>
+                    <th>Created</th>
                     <th>Size</th>
                     <th>Manual</th>
                     {% if show_actions %}<th>Actions</th>{% endif %}
