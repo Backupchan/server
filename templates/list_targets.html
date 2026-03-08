@@ -40,6 +40,7 @@
                     <th>Total filesize</th>
                     <th>Tags</th>
                     <th>Location</th>
+                    <th>Last backup</th>
                 </tr>
             </thead>
             <tbody>
@@ -58,6 +59,7 @@
                     <td>{{ target_info[2] }}</td>
                     <td>{% if target_info[0].tags | length == 0 %}<i>None</i>{% else %}{{ target_info[0].tags | join(', ') }}{% endif %}</td>
                     <td><span class="monospace">{{ target_info[0].location }}</span></td>
+                    <td>{% if target_info[3] is none %}<i>N/A</i>{% else %}<abbr title="{{ target_info[3].created_at | pretty_datetime }}">{{ target_info[3].created_at | pretty_timedelta }}</abbr>{% endif %}</td>
                 </tr>
                 {% endfor %}
             </tbody>

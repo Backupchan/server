@@ -12,9 +12,11 @@ def get_target_infos(targets: list[models.BackupTarget], db: database.Database):
     for target in targets:
         backups = db.list_backups_target(target.id)
         target_infos.append(
+                # TODO this should be a class
                 (target,
                  len(backups),
-                 utility.humanread_file_size(sum([backup.filesize for backup in backups]))
+                 utility.humanread_file_size(sum([backup.filesize for backup in backups])),
+                 None if not backups else backups[0] # With the default sorting, 1st backup to be listed is also the most recent one.
             )
         )
     return target_infos
@@ -28,15 +30,7 @@ def add_routes(context: WebContext):
         target_list = context.db.list_targets(page, sort_options)
         targets = target_list["targets"]
         has_more = target_list["has_more"]
-        target_infos = []
-        for target in targets:
-            backups = context.db.list_backups_target(target.id)
-            target_infos.append(
-                    (target,
-                     len(backups),
-                     utility.humanread_file_size(sum([backup.filesize for backup in backups]))
-                )
-            )
+        target_infos = get_target_infos(targets, context.db)
         return render_template("list_targets.html", targets=target_infos, num_targets=context.db.count_targets(), num_backups=context.db.count_backups(), page=page, has_more=has_more)
 
     @context.blueprint.route("/target/new", methods=["GET", "POST"])

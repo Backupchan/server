@@ -4,15 +4,18 @@ from flask import Blueprint
 
 def add_filters(blueprint: Blueprint):
     @blueprint.app_template_filter()
-    def time_until(n_target: float) -> str:
-        target = datetime.datetime.fromtimestamp(n_target)
+    def pretty_timedelta(target: datetime.datetime) -> str:
         now = datetime.datetime.now(target.tzinfo) if target.tzinfo else datetime.datetime.now()
         delta = target - now
-
         total_seconds = int(delta.total_seconds())
+        ago = False
 
-        if total_seconds <= 0:
+        if total_seconds == 0:
             return "now"
+
+        if total_seconds < 0:
+            total_seconds *= -1
+            ago = True
 
         days, remainder = divmod(total_seconds, 86400)
         hours, remainder = divmod(remainder, 3600)
@@ -29,7 +32,13 @@ def add_filters(blueprint: Blueprint):
         if seconds:
             parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
 
+        if ago:
+            return ", ".join(parts) + " ago"
         return "in " + ", ".join(parts)
+
+    @blueprint.app_template_filter()
+    def pretty_ftimedelta(target: float) -> str:
+        return pretty_timedelta(datetime.datetime.fromtimestamp(target))
 
     @blueprint.app_template_filter()
     def pretty_datetime(time: datetime.datetime) -> str:
