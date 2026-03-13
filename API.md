@@ -243,6 +243,20 @@ to indicate whether or not to permanently delete backup files as well.
 }
 ```
 
+### GET `/api/target/search`
+
+Search targets. Filters are passed as arguments in the URL, like `/api/target/search?name=hibiki`. Any combination of filters may be used.
+
+* `name`:
+* `type`(`single` or `multi`)
+* `recycle_criteria` (`none`, `count` or `age`)
+* `recycle_action` (`recycle` or `delete`)
+* `location`
+* `name_template`
+* `deduplicate` (`on` or `off`)
+* `alias`
+* `tags` (separate with spaces)
+
 ## Backup endpoints
 
 ### DELETE `/api/backup/<id>`

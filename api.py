@@ -16,6 +16,7 @@ import os
 import uuid
 import datetime
 from backupchan_server import models, utility
+from search_query import SearchQuery
 from version import PROGRAM_VERSION
 from flask import Blueprint, jsonify, request, Response, send_file
 
@@ -201,6 +202,26 @@ class API:
 
             self.server_api.delete_target_recycled_backups(id, data["delete_files"])
             return jsonify(success=True), 200
+
+        @self.blueprint.route("/target/search")
+        @requires_auth
+        def search_targets():
+            # TODO shared logic for getting search params
+            name = request.args.get("name", None)
+            target_type = request.args.get("type", None)
+            recycle_criteria = request.args.get("recycle_criteria", None)
+            recycle_action = request.args.get("recycle_action", None)
+            location = request.args.get("location", None)
+            name_template = request.args.get("name_template", None)
+            deduplicate = True if request.args.get("deduplicate", None) == "on" else False if request.args.get("deduplicate", None) else None
+            alias = request.args.get("alias", None)
+            tags = request.args.get("tags", "").split()
+
+            if not name and not target_type and not recycle_criteria and not recycle_action and not location and not name_template and deduplicate is None and not alias and not tags:
+                return jsonify(success=False), 400
+
+            results = self.db.search_targets(SearchQuery(name, target_type, recycle_criteria, recycle_action, location, name_template, deduplicate, alias, tags))
+            return jsonify(success=True, targets=[dataclasses.asdict(target) for target in results]), 200
 
         #
         # Backup endpoints
