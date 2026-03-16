@@ -2,6 +2,19 @@
 
 See what's changed between versions!
 
+## 2.9
+
+* Web UI improvements:
+  * Added sequential uploads table to jobs list.
+  * Added ability to cancel sequential uploads from Web UI.
+  * Only show targets table if there are any targets.
+  * Added option to bypass Web UI authentication from localhost connections.
+  * Use a monospace font for log messages.
+  * Show last backup column in target list.
+  * Show relative time instead of absolute time in various fields.
+* Added target tags.
+* Added target search.
+
 ## 2.8.3
 
 * Force the usage of forward-slashed istead of backslashes. This fixes some bugs related to sequential uploads.
