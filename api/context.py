@@ -21,3 +21,4 @@ class APIContext:
     stats: stats.Stats
     job_manager: delayed_jobs.JobManager
     job_scheduler: scheduled_jobs.JobScheduler
+    seq_upload_manager: seq_upload.SequentialUploadManager

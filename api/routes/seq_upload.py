@@ -62,13 +62,13 @@ def add_routes(context: APIContext):
     @context.auth.requires_auth
     def seq_upload_file(target_id: str):
         target = context.db.get_target(target_id)
-        verify_result = check_seq_upload(target)
+        verify_result = check_seq_upload(context.seq_upload_manager, target)
         if verify_result is not None:
             return verify_result
 
         # Verify that user supplied file name and path
         data = request.form
-        verify_result = verify_data_present(data, ["name", "path"])
+        verify_result = apiutil.verify_data_present(data, ["name", "path"])
         if verify_result is not None:
             return verify_result
 
@@ -108,7 +108,7 @@ def add_routes(context: APIContext):
     @context.auth.requires_auth
     def seq_finish(target_id: str):
         target = context.db.get_target(target_id)
-        verify_result = check_seq_upload(target)
+        verify_result = check_seq_upload(context.seq_upload_manager, target)
         if verify_result is not None:
             return verify_result
 
@@ -133,7 +133,7 @@ def add_routes(context: APIContext):
     @context.auth.requires_auth
     def seq_terminate(target_id: str):
         target = context.db.get_target(target_id)
-        verify_result = check_seq_upload(target)
+        verify_result = check_seq_upload(context.seq_upload_manager, target)
         if verify_result is not None:
             return verify_result
 

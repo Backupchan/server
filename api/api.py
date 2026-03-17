@@ -27,5 +27,5 @@ class API:
             seq_upload_manager: seq_upload.SequentialUploadManager):
         self.blueprint = Blueprint("api", __name__)
         self.auth = APIAuth()
-        context = APIContext(self.blueprint, self.auth, db, server_api, fm, config, stats, job_manager, job_scheduler)
+        context = APIContext(self.blueprint, self.auth, db, server_api, fm, config, stats, job_manager, job_scheduler, seq_upload_manager)
         routes.add_routes(context)
