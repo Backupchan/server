@@ -5,7 +5,6 @@ import file_manager
 import serverapi
 import serverconfig
 import stats
-import api
 import scheduled_jobs
 import delayed_jobs
 import seq_upload
@@ -17,6 +16,7 @@ import secrets
 import os
 import sys
 from web import webui
+from api import api
 from flask import Flask, render_template, request, redirect, url_for, abort, session
 from werkzeug.security import check_password_hash
 
