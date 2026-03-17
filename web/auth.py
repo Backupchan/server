@@ -1,5 +1,6 @@
 import configtony
 import functools
+import logging
 from flask import Blueprint, redirect, url_for, request, session, render_template
 from werkzeug.security import check_password_hash
 
@@ -9,6 +10,7 @@ class WebAuth:
     def __init__(self, passwd_hash: str | None, config: configtony.Config):
         self.passwd_hash = passwd_hash
         self.config = config
+        self.logger = logging.getLogger("webauth")
 
     def requires_auth(self, f):
         @functools.wraps(f)
@@ -26,8 +28,10 @@ class WebAuth:
                 password = request.form["password"]
                 if check_password_hash(self.passwd_hash, password):
                     session["authed"] = True
+                    self.logger.info("Successfully authenticated (IP: %s; UA: '%s')", request.remote_addr, request.headers.get("User-Agent", "[none]"))
                     return redirect(return_url or url_for("webui.list_targets"))
                 else:
+                    self.logger.info("Failed login attempt (IP: %s; UA: '%s')", request.remote_addr, request.headers.get("User-Agent", "[none]"))
                     return render_template("login.html", incorrect=True, return_url=return_url)
             return render_template("login.html", return_url=return_url)
 
