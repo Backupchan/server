@@ -12,21 +12,16 @@ from backupchan_server import models, nameformat, utility
 class FileManagerError(Exception):
     pass
 
-ZIP_SUFFIXES = [".zip"]
-TAR_SUFFIXES = [".tar"]
-TAR_GZ_SUFFIXES = [".tar", ".gz"]
-TAR_XZ_SUFFIXES = [".tar", ".xz"]
+def is_archive(filename: str) -> bool:
+    return os.path.isfile(filename) and (tarfile.is_tarfile(filename) or zipfile.is_zipfile(filename))
 
-VALID_ARCHIVE_SUFFIXES = [
-    ZIP_SUFFIXES,
-    TAR_SUFFIXES,
-    TAR_GZ_SUFFIXES,
-    TAR_XZ_SUFFIXES
-]
-
-def is_archive_filename(filename: str) -> bool:
-    suffixes = Path(filename).suffixes
-    return suffixes in VALID_ARCHIVE_SUFFIXES
+def safe_tar_extract(tar: tarfile.TarFile, path: str):
+    # Validate the file to make sure we don't get any path traversal garbage
+    for member in tar.getmembers():
+        member_path = os.path.join(path, member.name)
+        if not os.path.abspath(member_path).startswith(os.path.abspath(path)):
+            raise FileManagerError("Path traversal detected in tar file")
+    tar.extractall(path)
 
 def extract_archive(fs_location: str, filename: str):
     suffixes = Path(filename).suffixes
@@ -36,7 +31,7 @@ def extract_archive(fs_location: str, filename: str):
         return
     elif suffixes == TAR_SUFFIXES or suffixes == TAR_GZ_SUFFIXES or suffixes == TAR_XZ_SUFFIXES:
         with tarfile.open(filename, "r:*") as tar_file:
-            tar_file.extractall(fs_location)
+            safe_tar_extract(tar_file, fs_location)
         return
     raise FileManagerError("Unsupported archive format")
 
@@ -56,7 +51,7 @@ def find_single_backup_file(base_path: str) -> str | None:
     for file in parent.iterdir():
         if file.is_file() and file.stem == stem:
             return file
-    raise FileManagerError(f"Could not find backup file for backup {backup_id}")
+    raise FileManagerError(f"Could not find backup file for in base path {base_path}")
 
 def get_directory_size(path: Path)-> int:
     total = 0
@@ -108,7 +103,7 @@ class FileManager:
                 fs_location += Path(filenames[0]).suffix
 
             if os.path.exists(fs_location):
-                return FileManagerError(f"Path {fs_location} already exists")
+                raise FileManagerError(f"Path {fs_location} already exists")
 
             self.logger.info("Will be put in %s", fs_location)
 
@@ -118,8 +113,7 @@ class FileManager:
                 # If there's only one file...
                 if len(filenames) == 1:
                     # ...and it's either an archive or directory, then it's not a multi-file upload.
-                    # TODO is it worth checking the file content to check if it's a real zip/tar/whatever and not an imposter?
-                    if is_archive_filename(filenames[0]) or os.path.isdir(filenames[0]):
+                    if is_archive(filenames[0]) or os.path.isdir(filenames[0]):
                         is_multiple_files = False
                     # Otherwise it's a multi-file upload (or just 1 that will be put in a dir anyway)
                 # Having zero files physically wouldn't work.
