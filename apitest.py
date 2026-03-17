@@ -1,5 +1,4 @@
 import mock_modules
-import api
 import serverapi
 import serverconfig
 import stats
@@ -10,6 +9,7 @@ import io
 import datetime
 import random
 import string
+from api import api
 from backupchan_server import models
 from flask import Flask
 
@@ -24,7 +24,7 @@ server_api = serverapi.ServerAPI(db, file_manager)
 stats = stats.Stats(db, file_manager)
 job_manager = delayed_jobs.JobManager()
 api = api.API(db, server_api, config, file_manager, stats, job_manager, None, None)
-api.key = None
+api.auth.key = None
 
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
@@ -200,7 +200,7 @@ def test_recycle_bin_clear(client):
 
 def test_auth(client):
     db.reset()
-    api.key = "kantai_collection"
+    api.auth.key = "kantai_collection"
     
     # With valid token
     response = client.get("/api/target", headers={"Authorization": "Bearer kantai_collection"})
@@ -214,7 +214,7 @@ def test_auth(client):
     response = client.get("/api/target", headers={"Authorization": "Bearer efijwefoij"})
     assert response.status_code == 403
 
-    api.key = None
+    api.auth.key = None
 
 def test_stats(client):
     db.reset()
