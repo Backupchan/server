@@ -7,10 +7,17 @@ import tarfile
 import threading
 import hashlib
 from pathlib import Path
+from enum import Enum
 from backupchan_server import models, nameformat, utility
 
 class FileManagerError(Exception):
     pass
+
+class BackupUploadMode(Enum):
+    DIRECTORY = 0
+    ARCHIVE = 1
+    SINGLE_FILE = 2
+    MULTI_FILE = 3
 
 def is_archive(filename: str) -> bool:
     return os.path.isfile(filename) and (tarfile.is_tarfile(filename) or zipfile.is_zipfile(filename))
@@ -25,11 +32,11 @@ def safe_tar_extract(tar: tarfile.TarFile, path: str):
 
 def extract_archive(fs_location: str, filename: str):
     suffixes = Path(filename).suffixes
-    if suffixes == ZIP_SUFFIXES:
+    if zipfile.is_zipfile(filename):
         with zipfile.ZipFile(filename, "r") as zip_file:
             zip_file.extractall(fs_location)
         return
-    elif suffixes == TAR_SUFFIXES or suffixes == TAR_GZ_SUFFIXES or suffixes == TAR_XZ_SUFFIXES:
+    elif tarfile.is_tarfile(filename):
         with tarfile.open(filename, "r:*") as tar_file:
             safe_tar_extract(tar_file, fs_location)
         return
@@ -51,7 +58,7 @@ def find_single_backup_file(base_path: str) -> str | None:
     for file in parent.iterdir():
         if file.is_file() and file.stem == stem:
             return file
-    raise FileManagerError(f"Could not find backup file for in base path {base_path}")
+    raise FileManagerError(f"Could not find backup file in base path {base_path}")
 
 def get_directory_size(path: Path)-> int:
     total = 0
@@ -107,24 +114,23 @@ class FileManager:
 
             self.logger.info("Will be put in %s", fs_location)
 
-            # If it's multi-file...
-            is_multiple_files = True
-            if target.target_type == models.BackupType.MULTI:
-                # If there's only one file...
-                if len(filenames) == 1:
-                    # ...and it's either an archive or directory, then it's not a multi-file upload.
-                    if is_archive(filenames[0]) or os.path.isdir(filenames[0]):
-                        is_multiple_files = False
-                    # Otherwise it's a multi-file upload (or just 1 that will be put in a dir anyway)
-                # Having zero files physically wouldn't work.
-                elif len(filenames) == 0:
-                    raise FileManagerError("No files specified for backup")
-                # Two or more files.
+            if len(filenames) == 0:
+                raise FileManagerError("No files specified")
+            elif len(filenames) == 1:
+                file = filenames[0]
+                if os.path.isdir(file):
+                    upload_mode = BackupUploadMode.DIRECTORY
+                elif is_archive(file) and target.target_type == models.BackupType.MULTI:
+                    upload_mode = BackupUploadMode.ARCHIVE
                 else:
-                    # If any of them's a directory, then no.
-                    for filename in filenames:
-                        if os.path.isdir(filename):
-                            raise FileManagerError("Directories are not permitted when multiple filenames specified.")
+                    upload_mode = BackupUploadMode.SINGLE_FILE
+            else:
+                if any(os.path.isdir(f) for f in filenames):
+                    raise FileManagerError("Directories not allowed in multi-file upload")
+                upload_mode = BackupUploadMode.MULTI_FILE
+
+            if (upload_mode == BackupUploadMode.DIRECTORY or upload_mode == BackupUploadMode.MULTI_FILE) and target.target_type == models.BackupType.SINGLE:
+                raise FileManagerError("Cannot upload directory or multiple files to a single-file target")
 
             #
             # Actual operation
@@ -138,19 +144,15 @@ class FileManager:
             else:
                 os.makedirs(target.location, exist_ok=True)
 
-            if target.target_type == models.BackupType.SINGLE:
+            if upload_mode == BackupUploadMode.SINGLE_FILE:
                 shutil.move(filenames[0], fs_location)
-            else:
-                if is_multiple_files:
-                    # This keeps hex UUIDs that webUI prefixes, to avoid duplicate names.
-                    for filename in filenames:
-                        shutil.move(filename, fs_location)
-                else:
-                    if os.path.isdir(filenames[0]):
-                        shutil.move(filenames[0], fs_location)
-                    else:
-                        # pull up the extremely convenient archive extractor(tm)
-                        extract_archive(fs_location, filenames[0])
+            elif upload_mode == BackupUploadMode.MULTI_FILE:
+                for f in filenames:
+                    shutil.move(f, fs_location)
+            elif upload_mode == BackupUploadMode.ARCHIVE:
+                extract_archive(fs_location, filenames[0])
+            elif upload_mode == BackupUploadMode.DIRECTORY:
+                shutil.move(filenames[0], fs_location)
 
             self.logger.info("Finish upload")
 
