@@ -25,9 +25,6 @@
             <li><a href="{{ url_for('webui.new_target') }}">Create a new target</a></li>
             <li><a href="{{ url_for('webui.search_targets') }}">Search targets</a></li>
         </ul>
-        {% if page != 1 or has_more %}
-        <p><i>Now viewing page {{ page }}.</i></p>
-        {% endif %}
         {% endif %}
         {% if num_targets != 0 %}
         <table>
