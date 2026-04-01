@@ -22,6 +22,7 @@
             <thead>
                 <th>Time</th>
                 <th>Module</th>
+                <th>Function</th>
                 <th>Level</th>
                 <th>Message</th>
             </thead>
@@ -30,6 +31,7 @@
                 <tr>
                     <td>{{ line.time }}</td>
                     <td>{{ line.module }}</td>
+                    <td>{{ line.function }}</td>
                     <td class="log-{{ line.level | lower }}">{{ line.level }}</td>
                     <td><pre class="monospace">{{ line.message }}</pre></td>
                 </tr>

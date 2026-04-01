@@ -14,6 +14,7 @@ LOG_FILE = utility.join_path(LOG_DIRECTORY, "backupchan.log")
 class LogLine:
     time: str
     module: str
+    function: str
     level: str
     message: str
 
@@ -47,14 +48,15 @@ def parse(log: str) -> list[LogLine]:
     lines = log.split("\n")
     log_lines = []
     for line in lines:
-        if not re.match(r"\[\d+-\d+-\d+ \d+:\d+:\d+,\d+\] \[[a-z_.]+\] \[[A-Z]+\]: .*", line):
-            log_lines.append(LogLine("", "", "", line))
+        if not re.match(r"\[\d+-\d+-\d+ \d+:\d+:\d+,\d+\] \[[a-z_.]+\] \[[a-zA-Z0-9_]+\] \[[A-Z]+\]: .*", line):
+            log_lines.append(LogLine("", "", "", "", line))
             continue
         print(line)
         message = re.search(r": .*", line).group(0)[2:]
         info_split = line.replace(message, "").split("] [")
         time = info_split[0][1:]
         module = info_split[1]
-        level = info_split[2][:-3]
-        log_lines.append(LogLine(time, module, level, message))
+        function = info_split[2]
+        level = info_split[3][:-3]
+        log_lines.append(LogLine(time, module, function, level, message))
     return log_lines
