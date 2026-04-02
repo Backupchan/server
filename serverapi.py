@@ -51,6 +51,7 @@ class ServerAPI:
             raise
 
         self.db.set_backup_filesize(backup_id, self.fm.get_backup_size(backup_id))
+        self.db.set_backup_hash(backup_id, self.fm.get_backup_hash(backup_id))
         return backup_id
 
     def delete_backup(self, backup_id: str, delete_files: bool):
