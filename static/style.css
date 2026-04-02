@@ -166,3 +166,7 @@ th {
 .row {
     margin-bottom: 10px;
 }
+
+.backup-corrupted {
+    color: red;
+}

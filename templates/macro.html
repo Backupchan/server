@@ -66,6 +66,15 @@
     <td><abbr title="{{ backup.created_at | pretty_datetime }}">{{ backup.created_at | pretty_timedelta }}</abbr></td>
     <td>{{ backup.filesize | pretty_filesize }}</td>
     <td>{% if backup.manual %}yes{% else %}no{% endif %}</td>
+    <td>
+        {% if not backup.hash %}
+        Unknown
+        {% elif backup.hash_mismatch %}
+        <abbr title="Expected hash: {{ backup.hash }}" class="backup-corrupted">Corrupted</span>
+        {% else %}
+        Healthy
+        {% endif %}
+    </td>
     {% if show_actions %}
     <td>
         <a href="{{ url_for('webui.download_backup', id=backup.id) }}">Download</a> |
@@ -95,6 +104,7 @@
                     <th>Created</th>
                     <th>Size</th>
                     <th>Manual</th>
+                    <th>Status</th>
                     {% if show_actions %}<th>Actions</th>{% endif %}
                 </tr>
             </thead>

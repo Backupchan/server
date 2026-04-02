@@ -17,6 +17,7 @@ def get_server_config(defaults_only=False):
     server_config.add_option("deduplicate_job_interval", int, 18000)
     server_config.add_option("stale_seq_upload_job_interval", int, 3600)
     server_config.add_option("tmp_purge_job_interval", int, 43200)
+    server_config.add_option("integrity_check_job_interval", int, 57600)
     server_config.add_option("webui_auth", bool, False)
     server_config.add_option("page_size", int, 10)
     server_config.add_option("webui_localhost_disable_auth", bool, False)

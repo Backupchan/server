@@ -294,7 +294,7 @@ class Database:
                 raise DatabaseError(f"Target with id or alias '{target_id}' does not exist")
 
             backup_id = str(uuid.uuid4())
-            self.cursor.execute("INSERT INTO backups VALUES (?, ?, ?, ?, ?, ?)", (backup_id, target.id, created_at, manual, False, 0))
+            self.cursor.execute("INSERT INTO backups VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (backup_id, target.id, created_at, manual, False, 0, "", 0))
             self.connection.commit()
 
             self.logger.info("Add backup for target {%s} created at: %s, manual: %s", target.id, str(created_at), str(manual))
@@ -303,6 +303,16 @@ class Database:
     def set_backup_filesize(self, backup_id: str, filesize: int):
         with self.lock:
             self.cursor.execute("UPDATE backups SET filesize = ? WHERE id = ?", (filesize, backup_id))
+            self.connection.commit()
+
+    def set_backup_hash(self, backup_id: str, hash: int):
+        with self.lock:
+            self.cursor.execute("UPDATE backups SET hash = ? WHERE id = ?", (hash, backup_id))
+            self.connection.commit()
+
+    def set_backup_hash_mismatch(self, backup_id: str, mismatch: bool):
+        with self.lock:
+            self.cursor.execute("UPDATE backups SET hash_mismatch = ? WHERE id = ?", (mismatch, backup_id))
             self.connection.commit()
 
     def get_backup(self, id: str) -> None | models.Backup:

@@ -4,3 +4,4 @@ from .backup_filesize_job import BackupFilesizeJob
 from .deduplicate_job import DeduplicateJob
 from .stale_seq_upload_job import StaleSequentialUploadJob
 from .tmp_purge_job import TemporaryPurgeJob
+from .integrity_check_job import IntegrityCheckJob
