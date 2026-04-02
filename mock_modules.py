@@ -95,7 +95,7 @@ class MockDatabase(database.Database):
             created_at = datetime.now()
         
         backup_id = str(uuid.uuid4())
-        backup = models.Backup(backup_id, target_id, created_at, manual, False, 123456)
+        backup = models.Backup(backup_id, target_id, created_at, manual, False, 123456, hash(backup_id), False)
         self.backups.append(backup)
         self.logger.info("Add backup %s", backup)
         return backup_id
