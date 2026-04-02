@@ -70,7 +70,7 @@
         {% if not backup.hash %}
         Unknown
         {% elif backup.hash_mismatch %}
-        <span class="backup-corrupted">Corrupted</span>
+        <abbr title="Expected hash: {{ backup.hash }}" class="backup-corrupted">Corrupted</span>
         {% else %}
         Healthy
         {% endif %}
