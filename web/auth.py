@@ -15,7 +15,7 @@ class WebAuth:
     def requires_auth(self, f):
         @functools.wraps(f)
         def decorated(*args, **kwargs):
-            if not self.passwd_hash or not self.config.get("webui_auth") or session.get("authed") or self.can_bypass_auth():
+            if self.authed():
                 return f(*args, **kwargs)
             return redirect(url_for("webui.login", return_url=request.path))
         return decorated
@@ -33,7 +33,12 @@ class WebAuth:
                 else:
                     self.logger.info("Failed login attempt (IP: %s; UA: '%s')", request.remote_addr, request.headers.get("User-Agent", "[none]"))
                     return render_template("login.html", incorrect=True, return_url=return_url)
+            elif self.authed():
+                return redirect(return_url or url_for("webui.list_targets"))
             return render_template("login.html", return_url=return_url)
+
+    def authed(self):
+        return not self.passwd_hash or not self.config.get("webui_auth") or session.get("authed") or self.can_bypass_auth()
 
     def can_bypass_auth(self):
         return self.config.get("webui_localhost_disable_auth") and request.remote_addr in LOCAL_ADDRESSES
