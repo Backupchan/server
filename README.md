@@ -35,14 +35,8 @@ Once it's run, you can access the web UI through the browser or use a dedicated 
 
 ## Running migrations
 
-When updating Backup-chan, the database schema might change. New migrations are added into the `migrations` folder. Run new
-migrations like so:
-
-```bash
-./migrate.py 002_datetime_created_at.sql
-./migrate.py 003_backup_recycled.sql
-...
-```
+When updating Backup-chan, the database schema might change. New migrations are added into the `migrations` folder. Run the
+`migrate.py` script to apply any required migrations.
 
 ## Setting up authentication
 
