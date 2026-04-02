@@ -39,6 +39,9 @@
 	// Interval for purging temporary directory
 	"tmp_purge_job_interval": 43200, // 12hrs
 
+    // Interval for checking backup integrity
+    "integrity_check_job_interval": 57600, // 16hrs
+
     // Whether or not to enable authentication on webui
     // Set password by running passwd.py
     "webui_auth": true,
