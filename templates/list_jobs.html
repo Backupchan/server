@@ -18,13 +18,13 @@
                     <th>Name</th>
                     <th>Interval</th>
                     <th>Next run</th>
-					<th>Actions</th>
+		    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for job in scheduled_jobs %}
                 <tr>
-                    <td class="monospace">{{ job.name }}</td>
+                    <td>{{ job.display_name }}</td>
                     <td>{{ job.interval }} seconds</td>
                     <td><abbr title="{{ job.next_run | pretty_ftime }}">{{ job.next_run | pretty_ftimedelta }}</td>
 		    <td><a href="{{ url_for('webui.force_run_job', name=job.name) }}">Force re-run</a></td>

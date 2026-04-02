@@ -8,7 +8,7 @@ from backupchan_server import models
 
 class RecycleJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, server_api: serverapi.ServerAPI):
-        super().__init__(interval, __name__.split(".")[-1])
+        super().__init__(interval, __name__.split(".")[-1], "Check backups for recycling")
 
         self.db = db
         self.server_api = server_api

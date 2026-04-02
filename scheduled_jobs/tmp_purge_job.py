@@ -5,7 +5,7 @@ from backupchan_server import utility
 
 class TemporaryPurgeJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, temp_dir: str):
-        super().__init__(interval, __name__.split(".")[-1])
+        super().__init__(interval, __name__.split(".")[-1], "Purge temporary files")
 
         self.temp_dir = temp_dir
 

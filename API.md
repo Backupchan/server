@@ -367,6 +367,7 @@ List all scheduled and delayed jobs.
     "scheduled": [
         {
             "name": "recycle_job",
+            "display_name": "Check backups for recycling",
             "interval": 1800,
             "next_run": 1754915748.9602332 // unix timestamp
         }

@@ -5,7 +5,7 @@ from backupchan_server import utility
 
 class BackupFilesizeJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, fm: file_manager.FileManager):
-        super().__init__(interval, __name__.split(".")[-1])
+        super().__init__(interval, __name__.split(".")[-1], "Update backup filesizes")
 
         self.db = db
         self.fm = fm

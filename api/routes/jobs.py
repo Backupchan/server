@@ -19,6 +19,7 @@ def add_routes(context: APIContext):
             delayed_json.append({
                 "id": id,
                 "name": job.name,
+                "display_name": job.display_name,
                 "status": job.state.name,
                 "start_time": job.start_time,
                 "end_time": job.end_time

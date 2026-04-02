@@ -4,14 +4,15 @@ import threading
 import datetime
 
 class ScheduledJob:
-    def __init__(self, interval: int, name: str):
+    def __init__(self, interval: int, name: str, display_name: str):
         self.interval = interval
         self.name = name
+        self.display_name = display_name
         self.next_run = time.time() + interval
         self.logger = logging.getLogger(name)
         self.force_flag = False
 
-        self.logger.info(f"Created scheduled job {name} (interval: {interval} sec)")
+        self.logger.info(f"Created scheduled job {name} ({display_name}) (interval: {interval} sec)")
  
     def run(self):
         raise NotImplementedError()

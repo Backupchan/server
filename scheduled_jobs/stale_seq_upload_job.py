@@ -3,7 +3,7 @@ import seq_upload
 
 class StaleSequentialUploadJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, manager: seq_upload.SequentialUploadManager):
-        super().__init__(interval, __name__.split(".")[-1])
+        super().__init__(interval, __name__.split(".")[-1], "Purge stale sequential uploads")
 
         self.manager = manager
 

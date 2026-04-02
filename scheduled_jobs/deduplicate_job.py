@@ -5,7 +5,7 @@ import file_manager
 
 class DeduplicateJob(scheduled_jobs.ScheduledJob):
     def __init__(self, interval: int, db: database.Database, fm: file_manager.FileManager, server_api: serverapi.ServerAPI):
-        super().__init__(interval, __name__.split(".")[-1])
+        super().__init__(interval, __name__.split(".")[-1], "Deduplicate backups")
 
         self.db = db
         self.fm = fm
