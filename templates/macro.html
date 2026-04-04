@@ -72,7 +72,7 @@
         {% elif backup.hash_mismatch %}
         <abbr title="Expected hash: {{ backup.hash }}" class="backup-corrupted">Corrupted</span>
         {% else %}
-        Healthy
+        <abbr title="Hash: {{ backup.hash }}">Healthy</abbr>
         {% endif %}
     </td>
     {% if show_actions %}
