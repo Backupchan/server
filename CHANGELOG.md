@@ -2,6 +2,15 @@
 
 See what's changed between versions!
 
+## 2.10
+
+* Added backup integrity check.
+* Fixed backup downloads not working using the API.
+* Added display name to scheduled jobs.
+* Web UI login attempts are now logged.
+* Added logging function names.
+* Fixed potential path traversal vulnerability in file manager archive extraction logic.
+
 ## 2.9
 
 * Web UI improvements:
