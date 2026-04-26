@@ -6,7 +6,7 @@ import download
 import api.utility as apiutil
 from backupchan_server import utility
 from api.context import APIContext
-from flask import jsonify, request
+from flask import jsonify, request, send_file
 
 def add_routes(context: APIContext):
     logger = logging.getLogger("apibackup")
