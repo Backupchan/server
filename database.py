@@ -135,6 +135,7 @@ class Database:
         recycle_criteria: models.BackupRecycleCriteria,
         recycle_value: int | None,
         recycle_action: models.BackupRecycleAction | None,
+        target_type: models.BackupType, # Can only be edited if there's no backups
         location: str,
         name_template: str,
         deduplicate: bool,
@@ -150,7 +151,11 @@ class Database:
             target_id = target.id
             self.validate_target(name, name_template, location, target_id, alias)
 
-            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, location = ?, name_template = ?, deduplicate = ?, alias = ?, min_backups = ? WHERE id = ? OR alias = ?", (name, recycle_criteria, recycle_value, recycle_action, location, name_template, deduplicate, alias, min_backups, id, alias))
+            self.logger.info("%d, %s, %s", self.count_backups_target(target_id), target.target_type, target_type)
+            if target_type != target.target_type and self.count_backups_target(target_id) != 0:
+                raise DatabaseError(f"Cannot edit backup type for targets that have backups")
+
+            self.cursor.execute("UPDATE targets SET name = ?, recycle_criteria = ?, recycle_value = ?, recycle_action = ?, type = ?, location = ?, name_template = ?, deduplicate = ?, alias = ?, min_backups = ? WHERE id = ? OR alias = ?", (name, recycle_criteria, recycle_value, recycle_action, target_type, location, name_template, deduplicate, alias, min_backups, id, alias))
             self.connection.commit()
 
             self.set_target_tags(target_id, tags)
@@ -377,6 +382,11 @@ class Database:
     def count_backups(self) -> int:
         with self.lock:
             self.cursor.execute("SELECT COUNT(*) FROM backups")
+            return self.cursor.fetchone()[0]
+
+    def count_backups_target(self, target_id: str) -> int:
+        with self.lock:
+            self.cursor.execute("SELECT COUNT(*) FROM backups WHERE target_id = ?", (target_id,))
             return self.cursor.fetchone()[0]
 
     def count_recycled_backups(self) -> int:

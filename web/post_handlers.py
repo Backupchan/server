@@ -29,7 +29,7 @@ def edit_target(target_id: str, server_api: serverapi.ServerAPI) -> str | None:
         return "Specify a recycle value"
 
     try:
-        server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form.get("recycle_value", 0), request.form.get("recycle_action", "none"), request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form.get("alias", None) or None, request.form.get("min_backups", 0), request.form.get("tags", "").split())
+        server_api.edit_target(target_id, request.form["name"], request.form["recycle_criteria"], request.form.get("recycle_value", 0), request.form.get("recycle_action", "none"), request.form["backup_type"], request.form["location"], request.form["name_template"], int("deduplicate" in request.form), request.form.get("alias", None) or None, request.form.get("min_backups", 0), request.form.get("tags", "").split())
     except Exception as exc:
         return str(exc)
     return None

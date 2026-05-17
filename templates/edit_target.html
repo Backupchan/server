@@ -70,7 +70,7 @@
 
             <div class="row">
                 <span>Backup type:</span>&nbsp;
-                <select name="backup_type" {% if target is not none %}disabled{% else %}required{% endif %}>
+                <select name="backup_type" required>
                     <option value="single" {% if target is none or target.target_type == "single" %}selected="selected"{% endif %}>Single file</option>
                     <option value="multi" {% if target is not none and target.target_type == "multi" %}selected="selected"{% endif %}>Multiple files</option>
                 </select>
