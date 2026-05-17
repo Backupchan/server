@@ -12,11 +12,16 @@ def add_routes(context: WebContext):
     @context.blueprint.route("/")
     @context.auth.requires_auth
     def homepage():
-        return redirect(url_for("webui.list_targets"))
+        return redirect(url_for("webui.dashboard"))
 
     @context.blueprint.route("/favicon.ico")
     def favicon():
         return send_from_directory(utility.join_path(context.root_path, "static"), "favicon.ico", mimetype="vnd.microsoft.icon")
+
+    @context.blueprint.route("/dashboard")
+    @context.auth.requires_auth
+    def dashboard():
+        return None
 
     @context.blueprint.route("/force-run-job/<name>")
     @context.auth.requires_auth
@@ -40,18 +45,7 @@ def add_routes(context: WebContext):
     @context.blueprint.route("/stats")
     @context.auth.requires_auth
     def view_stats():
-        total_target_size = context.stats.total_target_size()
-        total_recycle_bin_size = context.stats.total_recycle_bin_size()
-        total_targets = context.db.count_targets()
-        total_backups = context.db.count_backups()
-        total_recycled_backups = context.db.count_recycled_backups()
-        return render_template("view_stats.html",
-                               total_target_size=total_target_size,
-                               total_recycle_bin_size=total_recycle_bin_size,
-                               total_targets=total_targets,
-                               total_backups=total_backups,
-                               total_recycled_backups=total_recycled_backups,
-                               program_version=PROGRAM_VERSION)
+        return render_template("view_stats.html", stats=context.stats, db=context.db, program_version=PROGRAM_VERSION)
 
     @context.blueprint.route("/log")
     @context.auth.requires_auth

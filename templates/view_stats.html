@@ -18,19 +18,19 @@
             </tr>
             <tr>
                 <td>Total targets</td>
-                <td><b>{{ total_targets }}</b></td>
+                <td><b>{{ db.count_targets() }}</b></td>
             </tr>
             <tr>
                 <td>Total backups</td>
-                <td><b>{{ total_backups }}</b> (<b>{{ total_recycled_backups }}</b> recycled)</td>
+                <td><b>{{ db.count_backups() }}</b> (<b>{{ db.count_recycled_backups() }}</b> recycled)</td>
             </tr>
             <tr>
                 <td>Total target size</td>
-                <td><b title="{{ total_target_size }} bytes">{{ total_target_size | pretty_filesize }}</b></td>
+                <td><b title="{{ total_target_size }} bytes">{{ stats.total_target_size() | pretty_filesize }}</b></td>
             </tr>
             <tr>
                 <td>Total recycle bin size</td>
-                <td><b title="{{ total_recycle_bin_size }} bytes">{{ total_recycle_bin_size | pretty_filesize }}</b></td>
+                <td><b title="{{ total_recycle_bin_size }} bytes">{{ stats.total_recycle_bin_size() | pretty_filesize }}</b></td>
             </tr>
         </table>
     </div>
