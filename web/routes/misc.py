@@ -64,9 +64,4 @@ def add_routes(context: WebContext):
     @context.blueprint.route("/jobs")
     @context.auth.requires_auth
     def list_jobs():
-        return render_template(
-                "list_jobs.html",
-                scheduled_jobs=context.job_scheduler.jobs,
-                delayed_jobs=context.job_manager.jobs,
-                delayed_job_count=len(context.job_manager.jobs),
-                seq_uploads=context.seq_upload_manager.uploads)
+        return render_template("list_jobs.html", job_scheduler=context.job_scheduler, job_manager=context.job_manager, seq_upload_manager=context.seq_upload_manager)

@@ -22,7 +22,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for job in scheduled_jobs %}
+                {% for job in job_scheduler.jobs %}
                 <tr>
                     <td>{{ job.display_name }}</td>
                     <td>{{ job.interval }} seconds</td>
@@ -33,7 +33,7 @@
             </tbody>
         </table>
         <h2>Delayed jobs</h2>
-        {% if delayed_job_count == 0 %}
+        {% if job_manager.jobs | length == 0 %}
         No delayed jobs have been run yet.
         {% else %}
         <table>
@@ -47,7 +47,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for id, job in delayed_jobs.items() %}
+                {% for id, job in job_manager.jobs.items() %}
                 <tr>
                     <td>{{ id }}</td>
                     <td class="monospace">{{ job }}</td>
@@ -60,7 +60,7 @@
         </table>
         {% endif %}
         <h2>Sequential uploads</h2>
-        {% if seq_uploads | length == 0 %}
+        {% if seq_upload_manager.uploads | length == 0 %}
         No sequential uploads are currently being processed.
         {% else %}
         <table>
@@ -74,7 +74,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for target_id, seq_upload in seq_uploads.items() %}
+                {% for target_id, seq_upload in seq_upload_manager.uploads.items() %}
                 <tr>
                     <td><a href="{{ url_for('webui.view_target', id=target_id) }}">{{ target_id }}</a></td>
                     <td>{{ seq_upload.file_list | length }}</td>
