@@ -2,6 +2,7 @@ import logging
 import log
 from version import PROGRAM_VERSION
 from backupchan_server import utility
+from database import BackupSortOptions
 from web.auth import WebAuth
 from web.context import WebContext
 from flask import Blueprint, redirect, url_for, send_from_directory, render_template, request
@@ -21,7 +22,8 @@ def add_routes(context: WebContext):
     @context.blueprint.route("/dashboard")
     @context.auth.requires_auth
     def dashboard():
-        return None
+        # i actually dk if it's possible to make sort options right in the template
+        return render_template("dashboard.html", db=context.db, stats=context.stats, recent_sort_options=BackupSortOptions(False, "created_at"))
 
     @context.blueprint.route("/force-run-job/<name>")
     @context.auth.requires_auth

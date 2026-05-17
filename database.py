@@ -343,10 +343,13 @@ class Database:
             self.connection.commit()
             self.logger.info("Recycle backup {%s} to %s", id, recycled)
 
-    def list_backups(self, sort_options: None | BackupSortOptions = None) -> list[models.Backup]:
+    def list_backups(self, sort_options: None | BackupSortOptions = None, limit: None | int = None) -> list[models.Backup]:
         sort_options = sort_options or BackupSortOptions.default()
         with self.lock:
-            self.cursor.execute(f"SELECT * FROM backups {sort_options.sql()}")
+            if limit:
+                self.cursor.execute(f"SELECT * FROM backups {sort_options.sql()} LIMIT ?", (int(limit),))
+            else:
+                self.cursor.execute(f"SELECT * FROM backups {sort_options.sql()}")
             rows = self.cursor.fetchall()
             return [models.Backup(*row) for row in rows]
 
