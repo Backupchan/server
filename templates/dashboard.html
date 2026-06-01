@@ -1,0 +1,46 @@
+{% from "macro.html" import navbar, backup_print %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <h1>Dashboard</h1>
+        <h2>Overview</h2>
+        <ul>
+            <li>Targets: <b>{{ db.count_targets() }}</b></li>
+            <li>Backups: <b>{{ db.count_backups() }}</b></li>
+            <li>Total storage used: <b>{{ stats.total_target_size() | pretty_filesize }}</b></li>
+        </ul>
+        <h2>Quick Links</h2>
+        <ul>
+            <li><a href="{{ url_for('webui.list_targets') }}">Target list</a></li>
+            <li><a href="{{ url_for('webui.new_target') }}">Create a new target</a></li>
+        </ul>
+        <h2>Recent Backups</h2>
+        Latest 8 backups:
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Target</th>
+                    <th>Date</th>
+                    <th>Size</th>
+                    <th>Manual</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for backup in db.list_backups(recent_sort_options, 8) %}
+                    {{ backup_print(backup, false, true, db.get_target(backup.id)) }}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
