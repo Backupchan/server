@@ -1,0 +1,18 @@
+{% from "macro.html" import navbar, errorpage %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backup-chan >> {{ message }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {{ navbar() }}
+    <div id="container">
+        <h1>{{ message }}</h1>
+        <p>{{ error.description }}</p>
+        <p>Please check the <a href="{{ url_for('webui.view_log') }}">log</a> for more information.</p>
+    </div>
+</body>
+</html>

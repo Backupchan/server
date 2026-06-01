@@ -96,5 +96,20 @@ if config.get("webui_enable"):
 api = api.API(db, server_api, config, file_manager, stats, manager, scheduler, seq_upload_manager)
 app.register_blueprint(api.blueprint, url_prefix="/api")
 
+#
+# Application-wide error handlers
+#
+# Basic handlers with no HTML so that they can be easily shown both in
+# browser and when using the API.
+#
+
+@app.errorhandler(404)
+def handle_404(error):
+    return f"{error}", 404
+
+@app.errorhandler(405)
+def handle_405(error):
+    return f"{error}", 405
+
 if __name__ == "__main__":
     app.run(debug=config.get("web_debug"))

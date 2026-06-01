@@ -8,6 +8,7 @@ import scheduled_jobs
 import seq_upload
 from api.context import APIContext
 from api import routes
+from api import error_handlers
 from api.auth import APIAuth
 from flask import Blueprint
 
@@ -29,3 +30,4 @@ class API:
         self.auth = APIAuth()
         context = APIContext(self.blueprint, self.auth, db, server_api, fm, config, stats, job_manager, job_scheduler, seq_upload_manager)
         routes.add_routes(context)
+        error_handlers.add_error_handlers(context)

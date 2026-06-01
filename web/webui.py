@@ -9,6 +9,7 @@ import configtony
 import logging
 from web import routes
 from web import filters
+from web import error_handlers
 from web.auth import WebAuth
 from web.context import WebContext
 from flask import Blueprint
@@ -47,3 +48,4 @@ class WebUI:
                 self.config
         )
         routes.add_routes(self.context)
+        error_handlers.add_error_handlers(self.context)
