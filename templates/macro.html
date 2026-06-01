@@ -1,5 +1,5 @@
-{% macro target_print(target) %}
-    ID: <b class="monospace">{{ target.id }}</b><br>
+{% macro target_print(target, copy_id_link) %}
+ID: <b class="monospace">{{ target.id }}</b> {% if copy_id_link %}(<a href="#" id="copy-id-link" data-target-id="{{ target.id }}">Copy</a>){% endif %}<br>
     Name: <b>{{ target.name }}</b><br>
 	{% if target.alias is not none %}
         Alias: <b>{{ target.alias }}</b><br>

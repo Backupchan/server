@@ -12,6 +12,10 @@
             .bulk_edit_actions {
                 display: inline-block;
             }
+
+            #copy-id-link {
+                display: none;
+            }
         </style>
     </noscript>
 </head>
@@ -19,7 +23,7 @@
     {{ navbar() }}
     <div id="container">
         <h1>Target details: {{ target.name }}</h1>
-        {{ target_print(target) }}
+        {{ target_print(target, true) }}
         <ul>
             <li><a href="{{ url_for('webui.upload_backup', id=target.id) }}">Upload backup</a></li>
             <li><a href="{{ url_for('webui.edit_target', id=target.id) }}">Edit target</a></li>
@@ -38,6 +42,7 @@
             {{ backup_table_print(recycled_backups, true, true, "del_unrec", "recycled_backups_form", target.id, true) }}
             </details>
         {% endif %}
+        <script src="{{ url_for('static', filename='copy_id.js') }}"></script>
     </div>
 </body>
 </html>
